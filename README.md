@@ -17,6 +17,33 @@ A clean, zero-dependency, pure Java 8 console-based management system tailored f
 
 ---
 
+## 📂 Project Structure
+
+```text
+fptu-pro192-food-store-management/
+├── .github/
+├── data/
+├── docs/
+├── tasks/
+├── src/main/java/fptu/pro192/foodstoremanagement/
+│   ├── Main.java
+│   ├── model/
+│   ├── repository/
+│   ├── service/
+│   ├── ui/
+│   └── util/
+├── nbproject/
+├── build.xml
+├── .editorconfig
+├── .gitattributes
+├── .gitignore
+├── CONTRIBUTING.md
+├── LICENSE
+└── README.md
+```
+
+---
+
 ## 📖 Project Documentation Links
 
 * [Business Rules Specification](docs/BUSINESS_RULES.md)
