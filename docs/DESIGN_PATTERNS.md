@@ -323,3 +323,7 @@ public abstract class Menu {
     }
 }
 ```
+
+> [!TIP]
+> **Submenu Navigation & Pause Control (Tasks #5, #6, #7, #9):**
+> When a menu option dispatches to a nested sub-menu view (e.g. `MainMenu` invoking `ProductMenu.display()`), returning from the sub-menu triggers `ConsoleUtil.pressEnterToContinue()` in the parent loop if `handleOption(choice)` returns `true`. If the sub-menu already finished its own interaction and no additional output was printed by the parent menu, developers may consider checking or configuring a pause suppression mechanism to ensure seamless transitions between menus without redundant Enter prompts.

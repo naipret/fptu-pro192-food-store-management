@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="fptu-pro192-food-store-management" default="default" basedir=".">
+    <description>Food Store Management System (PRO192)</description>
+    <property file="nbproject/project.properties"/>
+    <import file="nbproject/build-impl.xml" optional="true"/>
+
+    <!-- Target: init -->
+    <target name="init" unless="netbeans.in.ide">
+        <mkdir dir="${build.classes.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+    </target>
+
+    <!-- Target: compile -->
+    <target name="compile" depends="init" unless="netbeans.in.ide" description="Compile Java source files">
+        <javac srcdir="${src.dir}" 
+               destdir="${build.classes.dir}" 
+               source="${javac.source}" 
+               target="${javac.target}" 
+               encoding="${source.encoding}" 
+               includeantruntime="false" 
+               debug="true">
+            <compilerarg value="-Xlint:-options"/>
+        </javac>
+    </target>
+
+    <!-- Target: jar -->
+    <target name="jar" depends="compile" unless="netbeans.in.ide" description="Package jar distribution">
+        <jar destfile="${dist.jar}" basedir="${build.classes.dir}" manifest="${manifest.file}">
+            <manifest>
+                <attribute name="Main-Class" value="${main.class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <!-- Target: run -->
+    <target name="run" depends="compile" unless="netbeans.in.ide" description="Run application main class">
+        <java classname="${main.class}" fork="true">
+            <classpath path="${build.classes.dir}"/>
+        </java>
+    </target>
+
+    <!-- Target: clean -->
+    <target name="clean" unless="netbeans.in.ide" description="Clean build artifacts">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+    <!-- Target: javadoc -->
+    <target name="javadoc" unless="netbeans.in.ide" description="Generate Javadoc documentation">
+        <mkdir dir="${dist.javadoc.dir}"/>
+        <javadoc sourcepath="${src.dir}" 
+                 destdir="${dist.javadoc.dir}" 
+                 encoding="${source.encoding}" 
+                 charset="${source.encoding}" 
+                 docencoding="${source.encoding}" 
+                 source="${javac.source}" 
+                 windowtitle="${javadoc.windowtitle}">
+        </javadoc>
+    </target>
+
+    <!-- Target: test-compile -->
+    <target name="test-compile" depends="compile" unless="netbeans.in.ide" description="Compile test sources">
+        <mkdir dir="${build.test.classes.dir}"/>
+        <javac srcdir="${test.src.dir}" 
+               destdir="${build.test.classes.dir}" 
+               source="${javac.source}" 
+               target="${javac.target}" 
+               encoding="${source.encoding}" 
+               includeantruntime="false" 
+               debug="true">
+            <compilerarg value="-Xlint:-options"/>
+            <classpath>
+                <pathelement path="${build.classes.dir}"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <!-- Target: test -->
+    <target name="test" depends="test-compile" unless="netbeans.in.ide" description="Run test driver">
+        <java classname="fptu.pro192.foodstoremanagement.util.CoreInfrastructureTest" fork="true">
+            <classpath>
+                <pathelement path="${build.classes.dir}"/>
+                <pathelement path="${build.test.classes.dir}"/>
+            </classpath>
+        </java>
+    </target>
+
+    <!-- Target: default -->
+    <target name="default" depends="compile"/>
+</project>

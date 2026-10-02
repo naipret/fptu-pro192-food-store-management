@@ -54,6 +54,24 @@ fptu-pro192-food-store-management/
 
 ---
 
+## 🛠️ Build & Execution Instructions
+
+### Running in NetBeans IDE 13
+
+1. Open **Apache NetBeans IDE 13**.
+2. Select **File -> Open Project...** and choose the repository root folder (`fptu-pro192-food-store-management`).
+3. NetBeans will automatically detect the project via `nbproject/project.xml` and initialize `nbproject/build-impl.xml`.
+4. Right-click the project and select **Clean and Build** or **Run** (Java SE 1.8 platform).
+
+### Running via Command Line (Ant)
+
+* Compile: `ant compile`
+* Run test suite: `ant test`
+* Package executable JAR: `ant jar`
+* Generate Javadoc: `ant javadoc`
+
+---
+
 ## 📄 License
 
 This project is licensed under the terms of the [MIT License](LICENSE).
