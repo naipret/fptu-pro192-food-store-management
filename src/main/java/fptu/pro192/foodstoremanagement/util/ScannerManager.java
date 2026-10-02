@@ -9,7 +9,7 @@ import java.util.Scanner;
  * closures or descriptor exhaustion caused by creating and closing multiple {@link Scanner}
  * instances throughout the application lifecycle.
  */
-public class ScannerManager {
+public final class ScannerManager {
 
     private static ScannerManager instance;
     private final Scanner scanner;

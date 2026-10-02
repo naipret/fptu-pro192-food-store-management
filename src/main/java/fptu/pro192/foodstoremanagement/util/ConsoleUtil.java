@@ -58,8 +58,13 @@ public final class ConsoleUtil {
      * @param min The minimum acceptable integer value (inclusive)
      * @param max The maximum acceptable integer value (inclusive)
      * @return The validated integer within {@code [min, max]}
+     * @throws IllegalArgumentException If {@code min > max}
      */
     public static int readInt(String prompt, int min, int max) {
+        if (min > max) {
+            throw new IllegalArgumentException(
+                    "min (" + min + ") cannot be greater than max (" + max + ")");
+        }
         Scanner scanner = ScannerManager.getInstance().getScanner();
         while (true) {
             System.out.print(prompt);

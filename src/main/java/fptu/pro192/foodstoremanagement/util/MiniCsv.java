@@ -44,7 +44,7 @@ public final class MiniCsv {
      * <li>Commas within double quotes (e.g. {@code "item 1, part 2"})</li>
      * <li>Escaped double quotes (e.g. {@code "He said ""Hello"""})</li>
      * <li>Multiline text inside quoted cells</li>
-     * <li>Standard UTF-8 character encoding</li>
+     * <li>Standard UTF-8 character encoding with optional Byte Order Mark (BOM) stripping</li>
      * </ul>
      * If the specified file does not exist, an empty list is returned.
      *
@@ -69,10 +69,18 @@ public final class MiniCsv {
             List<String> currentRow = new ArrayList<>();
             StringBuilder currentField = new StringBuilder();
             boolean inQuotes = false;
+            boolean isFirstChar = true;
             int c;
 
             while ((c = reader.read()) != -1) {
                 char ch = (char) c;
+
+                if (isFirstChar) {
+                    isFirstChar = false;
+                    if (ch == '\uFEFF') {
+                        continue;
+                    }
+                }
 
                 if (inQuotes) {
                     if (ch == '"') {
