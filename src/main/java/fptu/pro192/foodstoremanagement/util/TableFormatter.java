@@ -1,8 +1,8 @@
 package fptu.pro192.foodstoremanagement.util;
 
 /**
- * Utility class providing text formatting and layout helpers conforming to
- * the rigid 80-column terminal display specification (VT100 standard).
+ * Utility class providing text formatting and layout helpers conforming to the rigid 80-column
+ * terminal display specification (VT100 standard).
  */
 public final class TableFormatter {
 
@@ -14,22 +14,21 @@ public final class TableFormatter {
     /**
      * Private constructor to prevent instantiation of utility class.
      */
-    private TableFormatter() {
-    }
+    private TableFormatter() {}
 
     /**
      * Formats a given string to strictly fit within the target column width.
      * <p>
      * Behavior:
      * <ul>
-     *   <li>If {@code text} is null, it is treated as an empty string.</li>
-     *   <li>If {@code text.length() > width}, it is truncated to {@code width - 2}
-     *       characters and suffixed with {@code ".."}.</li>
-     *   <li>If {@code text.length() < width}, it is right-padded with whitespace
-     *       to guarantee the resulting string has an exact length of {@code width}.</li>
+     * <li>If {@code text} is null, it is treated as an empty string.</li>
+     * <li>If {@code text.length() > width}, it is truncated to {@code width - 2} characters and
+     * suffixed with {@code ".."}.</li>
+     * <li>If {@code text.length() < width}, it is right-padded with whitespace to guarantee the
+     * resulting string has an exact length of {@code width}.</li>
      * </ul>
      *
-     * @param text  The original text to format
+     * @param text The original text to format
      * @param width The target column character width (must be non-negative)
      * @return The formatted string guaranteed to have exact length of {@code width}
      */
@@ -62,7 +61,7 @@ public final class TableFormatter {
     /**
      * Centers text within a column of specified width, with equal flanking whitespace.
      *
-     * @param text  The text to center
+     * @param text The text to center
      * @param width The total column width
      * @return The centered and padded string with exact length of {@code width}
      */
@@ -92,7 +91,7 @@ public final class TableFormatter {
     /**
      * Alias for {@link #center(String, int)} supporting alternative naming conventions.
      *
-     * @param text  The text to center
+     * @param text The text to center
      * @param width The total column width
      * @return The centered and padded string
      */
@@ -103,7 +102,7 @@ public final class TableFormatter {
     /**
      * Generates a string composed of a repeated character.
      *
-     * @param ch    The character to repeat
+     * @param ch The character to repeat
      * @param count The number of repetitions (must be non-negative)
      * @return The resulting repeated string, or empty string if {@code count <= 0}
      */

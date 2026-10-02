@@ -5,23 +5,22 @@ import java.util.Scanner;
 /**
  * Utility class for terminal screen manipulation and defensive console input reading.
  * <p>
- * Enforces business rule BR18 (All user inputs must be validated prior to persistence
- * or business rule processing) by validating user inputs defensively with Vietnamese prompts.
+ * Enforces business rule BR18 (All user inputs must be validated prior to persistence or business
+ * rule processing) by validating user inputs defensively with Vietnamese prompts.
  */
 public final class ConsoleUtil {
 
     /**
      * Private constructor to prevent instantiation.
      */
-    private ConsoleUtil() {
-    }
+    private ConsoleUtil() {}
 
     /**
      * Clears the terminal screen.
      * <p>
-     * Sends ANSI escape sequence {@code \033[H\033[2J} and flushes standard output.
-     * In non-ANSI terminal environments where escape sequences fail or throw an exception,
-     * it falls back to printing 50 blank lines to push prior content out of view.
+     * Sends ANSI escape sequence {@code \033[H\033[2J} and flushes standard output. In non-ANSI
+     * terminal environments where escape sequences fail or throw an exception, it falls back to
+     * printing 50 blank lines to push prior content out of view.
      */
     public static void clearScreen() {
         try {
@@ -51,12 +50,13 @@ public final class ConsoleUtil {
     /**
      * Prompts the user and reads an integer bounded within the inclusive range {@code [min, max]}.
      * <p>
-     * Continuously prompts until the user enters a valid integer matching the specified range constraints.
-     * Displays informative Vietnamese error messages on invalid formats or range violations.
+     * Continuously prompts until the user enters a valid integer matching the specified range
+     * constraints. Displays informative Vietnamese error messages on invalid formats or range
+     * violations.
      *
      * @param prompt The display message prompting the user
-     * @param min    The minimum acceptable integer value (inclusive)
-     * @param max    The maximum acceptable integer value (inclusive)
+     * @param min The minimum acceptable integer value (inclusive)
+     * @param max The maximum acceptable integer value (inclusive)
      * @return The validated integer within {@code [min, max]}
      */
     public static int readInt(String prompt, int min, int max) {
@@ -85,7 +85,9 @@ public final class ConsoleUtil {
             try {
                 int value = Integer.parseInt(trimmed);
                 if (value < min || value > max) {
-                    System.out.printf("Giá trị phải nằm trong khoảng [%d - %d]. Vui lòng nhập lại!\n", min, max);
+                    System.out.printf(
+                            "Giá trị phải nằm trong khoảng [%d - %d]. Vui lòng nhập lại!\n", min,
+                            max);
                     continue;
                 }
                 return value;
@@ -98,9 +100,10 @@ public final class ConsoleUtil {
     /**
      * Prompts the user and reads a line of text input with optional blank guarding.
      * <p>
-     * If {@code allowEmpty} is false, continuously prompts the user until a non-blank string is provided.
+     * If {@code allowEmpty} is false, continuously prompts the user until a non-blank string is
+     * provided.
      *
-     * @param prompt     The display message prompting the user
+     * @param prompt The display message prompting the user
      * @param allowEmpty Whether an empty or whitespace-only string is considered valid
      * @return The trimmed user input string
      */

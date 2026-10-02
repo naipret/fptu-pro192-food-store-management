@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Self-contained verification test suite for Task #1 (Core Infrastructure).
- * Validates all acceptance criteria without external testing libraries.
+ * Self-contained verification test suite for Task #1 (Core Infrastructure). Validates all
+ * acceptance criteria without external testing libraries.
  */
 public class CoreInfrastructureTest {
 
@@ -56,7 +56,8 @@ public class CoreInfrastructureTest {
             System.out.printf("  [PASS] %s\n", testName);
             totalPassed++;
         } else {
-            System.err.printf("  [FAIL] %s: Expected [%s] but got [%s]\n", testName, expected, actual);
+            System.err.printf("  [FAIL] %s: Expected [%s] but got [%s]\n", testName, expected,
+                    actual);
             totalFailed++;
         }
     }
@@ -77,7 +78,8 @@ public class CoreInfrastructureTest {
         assertEquals("SCREEN_WIDTH constant is 80", 80, TableFormatter.SCREEN_WIDTH);
 
         // Required Acceptance Criteria check:
-        // TableFormatter.fit("Thịt heo ba rọi đóng hộp cao cấp", 15) produces "Thịt heo ba r.." with length exactly 15
+        // TableFormatter.fit("Thịt heo ba rọi đóng hộp cao cấp", 15) produces "Thịt heo ba r.."
+        // with length exactly 15
         String sampleVietnamese = "Thịt heo ba rọi đóng hộp cao cấp";
         String fitted15 = TableFormatter.fit(sampleVietnamese, 15);
         assertEquals("fit() Vietnamese string to 15 chars", "Thịt heo ba r..", fitted15);
@@ -116,13 +118,16 @@ public class CoreInfrastructureTest {
 
         List<String[]> rows = new ArrayList<>();
         // Row 1: Normal row with Vietnamese diacritics
-        rows.add(new String[]{"P00001", "Mì Hảo Hảo Tôm Chua Cay", "DRY", "Mì ăn liền gói 75g", "8000"});
+        rows.add(new String[] {"P00001", "Mì Hảo Hảo Tôm Chua Cay", "DRY", "Mì ăn liền gói 75g",
+                "8000"});
         // Row 2: Cell containing comma
-        rows.add(new String[]{"P00002", "Sữa Tươi Tiệt Trùng, Có Đường", "CHILLED", "Hộp 1L", "35000"});
+        rows.add(new String[] {"P00002", "Sữa Tươi Tiệt Trùng, Có Đường", "CHILLED", "Hộp 1L",
+                "35000"});
         // Row 3: Cell containing double quotes
-        rows.add(new String[]{"P00003", "Thịt Bò \"Wagyu\" Thượng Hạng", "FROZEN", "Khay 500g", "250000"});
+        rows.add(new String[] {"P00003", "Thịt Bò \"Wagyu\" Thượng Hạng", "FROZEN", "Khay 500g",
+                "250000"});
         // Row 4: Cell containing newline
-        rows.add(new String[]{"P00004", "Combo Rau Củ\nTươi", "CHILLED", "Túi 1kg", "45000"});
+        rows.add(new String[] {"P00004", "Combo Rau Củ\nTươi", "CHILLED", "Túi 1kg", "45000"});
 
         // Write atomically
         MiniCsv.writeAtomic(testFile, headers, rows);
@@ -173,7 +178,8 @@ public class CoreInfrastructureTest {
         AbstractMenu menu = new AbstractMenu("Menu Quản Lý Sản Phẩm") {
             @Override
             protected void renderBody() {
-                System.out.println("| 1. Xem danh sách                                                             |");
+                System.out.println(
+                        "| 1. Xem danh sách                                                             |");
             }
 
             @Override

@@ -20,9 +20,9 @@ import java.util.List;
 /**
  * Pure, zero-dependency CSV parser and serializer compliant with RFC 4180.
  * <p>
- * Supports quoted fields containing commas, double quotes, newlines, and UTF-8
- * characters. Provides atomic file persistence via temporary files and
- * {@link StandardCopyOption#ATOMIC_MOVE} to prevent file corruption.
+ * Supports quoted fields containing commas, double quotes, newlines, and UTF-8 characters. Provides
+ * atomic file persistence via temporary files and {@link StandardCopyOption#ATOMIC_MOVE} to prevent
+ * file corruption.
  */
 public final class MiniCsv {
 
@@ -34,18 +34,17 @@ public final class MiniCsv {
     /**
      * Private constructor to prevent instantiation.
      */
-    private MiniCsv() {
-    }
+    private MiniCsv() {}
 
     /**
      * Reads and parses a CSV file into a list of string arrays.
      * <p>
      * Complies with RFC 4180 by correctly handling:
      * <ul>
-     *   <li>Commas within double quotes (e.g. {@code "item 1, part 2"})</li>
-     *   <li>Escaped double quotes (e.g. {@code "He said ""Hello"""})</li>
-     *   <li>Multiline text inside quoted cells</li>
-     *   <li>Standard UTF-8 character encoding</li>
+     * <li>Commas within double quotes (e.g. {@code "item 1, part 2"})</li>
+     * <li>Escaped double quotes (e.g. {@code "He said ""Hello"""})</li>
+     * <li>Multiline text inside quoted cells</li>
+     * <li>Standard UTF-8 character encoding</li>
      * </ul>
      * If the specified file does not exist, an empty list is returned.
      *
@@ -137,15 +136,15 @@ public final class MiniCsv {
      * <p>
      * Two-phase atomic write strategy:
      * <ol>
-     *   <li>Writes content to {@code filePath + ".tmp"} using UTF-8 encoding.</li>
-     *   <li>Flushes and closes the stream completely.</li>
-     *   <li>Replaces target file atomically via {@link StandardCopyOption#ATOMIC_MOVE}
-     *       with fallback to {@link StandardCopyOption#REPLACE_EXISTING}.</li>
+     * <li>Writes content to {@code filePath + ".tmp"} using UTF-8 encoding.</li>
+     * <li>Flushes and closes the stream completely.</li>
+     * <li>Replaces target file atomically via {@link StandardCopyOption#ATOMIC_MOVE} with fallback
+     * to {@link StandardCopyOption#REPLACE_EXISTING}.</li>
      * </ol>
      *
      * @param filePath The target CSV destination file path
-     * @param headers  Optional list of header column names (may be null or empty)
-     * @param rows     List of data rows to persist
+     * @param headers Optional list of header column names (may be null or empty)
+     * @param rows List of data rows to persist
      * @throws RuntimeException If an I/O error occurs during write or file replacement
      */
     public static void writeAtomic(String filePath, List<String> headers, List<String[]> rows) {
@@ -162,8 +161,9 @@ public final class MiniCsv {
         File tempFile = new File(filePath + ".tmp");
 
         try {
-            try (BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(tempFile), StandardCharsets.UTF_8))) {
+            try (BufferedWriter writer =
+                    new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile),
+                            StandardCharsets.UTF_8))) {
 
                 // Write header row if provided
                 if (headers != null && !headers.isEmpty()) {
@@ -184,8 +184,7 @@ public final class MiniCsv {
             Path targetPath = targetFile.toPath();
 
             try {
-                Files.move(tempPath, targetPath,
-                        StandardCopyOption.REPLACE_EXISTING,
+                Files.move(tempPath, targetPath, StandardCopyOption.REPLACE_EXISTING,
                         StandardCopyOption.ATOMIC_MOVE);
             } catch (AtomicMoveNotSupportedException e) {
                 // Filesystem does not support atomic move; fallback to replace existing
@@ -204,7 +203,7 @@ public final class MiniCsv {
      * Atomically writes data rows without a separate header list.
      *
      * @param filePath The target CSV file path
-     * @param rows     List of rows to persist
+     * @param rows List of rows to persist
      * @throws RuntimeException If an I/O error occurs during write
      */
     public static void writeAtomic(String filePath, List<String[]> rows) {
@@ -215,7 +214,7 @@ public final class MiniCsv {
      * Writes a single CSV row to the buffered writer with RFC 4180 compliant escaping.
      *
      * @param writer Output buffered writer
-     * @param row    Array of cell values
+     * @param row Array of cell values
      * @throws IOException If write fails
      */
     private static void writeRow(BufferedWriter writer, String[] row) throws IOException {

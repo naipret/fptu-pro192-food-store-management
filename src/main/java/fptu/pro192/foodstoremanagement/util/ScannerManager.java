@@ -5,9 +5,9 @@ import java.util.Scanner;
 /**
  * Singleton manager for the application standard input {@link Scanner}.
  * <p>
- * Centralizes standard input stream reading from {@code System.in} to prevent
- * premature stream closures or descriptor exhaustion caused by creating and
- * closing multiple {@link Scanner} instances throughout the application lifecycle.
+ * Centralizes standard input stream reading from {@code System.in} to prevent premature stream
+ * closures or descriptor exhaustion caused by creating and closing multiple {@link Scanner}
+ * instances throughout the application lifecycle.
  */
 public class ScannerManager {
 
