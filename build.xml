@@ -68,6 +68,7 @@
                encoding="${source.encoding}" 
                includeantruntime="false" 
                debug="true">
+            <compilerarg value="-Xlint:-options"/>
             <classpath>
                 <pathelement path="${build.classes.dir}"/>
             </classpath>
