@@ -26,6 +26,7 @@ public class CoreInfrastructureTest {
         System.out.println("================================================================");
 
         testScannerManager();
+        testConsoleUtil();
         testTableFormatter();
         testMiniCsv();
         testAbstractMenuLayout();
@@ -70,6 +71,19 @@ public class CoreInfrastructureTest {
         assertTrue("ScannerManager returns non-null instance", sm1 != null);
         assertTrue("ScannerManager returns identical singleton instance", sm1 == sm2);
         assertTrue("Scanner instance is non-null", sm1.getScanner() != null);
+        assertTrue("ScannerManager is declared final",
+                java.lang.reflect.Modifier.isFinal(ScannerManager.class.getModifiers()));
+    }
+
+    private static void testConsoleUtil() {
+        System.out.println("\n[Testing ConsoleUtil (Defensive Input Validation)]");
+        boolean threw = false;
+        try {
+            ConsoleUtil.readInt("Test prompt: ", 10, 5);
+        } catch (IllegalArgumentException e) {
+            threw = true;
+        }
+        assertTrue("readInt() throws IllegalArgumentException when min > max", threw);
     }
 
     private static void testTableFormatter() {
@@ -169,6 +183,20 @@ public class CoreInfrastructureTest {
 
         // Clean up test file
         f.delete();
+
+        // Verify UTF-8 BOM handling
+        String bomFile = "build/test_bom.csv";
+        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(bomFile)) {
+            fos.write(new byte[] {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF});
+            fos.write("ID,Name\r\nP00001,BOM Test\r\n"
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Failed to prepare BOM test file", e);
+        }
+        List<String[]> bomRecords = MiniCsv.read(bomFile);
+        assertEquals("BOM file parsed rows", 2, bomRecords.size());
+        assertEquals("Header column 0 stripped of BOM", "ID", bomRecords.get(0)[0]);
+        new File(bomFile).delete();
     }
 
     private static void testAbstractMenuLayout() {
