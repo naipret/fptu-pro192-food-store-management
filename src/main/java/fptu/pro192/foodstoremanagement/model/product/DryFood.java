@@ -4,10 +4,18 @@ public class DryFood extends Food {
     
     public DryFood() {
         super();
+        this.minTemperature = 15.0;
+        this.maxTemperature = 25.0;
+        this.minHumidity = 30.0;
+        this.maxHumidity = 60.0;
     }
 
     public DryFood(String id, String name, String category, String unit, double price) {
         super(id, name, category, unit, price);
+        this.minTemperature = 15.0;
+        this.maxTemperature = 25.0;
+        this.minHumidity = 30.0;
+        this.maxHumidity = 60.0;
     }
 
     @Override 

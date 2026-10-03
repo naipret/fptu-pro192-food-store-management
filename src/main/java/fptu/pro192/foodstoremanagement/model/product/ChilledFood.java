@@ -3,10 +3,18 @@ package fptu.pro192.foodstoremanagement.model.product;
 public class ChilledFood extends Food {
     public ChilledFood() {
         super();
+        this.minTemperature = 0.0;
+        this.maxTemperature = 4.0;
+        this.minHumidity = 75.0;
+        this.maxHumidity = 85.0;
     }
 
     public ChilledFood(String id, String name, String category, String unit, double price) {
         super(id, name, category, unit, price);
+        this.minTemperature = 0.0;
+        this.maxTemperature = 4.0;
+        this.minHumidity = 75.0;
+        this.maxHumidity = 85.0;
     }
 
     @Override
