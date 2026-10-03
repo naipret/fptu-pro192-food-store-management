@@ -52,6 +52,36 @@ public class Batch {
     public int getQuantity() {
         return quantity;
     }
+
+
+
+    public String getBatchId() {
+        return batchId;
+    }
+
+
+
+    public String getProductId() {
+        return productId;
+    }
+
+
+
+    public LocalDate getImportDate() {
+        return importDate;
+    }
+
+
+
+    public LocalDate getProductionDate() {
+        return productionDate;
+    }
+
+
+
+    public LocalDate getExpirationDate() {
+        return expirationDate;
+    }
     
 
 }

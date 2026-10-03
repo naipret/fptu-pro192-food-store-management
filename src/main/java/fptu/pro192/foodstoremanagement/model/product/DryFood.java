@@ -2,6 +2,13 @@ package fptu.pro192.foodstoremanagement.model.product;
 
 public class DryFood extends Food {
     
+
+    
+    public DryFood(String id, String name, String category, String unit, double price, double minTemperature,
+            double maxTemperature, double minHumidity, double maxHumidity, boolean isDeleted) {
+        super(id, name, category, unit, price, minTemperature, maxTemperature, minHumidity, maxHumidity, isDeleted);
+    }
+
     public DryFood() {
         super();
         this.minTemperature = 15.0;

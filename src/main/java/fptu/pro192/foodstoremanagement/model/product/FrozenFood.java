@@ -1,8 +1,21 @@
 package fptu.pro192.foodstoremanagement.model.product;
 
-import java.util.List;
 
 public class FrozenFood extends Food {
+
+    
+
+    
+
+
+
+    public FrozenFood(String id, String name, String category, String unit, double price, double minTemperature,
+            double maxTemperature, double minHumidity, double maxHumidity, boolean isDeleted) {
+        super(id, name, category, unit, price, minTemperature, maxTemperature, minHumidity, maxHumidity, isDeleted);
+    }
+
+
+
     public FrozenFood() {
         super();
         this.minTemperature = -25.0;
@@ -10,6 +23,8 @@ public class FrozenFood extends Food {
         this.minHumidity = 85.0;
         this.maxHumidity = 95.0;
     }
+
+
 
     public FrozenFood(String id, String name, String category, String unit, double price) {
         super(id, name, category, unit, price);
@@ -20,13 +35,7 @@ public class FrozenFood extends Food {
 
     }
     
-    public FrozenFood(String id, String name, String category, String unit, double price, List<Batch> batches) {
-        super(id, name, category, unit, price, batches);
-        this.minTemperature = -25.0;
-        this.maxTemperature = -18.0;
-        this.minHumidity = 85.0;
-        this.maxHumidity = 95.0;
-    }
+    
 
     @Override
     public String getStorageInstructions() {

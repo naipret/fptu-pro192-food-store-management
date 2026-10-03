@@ -23,6 +23,23 @@ public abstract class Food {
     }
     
     
+    
+    public Food(String id, String name, String category, String unit, double price, double minTemperature,
+            double maxTemperature, double minHumidity, double maxHumidity, boolean isDeleted) {
+        this.id = id;
+        this.name = name;
+        this.category = category;
+        this.unit = unit;
+        this.price = price;
+        this.minTemperature = minTemperature;
+        this.maxTemperature = maxTemperature;
+        this.minHumidity = minHumidity;
+        this.maxHumidity = maxHumidity;
+        this.isDeleted = isDeleted;
+    }
+
+
+
     public Food(String id, String name, String category, String unit, double price) {
         this.id = id;
         this.name = name;
@@ -70,6 +87,72 @@ public abstract class Food {
     public List<Batch> getBatches(){
         return Collections.unmodifiableList(batches);
     }
+
+    public String getId() {
+        return id;
+    }
+
+
+
+    public String getName() {
+        return name;
+    }
+
+
+
+    public String getCategory() {
+        return category;
+    }
+
+
+
+    public String getUnit() {
+        return unit;
+    }
+
+
+
+    public double getPrice() {
+        return price;
+    }
+
+
+
+    public double getMinTemperature() {
+        return minTemperature;
+    }
+
+
+
+    public double getMaxTemperature() {
+        return maxTemperature;
+    }
+
+
+
+    public double getMinHumidity() {
+        return minHumidity;
+    }
+
+
+
+    public double getMaxHumidity() {
+        return maxHumidity;
+    }
+
+
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    
+
+    public void setDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+
 
     abstract String getStorageInstructions();
 

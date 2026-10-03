@@ -1,6 +1,13 @@
 package fptu.pro192.foodstoremanagement.model.product;
 
 public class ChilledFood extends Food {
+
+    
+    public ChilledFood(String id, String name, String category, String unit, double price, double minTemperature,
+            double maxTemperature, double minHumidity, double maxHumidity, boolean isDeleted) {
+        super(id, name, category, unit, price, minTemperature, maxTemperature, minHumidity, maxHumidity, isDeleted);
+    }
+
     public ChilledFood() {
         super();
         this.minTemperature = 0.0;
