@@ -1,4 +1,4 @@
-package fptu.pro192.foodstoremanagement.model;
+package fptu.pro192.foodstoremanagement.model.product;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
