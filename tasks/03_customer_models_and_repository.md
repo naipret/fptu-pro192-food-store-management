@@ -13,11 +13,11 @@
 
 ### 🎯 Objective & Summary
 
-Implement the Customer domain model hierarchy (`Customer`, `RegularCustomer`, `VIPCustomer`), Vietnamese phone number normalization utility in `InputValidator`, and the `CustomerRepository` managing in-memory customer caching and atomic CSV persistence (`data/customers.csv`).
+Implement the Customer domain model hierarchy (`Customers`, `RegularCustomer`, `VIPCustomer`), Vietnamese phone number normalization utility in `InputValidator`, and the `CustomerRepository` managing in-memory customer caching and atomic CSV persistence (`data/customers.csv`).
 
 This task models:
 
-1. `Customer` (abstract parent class): Defines customer attributes and the polymorphic discount calculation contract (**Strategy Pattern**).
+1. `Customers` (abstract parent class): Defines customer attributes and the polymorphic discount calculation contract (**Strategy Pattern**).
 2. `RegularCustomer` and `VIPCustomer`: Concrete classes enforcing **BR15** (0% discount) and **BR16** (10% discount).
 3. `InputValidator`: Centralized phone number parser handling irregular Vietnamese phone inputs (**BR25**).
 4. `CustomerRepository`: Handles in-memory storage, soft-deletion (**BR27**), and atomic CSV persistence.

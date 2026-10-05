@@ -26,7 +26,7 @@ Each class in the system is assigned a single, well-defined responsibility:
 The architecture allows adding new business capabilities without modifying tested core logic:
 
 * **Extending Product Categories**: If the business introduces a new category (e.g., `CannedFood` or `BeverageFood`), developers create a new subclass extending `Food` and implement the polymorphic methods `getStorageInstructions()` and `getDaysBeforeExpiryWarning()`. The checkout engine in `OrderService` and table renderers in `ConsoleView` require **zero modifications**.
-* **Extending Customer Tiers**: Introducing a new customer tier (e.g., `WholesaleCustomer` with 15% discount) requires creating a new subclass of `Customer` overriding `getDiscountRate()`. Billing calculations remain unchanged.
+* **Extending Customer Tiers**: Introducing a new customer tier (e.g., `WholesaleCustomer` with 15% discount) requires creating a new subclass of `Customers` overriding `getDiscountRate()`. Billing calculations remain unchanged.
 
 ### 1.3. Liskov Substitution Principle (LSP)
 >
@@ -35,7 +35,7 @@ The architecture allows adding new business capabilities without modifying teste
 All subclasses maintain behavioral compatibility with their parent contracts:
 
 * **Product Substitution**: `FrozenFood`, `ChilledFood`, and `DryFood` can be treated interchangeably as `Food` references throughout `OrderDetail`, `InventoryService`, and sorting algorithms without type-checking hacks (`instanceof`).
-* **Customer Substitution**: `RegularCustomer` and `VIPCustomer` can be substituted wherever a `Customer` is expected during order calculations; neither subclass throws unsupported exceptions or alters pre/post-conditions.
+* **Customer Substitution**: `RegularCustomer` and `VIPCustomer` can be substituted wherever a `Customers` is expected during order calculations; neither subclass throws unsupported exceptions or alters pre/post-conditions.
 
 ### 1.4. Interface Segregation Principle (ISP)
 >
@@ -100,7 +100,7 @@ The application is organized into three distinct architectural layers with stric
 | :--- | :--- | :--- |
 | **SRP** | `MiniCsv`, `ProductRepository`, `OrderService`, `ConsoleView` | Dedicated file I/O, persistence, business rules, and UI rendering. |
 | **OCP** | `Food` $\to$ (`FrozenFood`, `ChilledFood`, `DryFood`) | Add new food types without modifying checkout or inventory calculation. |
-| **LSP** | `Customer` $\to$ (`RegularCustomer`, `VIPCustomer`) | Transparent polymorphic discount calculation via `getDiscountRate()`. |
+| **LSP** | `Customers` $\to$ (`RegularCustomer`, `VIPCustomer`) | Transparent polymorphic discount calculation via `getDiscountRate()`. |
 | **ISP** | `Identifiable`, `TableDisplayable` | Segregated, purpose-built interfaces. |
 | **DIP** | `ProductService` depends on `ProductRepository` | Decoupled business logic from low-level CSV file I/O. |
 | **DRY** | `ScannerManager`, `ConsoleUtil`, `TableFormatter` | Single Scanner lifecycle and shared ASCII layout rendering. |
