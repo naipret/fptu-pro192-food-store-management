@@ -1,20 +1,17 @@
 package fptu.pro192.foodstoremanagement.model;
 
-public class Customer {
-    public abstract class Customers {
-
-        // Fields
-        protected String id;          // BR2
+public abstract class Customer {
+        protected String id;
         protected String fullName;
-        protected String phone;       // BR25
+        protected String phone;
         protected String address;
-        protected boolean isDeleted;  // BR27
+        protected boolean isDeleted;
 
         // Constructors
-        public Customers() {
+        public Customer() {
         }
 
-        public Customers(String id, String fullName, String phone, String address) {
+        public Customer(String id, String fullName, String phone, String address) {
             this.id = id;
             this.fullName = fullName;
             this.phone = phone;
@@ -22,15 +19,14 @@ public class Customer {
             this.isDeleted = false;
         }
 
-        // Strategy contract: Returns discount rate (0.0 to 1.0)
+
         public abstract double getDiscountRate();
 
-        // BR15 & BR16: Calculates discount amount based on subtotal
+
         public double calculateDiscount(double subtotal) {
             return subtotal * getDiscountRate();
         }
 
-        // Standard getters and setters
         public String getId() {
             return id;
         }
@@ -71,4 +67,5 @@ public class Customer {
             isDeleted = deleted;
         }
     }
-}
+
+

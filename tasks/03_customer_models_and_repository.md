@@ -76,7 +76,7 @@ This task models:
   - `protected String phone;` (BR25)
   - `protected String address;`
   - `protected boolean isDeleted;` (BR27)
-- **Abstract Methods:**
+- **Abstract Methods:(**
   - `// Strategy contract: Returns discount rate (0.0 to 1.0)`
     `public abstract double getDiscountRate();`
 - **Concrete Domain Methods:**
