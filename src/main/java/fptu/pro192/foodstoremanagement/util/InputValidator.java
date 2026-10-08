@@ -1,5 +1,7 @@
 package fptu.pro192.foodstoremanagement.util;
 
+import java.time.LocalDate;
+
 /**
  * Utility class for validating and normalizing user inputs according to business rules.
  */
@@ -48,5 +50,25 @@ public final class InputValidator {
      */
     public static String normalPhoneNumbers(String rawNumbers) {
         return normalizePhone(rawNumbers);
+    }
+
+    /**
+     * BR7: Validates that production date is not after expiration date and not in the future.
+     *
+     * @param productionDate Production date
+     * @param expirationDate Expiration date
+     * @return true if dates are valid; false otherwise
+     */
+    public static boolean isValidDate(LocalDate productionDate, LocalDate expirationDate) {
+        if (productionDate == null || expirationDate == null) {
+            return false;
+        }
+        if (productionDate.isAfter(expirationDate)) {
+            return false;
+        }
+        if (productionDate.isAfter(LocalDate.now())) {
+            return false;
+        }
+        return true;
     }
 }
