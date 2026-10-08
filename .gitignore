@@ -67,3 +67,5 @@ _bmad-output/
 skills-lock.json
 
 .idea/
+src/main/main.iml
+src/test/test.iml
