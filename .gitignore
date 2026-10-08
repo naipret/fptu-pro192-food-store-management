@@ -65,3 +65,5 @@ _bmad
 _bmad-output/
 .agents
 skills-lock.json
+
+.idea/
