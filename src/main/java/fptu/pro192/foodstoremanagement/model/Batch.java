@@ -7,10 +7,9 @@ import java.util.Objects;
 /**
  * Represents an inventory shipment batch with distinct production and expiration dates.
  *
- * BR7: Production date <= Expiration date, and Production date <= Current system date.
- * BR11: Expired batches cannot be sold.
- * BR20: Close to expiration warning threshold.
- * BR26: Quantity must be a non-negative integer.
+ * BR7: Production date <= Expiration date, and Production date <= Current system date. BR11:
+ * Expired batches cannot be sold. BR20: Close to expiration warning threshold. BR26: Quantity must
+ * be a non-negative integer.
  */
 public class Batch {
 
@@ -24,8 +23,7 @@ public class Batch {
     /**
      * Default constructor for serialization frameworks or bean conventions.
      */
-    public Batch() {
-    }
+    public Batch() {}
 
     /**
      * Constructs an inventory batch with strict domain invariants validation.
@@ -58,11 +56,13 @@ public class Batch {
         }
         // BR7: Production date <= Current system date
         if (productionDate.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Production date cannot be in the future relative to system date");
+            throw new IllegalArgumentException(
+                    "Production date cannot be in the future relative to system date");
         }
         // BR26: Quantity cannot be negative
         if (quantity < 0) {
-            throw new IllegalArgumentException("Batch stock quantity cannot be negative: " + quantity);
+            throw new IllegalArgumentException(
+                    "Batch stock quantity cannot be negative: " + quantity);
         }
 
         this.batchId = batchId.trim();
@@ -153,8 +153,8 @@ public class Batch {
             throw new IllegalArgumentException("Deduction amount must be positive: " + amount);
         }
         if (amount > this.quantity) {
-            throw new IllegalArgumentException(
-                    "Insufficient batch stock. Available: " + this.quantity + ", requested: " + amount);
+            throw new IllegalArgumentException("Insufficient batch stock. Available: "
+                    + this.quantity + ", requested: " + amount);
         }
         this.quantity -= amount;
     }
@@ -188,7 +188,8 @@ public class Batch {
     }
 
     public void setProductionDate(LocalDate productionDate) {
-        if (productionDate != null && expirationDate != null && productionDate.isAfter(expirationDate)) {
+        if (productionDate != null && expirationDate != null
+                && productionDate.isAfter(expirationDate)) {
             throw new IllegalArgumentException("Production date cannot be after expiration date");
         }
         this.productionDate = productionDate;
@@ -199,7 +200,8 @@ public class Batch {
     }
 
     public void setExpirationDate(LocalDate expirationDate) {
-        if (productionDate != null && expirationDate != null && productionDate.isAfter(expirationDate)) {
+        if (productionDate != null && expirationDate != null
+                && productionDate.isAfter(expirationDate)) {
             throw new IllegalArgumentException("Production date cannot be after expiration date");
         }
         this.expirationDate = expirationDate;
@@ -218,8 +220,10 @@ public class Batch {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Batch batch = (Batch) o;
         return Objects.equals(batchId, batch.batchId);
     }
@@ -231,13 +235,8 @@ public class Batch {
 
     @Override
     public String toString() {
-        return "Batch{" +
-                "batchId='" + batchId + '\'' +
-                ", productId='" + productId + '\'' +
-                ", importDate=" + importDate +
-                ", productionDate=" + productionDate +
-                ", expirationDate=" + expirationDate +
-                ", quantity=" + quantity +
-                '}';
+        return "Batch{" + "batchId='" + batchId + '\'' + ", productId='" + productId + '\''
+                + ", importDate=" + importDate + ", productionDate=" + productionDate
+                + ", expirationDate=" + expirationDate + ", quantity=" + quantity + '}';
     }
 }

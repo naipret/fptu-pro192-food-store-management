@@ -1,9 +1,8 @@
 package fptu.pro192.foodstoremanagement.model;
 
 /**
- * Concrete food subclass representing frozen goods requiring deep freeze preservation.
- * Standard HACCP Range: -25.0°C to -18.0°C, Humidity 85.0% to 95.0%.
- * Expiration warning threshold: 14 days.
+ * Concrete food subclass representing frozen goods requiring deep freeze preservation. Standard
+ * HACCP Range: -25.0°C to -18.0°C, Humidity 85.0% to 95.0%. Expiration warning threshold: 14 days.
  */
 public class FrozenFood extends Food {
 
@@ -22,13 +21,15 @@ public class FrozenFood extends Food {
     }
 
     public FrozenFood(String id, String name, String category, String unit, double price,
-            double minTemperature, double maxTemperature, double minHumidity,
-            double maxHumidity, boolean isDeleted) {
-        super(id, name, category, unit, price, minTemperature, maxTemperature, minHumidity, maxHumidity, isDeleted);
+            double minTemperature, double maxTemperature, double minHumidity, double maxHumidity,
+            boolean isDeleted) {
+        super(id, name, category, unit, price, minTemperature, maxTemperature, minHumidity,
+                maxHumidity, isDeleted);
     }
 
     public FrozenFood(String id, String name, String category, String unit, double price) {
-        super(id, name, category, unit, price, DEFAULT_MIN_TEMP, DEFAULT_MAX_TEMP, DEFAULT_MIN_HUMIDITY, DEFAULT_MAX_HUMIDITY, false);
+        super(id, name, category, unit, price, DEFAULT_MIN_TEMP, DEFAULT_MAX_TEMP,
+                DEFAULT_MIN_HUMIDITY, DEFAULT_MAX_HUMIDITY, false);
     }
 
     @Override

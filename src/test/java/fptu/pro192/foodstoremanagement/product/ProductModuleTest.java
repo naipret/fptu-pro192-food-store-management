@@ -53,13 +53,15 @@ public class ProductModuleTest {
             System.out.printf("  [PASS] %s\n", testName);
             totalPassed++;
         } else {
-            System.err.printf("  [FAIL] %s: Expected [%s] but got [%s]\n", testName, expected, actual);
+            System.err.printf("  [FAIL] %s: Expected [%s] but got [%s]\n", testName, expected,
+                    actual);
             totalFailed++;
         }
     }
 
     private static void testConstructorInvariants() {
-        System.out.println("\n--- 1. Testing Domain Invariants Validation (BR1, BR3, BR4, BR5, BR5.1, BR7, BR26) ---");
+        System.out.println(
+                "\n--- 1. Testing Domain Invariants Validation (BR1, BR3, BR4, BR5, BR5.1, BR7, BR26) ---");
 
         // Valid product creation
         try {
@@ -73,9 +75,10 @@ public class ProductModuleTest {
         assertThrows("Invalid ID 'P123' throws IllegalArgumentException", () -> {
             new DryFood("P123", "Mi Hao Hao", "DRY", "Goi", 8000.0);
         });
-        assertThrows("Invalid ID 'C00001' (customer prefix) throws IllegalArgumentException", () -> {
-            new DryFood("C00001", "Mi Hao Hao", "DRY", "Goi", 8000.0);
-        });
+        assertThrows("Invalid ID 'C00001' (customer prefix) throws IllegalArgumentException",
+                () -> {
+                    new DryFood("C00001", "Mi Hao Hao", "DRY", "Goi", 8000.0);
+                });
 
         // BR3: Empty name or category
         assertThrows("Empty name throws IllegalArgumentException", () -> {
@@ -104,30 +107,38 @@ public class ProductModuleTest {
         });
 
         // BR7: Batch production date > expiration date
-        assertThrows("Batch production date after expiry date throws IllegalArgumentException", () -> {
-            new Batch("B00001", "P00001", LocalDate.now(), LocalDate.now(), LocalDate.now().minusDays(5), 10);
-        });
+        assertThrows("Batch production date after expiry date throws IllegalArgumentException",
+                () -> {
+                    new Batch("B00001", "P00001", LocalDate.now(), LocalDate.now(),
+                            LocalDate.now().minusDays(5), 10);
+                });
 
         // BR26: Batch negative quantity
         assertThrows("Batch negative quantity throws IllegalArgumentException", () -> {
-            new Batch("B00001", "P00001", LocalDate.now(), LocalDate.now(), LocalDate.now().plusDays(10), -5);
+            new Batch("B00001", "P00001", LocalDate.now(), LocalDate.now(),
+                    LocalDate.now().plusDays(10), -5);
         });
     }
 
     private static void testPolymorphismAndHACCP() {
-        System.out.println("\n--- 2. Testing Polymorphism & HACCP Shelf-Life Warning Thresholds ---");
+        System.out
+                .println("\n--- 2. Testing Polymorphism & HACCP Shelf-Life Warning Thresholds ---");
 
         Food frozen = new FrozenFood("P00001", "Ca Hoi Phi Le", "FROZEN", "Kg", 250000.0);
         Food chilled = new ChilledFood("P00002", "Sua Tuoi Thanh Trung", "CHILLED", "Hop", 35000.0);
         Food dry = new DryFood("P00003", "Gao ST25", "DRY", "Kg", 40000.0);
 
         assertEquals("FrozenFood warning days is 14", 14, frozen.getDaysBeforeExpiryWarning());
-        assertEquals("ChilledFood warning days is 1 (BR20.1)", 1, chilled.getDaysBeforeExpiryWarning());
+        assertEquals("ChilledFood warning days is 1 (BR20.1)", 1,
+                chilled.getDaysBeforeExpiryWarning());
         assertEquals("DryFood warning days is 7 (BR20.2)", 7, dry.getDaysBeforeExpiryWarning());
 
-        assertTrue("FrozenFood storage instructions mention frozen", frozen.getStorageInstructions().contains("frozen"));
-        assertTrue("ChilledFood storage instructions mention refrigerated", chilled.getStorageInstructions().contains("refrigerated"));
-        assertTrue("DryFood storage instructions mention cool, dry place", dry.getStorageInstructions().contains("cool, dry place"));
+        assertTrue("FrozenFood storage instructions mention frozen",
+                frozen.getStorageInstructions().contains("frozen"));
+        assertTrue("ChilledFood storage instructions mention refrigerated",
+                chilled.getStorageInstructions().contains("refrigerated"));
+        assertTrue("DryFood storage instructions mention cool, dry place",
+                dry.getStorageInstructions().contains("cool, dry place"));
     }
 
     private static void testBatchExpiryAndDeduction() {
@@ -138,8 +149,10 @@ public class ProductModuleTest {
         LocalDate nearDate = LocalDate.of(2026, 10, 12);
         LocalDate farDate = LocalDate.of(2026, 11, 8);
 
-        Batch expiredBatch = new Batch("B00001", "P00001", pastDate.minusDays(10), pastDate.minusDays(10), pastDate, 50);
-        Batch nearBatch = new Batch("B00002", "P00001", today.minusDays(5), today.minusDays(5), nearDate, 30);
+        Batch expiredBatch = new Batch("B00001", "P00001", pastDate.minusDays(10),
+                pastDate.minusDays(10), pastDate, 50);
+        Batch nearBatch =
+                new Batch("B00002", "P00001", today.minusDays(5), today.minusDays(5), nearDate, 30);
         Batch farBatch = new Batch("B00003", "P00001", today, today, farDate, 100);
 
         // BR11: isExpired
@@ -148,9 +161,12 @@ public class ProductModuleTest {
         assertTrue("Far batch is not expired relative to today", !farBatch.isExpired(today));
 
         // BR20: isCloseToExpiry
-        assertTrue("Expired batch is NOT close to expiry (already expired)", !expiredBatch.isCloseToExpiry(today, 7));
-        assertTrue("Near batch (4 days remaining) IS close to expiry within 7 days", nearBatch.isCloseToExpiry(today, 7));
-        assertTrue("Far batch (31 days remaining) is NOT close to expiry within 7 days", !farBatch.isCloseToExpiry(today, 7));
+        assertTrue("Expired batch is NOT close to expiry (already expired)",
+                !expiredBatch.isCloseToExpiry(today, 7));
+        assertTrue("Near batch (4 days remaining) IS close to expiry within 7 days",
+                nearBatch.isCloseToExpiry(today, 7));
+        assertTrue("Far batch (31 days remaining) is NOT close to expiry within 7 days",
+                !farBatch.isCloseToExpiry(today, 7));
 
         // BR14, BR24: Deduct
         farBatch.deduct(25);
@@ -167,16 +183,20 @@ public class ProductModuleTest {
     private static void testProductFactory() {
         System.out.println("\n--- 4. Testing ProductFactory Factory Method Pattern ---");
 
-        Food frozen = ProductFactory.create("FROZEN", "P00001", "Thit Bo Uc Dong Lanh", "FROZEN", "Kg", 180000.0, -25.0, -18.0, 85.0, 95.0, false);
-        Food chilled = ProductFactory.create("CHILLED", "P00002", "Sua Chua Co Duong", "CHILLED", "Hop", 7000.0, 0.0, 4.0, 75.0, 85.0, false);
-        Food dry = ProductFactory.create("DRY", "P00003", "Nuoc Mam Nam Ngu", "DRY", "Chai", 32000.0, 15.0, 25.0, 30.0, 60.0, false);
+        Food frozen = ProductFactory.create("FROZEN", "P00001", "Thit Bo Uc Dong Lanh", "FROZEN",
+                "Kg", 180000.0, -25.0, -18.0, 85.0, 95.0, false);
+        Food chilled = ProductFactory.create("CHILLED", "P00002", "Sua Chua Co Duong", "CHILLED",
+                "Hop", 7000.0, 0.0, 4.0, 75.0, 85.0, false);
+        Food dry = ProductFactory.create("DRY", "P00003", "Nuoc Mam Nam Ngu", "DRY", "Chai",
+                32000.0, 15.0, 25.0, 30.0, 60.0, false);
 
         assertTrue("Factory produces FrozenFood", frozen instanceof FrozenFood);
         assertTrue("Factory produces ChilledFood", chilled instanceof ChilledFood);
         assertTrue("Factory produces DryFood", dry instanceof DryFood);
 
         assertThrows("Unknown type 'CANNED' throws IllegalArgumentException", () -> {
-            ProductFactory.create("CANNED", "P00004", "Ca Hop", "CANNED", "Hop", 20000.0, 0.0, 0.0, 0.0, 0.0, false);
+            ProductFactory.create("CANNED", "P00004", "Ca Hop", "CANNED", "Hop", 20000.0, 0.0, 0.0,
+                    0.0, 0.0, false);
         });
     }
 
@@ -187,9 +207,12 @@ public class ProductModuleTest {
         Food food = new DryFood("P00001", "Mi Hao Hao", "DRY", "Goi", 8000.0);
 
         // Batches with different expiry dates:
-        Batch bExpired = new Batch("B00001", "P00001", today.minusDays(20), today.minusDays(20), today.minusDays(1), 10);
-        Batch bLate = new Batch("B00002", "P00001", today.minusDays(5), today.minusDays(5), today.plusDays(30), 40);
-        Batch bEarly = new Batch("B00003", "P00001", today.minusDays(10), today.minusDays(10), today.plusDays(10), 20);
+        Batch bExpired = new Batch("B00001", "P00001", today.minusDays(20), today.minusDays(20),
+                today.minusDays(1), 10);
+        Batch bLate = new Batch("B00002", "P00001", today.minusDays(5), today.minusDays(5),
+                today.plusDays(30), 40);
+        Batch bEarly = new Batch("B00003", "P00001", today.minusDays(10), today.minusDays(10),
+                today.plusDays(10), 20);
 
         food.addBatch(bExpired);
         food.addBatch(bLate);
@@ -201,8 +224,10 @@ public class ProductModuleTest {
         // FEFO active batches sorting: bEarly (10 days) before bLate (30 days)
         List<Batch> activeBatches = food.getActiveBatches(today);
         assertEquals("Active batches count is 2", 2, activeBatches.size());
-        assertEquals("First batch in FEFO order is earliest expiring (B00003)", "B00003", activeBatches.get(0).getBatchId());
-        assertEquals("Second batch in FEFO order is later expiring (B00002)", "B00002", activeBatches.get(1).getBatchId());
+        assertEquals("First batch in FEFO order is earliest expiring (B00003)", "B00003",
+                activeBatches.get(0).getBatchId());
+        assertEquals("Second batch in FEFO order is later expiring (B00002)", "B00002",
+                activeBatches.get(1).getBatchId());
     }
 
     private static void testProductRepositoryPersistenceAndAtomicSync() {
@@ -217,11 +242,14 @@ public class ProductModuleTest {
             ProductRepository repo = new ProductRepository(pPath, bPath);
 
             Food f1 = new DryFood("P00001", "Mi Hao Hao", "DRY", "Goi", 8000.0);
-            f1.addBatch(new Batch("B00001", "P00001", LocalDate.now(), LocalDate.now(), LocalDate.now().plusDays(60), 100));
-            f1.addBatch(new Batch("B00002", "P00001", LocalDate.now(), LocalDate.now(), LocalDate.now().plusDays(90), 50));
+            f1.addBatch(new Batch("B00001", "P00001", LocalDate.now(), LocalDate.now(),
+                    LocalDate.now().plusDays(60), 100));
+            f1.addBatch(new Batch("B00002", "P00001", LocalDate.now(), LocalDate.now(),
+                    LocalDate.now().plusDays(90), 50));
 
             Food f2 = new ChilledFood("P00002", "Sua Tuoi 1L", "CHILLED", "Hop", 35000.0);
-            f2.addBatch(new Batch("B00003", "P00002", LocalDate.now(), LocalDate.now(), LocalDate.now().plusDays(10), 30));
+            f2.addBatch(new Batch("B00003", "P00002", LocalDate.now(), LocalDate.now(),
+                    LocalDate.now().plusDays(10), 30));
 
             repo.save(f1);
             repo.save(f2);
@@ -234,7 +262,8 @@ public class ProductModuleTest {
 
             Food reloadedF1 = reloaded.findById("P00001");
             assertTrue("Reloaded P00001 is found", reloadedF1 != null);
-            assertEquals("Reloaded P00001 has 2 attached batches", 2, reloadedF1.getBatches().size());
+            assertEquals("Reloaded P00001 has 2 attached batches", 2,
+                    reloadedF1.getBatches().size());
             assertEquals("Reloaded P00001 total stock is 150", 150, reloadedF1.getTotalStock());
 
             Food reloadedF2 = reloaded.findById("p00002"); // case-insensitive check
@@ -243,12 +272,15 @@ public class ProductModuleTest {
 
             // Soft-delete test (BR27)
             reloaded.delete("P00001");
-            assertEquals("After delete, findAll returns 1 active product", 1, reloaded.findAll().size());
-            assertTrue("findById('P00001') returns null after soft delete", reloaded.findById("P00001") == null);
+            assertEquals("After delete, findAll returns 1 active product", 1,
+                    reloaded.findAll().size());
+            assertTrue("findById('P00001') returns null after soft delete",
+                    reloaded.findById("P00001") == null);
 
             // Re-read from disk to ensure soft delete persisted
             ProductRepository reloadedAfterDelete = new ProductRepository(pPath, bPath);
-            assertEquals("Reloaded after delete persists soft delete state", 1, reloadedAfterDelete.findAll().size());
+            assertEquals("Reloaded after delete persists soft delete state", 1,
+                    reloadedAfterDelete.findAll().size());
 
         } finally {
             new File(pPath).delete();
@@ -267,7 +299,8 @@ public class ProductModuleTest {
             System.out.printf("  [PASS] %s\n", testName);
             totalPassed++;
         } catch (Exception e) {
-            System.err.printf("  [FAIL] %s: Expected IllegalArgumentException but got %s\n", testName, e.getClass().getSimpleName());
+            System.err.printf("  [FAIL] %s: Expected IllegalArgumentException but got %s\n",
+                    testName, e.getClass().getSimpleName());
             totalFailed++;
         }
     }

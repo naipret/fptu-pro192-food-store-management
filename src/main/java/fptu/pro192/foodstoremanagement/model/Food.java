@@ -10,13 +10,10 @@ import java.util.Objects;
 /**
  * Abstract domain model representing a food product item in catalog inventory.
  *
- * BR1: Product ID format P00001-P99999 (immutable).
- * BR3: Name and category cannot be empty or blank.
- * BR4: Unit cannot be empty or blank.
- * BR5: Price must be greater than zero.
- * BR5.1: Name must contain alphabetic characters.
- * BR6: Stock quantity cannot be negative.
- * BR27: Soft delete semantics (isDeleted = true).
+ * BR1: Product ID format P00001-P99999 (immutable). BR3: Name and category cannot be empty or
+ * blank. BR4: Unit cannot be empty or blank. BR5: Price must be greater than zero. BR5.1: Name must
+ * contain alphabetic characters. BR6: Stock quantity cannot be negative. BR27: Soft delete
+ * semantics (isDeleted = true).
  */
 public abstract class Food {
 
@@ -35,8 +32,7 @@ public abstract class Food {
     /**
      * Default constructor for serialization or subclass instantiation.
      */
-    public Food() {
-    }
+    public Food() {}
 
     /**
      * Full domain constructor enforcing all business rules and invariants.
@@ -54,9 +50,10 @@ public abstract class Food {
      * @throws IllegalArgumentException If any invariant is violated
      */
     public Food(String id, String name, String category, String unit, double price,
-            double minTemperature, double maxTemperature, double minHumidity,
-            double maxHumidity, boolean isDeleted) {
-        validateInvariants(id, name, category, unit, price, minTemperature, maxTemperature, minHumidity, maxHumidity);
+            double minTemperature, double maxTemperature, double minHumidity, double maxHumidity,
+            boolean isDeleted) {
+        validateInvariants(id, name, category, unit, price, minTemperature, maxTemperature,
+                minHumidity, maxHumidity);
         this.id = id.trim();
         this.name = name.trim();
         this.category = category.trim();
@@ -89,8 +86,8 @@ public abstract class Food {
             double price, double minTemp, double maxTemp, double minHum, double maxHum) {
         // BR1: Unique Product ID format P00001-P99999
         if (id == null || !id.trim().matches("^P\\d{5}$")) {
-            throw new IllegalArgumentException(
-                    "Invalid product ID: " + id + ". Product ID must follow format P00001-P99999 (BR1).");
+            throw new IllegalArgumentException("Invalid product ID: " + id
+                    + ". Product ID must follow format P00001-P99999 (BR1).");
         }
         // BR3 & BR5.1: Name not empty and must contain letters
         if (name == null || name.trim().isEmpty()) {
@@ -110,16 +107,17 @@ public abstract class Food {
         }
         // BR5: Price > 0
         if (price <= 0) {
-            throw new IllegalArgumentException("Product price must be greater than zero (BR5). Got: " + price);
+            throw new IllegalArgumentException(
+                    "Product price must be greater than zero (BR5). Got: " + price);
         }
         // Environmental bounds invariant
         if (minTemp > maxTemp) {
-            throw new IllegalArgumentException(
-                    "Minimum temperature (" + minTemp + ") cannot exceed maximum temperature (" + maxTemp + ")");
+            throw new IllegalArgumentException("Minimum temperature (" + minTemp
+                    + ") cannot exceed maximum temperature (" + maxTemp + ")");
         }
         if (minHum > maxHum) {
-            throw new IllegalArgumentException(
-                    "Minimum humidity (" + minHum + ") cannot exceed maximum humidity (" + maxHum + ")");
+            throw new IllegalArgumentException("Minimum humidity (" + minHum
+                    + ") cannot exceed maximum humidity (" + maxHum + ")");
         }
     }
 
@@ -138,7 +136,8 @@ public abstract class Food {
     public abstract int getDaysBeforeExpiryWarning();
 
     /**
-     * BR6, BR11: Calculates total active inventory stock across all non-expired batches relative to reference date.
+     * BR6, BR11: Calculates total active inventory stock across all non-expired batches relative to
+     * reference date.
      *
      * @param today Reference date for expiry evaluation
      * @return Total active stock quantity
@@ -164,7 +163,8 @@ public abstract class Food {
     }
 
     /**
-     * BR24: Returns all active (non-expired) batches sorted by expiration date ascending (FEFO order).
+     * BR24: Returns all active (non-expired) batches sorted by expiration date ascending (FEFO
+     * order).
      *
      * @param today Reference date for expiry evaluation
      * @return Unmodifiable or copy list of sorted active batches
@@ -295,8 +295,10 @@ public abstract class Food {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Food food = (Food) o;
         return Objects.equals(id, food.id);
     }
@@ -308,14 +310,8 @@ public abstract class Food {
 
     @Override
     public String toString() {
-        return "Food{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", category='" + category + '\'' +
-                ", unit='" + unit + '\'' +
-                ", price=" + price +
-                ", isDeleted=" + isDeleted +
-                ", totalStock=" + getTotalStock() +
-                '}';
+        return "Food{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", category='" + category
+                + '\'' + ", unit='" + unit + '\'' + ", price=" + price + ", isDeleted=" + isDeleted
+                + ", totalStock=" + getTotalStock() + '}';
     }
 }

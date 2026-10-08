@@ -10,11 +10,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Lightweight repository managing in-memory product collections and coordinating
- * atomic two-phase CSV persistence for products and inventory batches.
+ * Lightweight repository managing in-memory product collections and coordinating atomic two-phase
+ * CSV persistence for products and inventory batches.
  *
- * BR1: Unique Product ID lookup.
- * BR27: Soft-delete semantics (isDeleted = true) preserving physical audit trails.
+ * BR1: Unique Product ID lookup. BR27: Soft-delete semantics (isDeleted = true) preserving physical
+ * audit trails.
  */
 public class ProductRepository {
 
@@ -48,8 +48,8 @@ public class ProductRepository {
     }
 
     /**
-     * Loads catalog products and inventory batches from CSV storage into memory.
-     * Synchronized to prevent state corruption during concurrent reloads.
+     * Loads catalog products and inventory batches from CSV storage into memory. Synchronized to
+     * prevent state corruption during concurrent reloads.
      */
     public synchronized void loadFromCsv() {
         products.clear();
@@ -76,7 +76,8 @@ public class ProductRepository {
                         minTemperature, maxTemperature, minHumidity, maxHumidity, isDeleted);
                 products.add(food);
             } catch (Exception e) {
-                throw new RuntimeException("Corrupted record in product CSV file: " + String.join(",", row), e);
+                throw new RuntimeException(
+                        "Corrupted record in product CSV file: " + String.join(",", row), e);
             }
         }
 
@@ -94,7 +95,8 @@ public class ProductRepository {
                 LocalDate productionDate = LocalDate.parse(row[4]);
                 LocalDate expirationDate = LocalDate.parse(row[5]);
 
-                Batch batch = new Batch(batchId, productId, importDate, productionDate, expirationDate, quantity);
+                Batch batch = new Batch(batchId, productId, importDate, productionDate,
+                        expirationDate, quantity);
 
                 // Attach batch to corresponding food item
                 for (Food product : products) {
@@ -104,7 +106,8 @@ public class ProductRepository {
                     }
                 }
             } catch (Exception e) {
-                throw new RuntimeException("Corrupted record in batch CSV file: " + String.join(",", row), e);
+                throw new RuntimeException(
+                        "Corrupted record in batch CSV file: " + String.join(",", row), e);
             }
         }
     }
@@ -117,29 +120,18 @@ public class ProductRepository {
         List<String[]> batchesData = new ArrayList<>();
 
         for (Food product : products) {
-            String[] productRow = {
-                    product.getId(),
-                    product.getName(),
-                    product.getCategory(),
-                    product.getUnit(),
-                    String.valueOf(product.getPrice()),
+            String[] productRow = {product.getId(), product.getName(), product.getCategory(),
+                    product.getUnit(), String.valueOf(product.getPrice()),
                     String.valueOf(product.getMinTemperature()),
                     String.valueOf(product.getMaxTemperature()),
                     String.valueOf(product.getMinHumidity()),
-                    String.valueOf(product.getMaxHumidity()),
-                    String.valueOf(product.isDeleted())
-            };
+                    String.valueOf(product.getMaxHumidity()), String.valueOf(product.isDeleted())};
             productsData.add(productRow);
 
             for (Batch batch : product.getBatches()) {
-                String[] batchRow = {
-                        batch.getBatchId(),
-                        product.getId(),
-                        batch.getImportDate().toString(),
-                        String.valueOf(batch.getQuantity()),
-                        batch.getProductionDate().toString(),
-                        batch.getExpirationDate().toString()
-                };
+                String[] batchRow = {batch.getBatchId(), product.getId(),
+                        batch.getImportDate().toString(), String.valueOf(batch.getQuantity()),
+                        batch.getProductionDate().toString(), batch.getExpirationDate().toString()};
                 batchesData.add(batchRow);
             }
         }
