@@ -27,7 +27,7 @@ The system adheres to a **Layered Model-View-Controller (Layered MVC)** paradigm
 | :--- | :--- | :--- |
 | **View** | `fptu.pro192.foodstore.ui` | Formats and renders the 80-column ASCII terminal user interface, draws aligned tables, displays success/failure feedback, and captures raw keyboard input. Completely decoupled from business rules and file I/O. |
 | **Controller** | `fptu.pro192.foodstore.service` | Coordinates user actions received from the View. Enforces business rules (BR1–BR27), executes algorithmic calculations (FEFO batch deduction, VIP discount computation), and manages state transitions. |
-| **Model** | `fptu.pro192.foodstore.model`<br>& `fptu.pro192.foodstore.repository` | **Domain Entities (`model`)**: Encapsulates state and polymorphic behaviors (`Food` hierarchy, `Customers` hierarchy).<br>**Data Persistence (`repository`)**: Manages in-memory object collections and coordinates atomic CSV serialization via `MiniCsv`. |
+| **Model** | `fptu.pro192.foodstore.model`<br>& `fptu.pro192.foodstore.repository` | **Domain Entities (`model`)**: Encapsulates state and polymorphic behaviors (`Food` hierarchy, `Customer` hierarchy).<br>**Data Persistence (`repository`)**: Manages in-memory object collections and coordinates atomic CSV serialization via `MiniCsv`. |
 
 ### 1.2. Architectural Rationale: Preventing the "Fat Controller" Anti-Pattern
 

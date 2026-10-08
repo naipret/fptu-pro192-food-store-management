@@ -45,7 +45,7 @@ This task models:
 1. **Why `OrderDetail` Must Snapshot Unit Price:**
    - If Instant Noodles is sold today for 8,000 VND and the store raises the price tomorrow to 10,000 VND, historical invoices must still reflect 8,000 VND. Therefore, `OrderDetail` stores a detached copy of `unitPrice` and `productName` rather than referencing the live mutable `Food` entity directly.
 2. **Order Aggregation & Subtotal Logic (BR13 & BR17):**
-   - An `Order` owns a collection of `OrderDetail` items. Subtotal is computed by summing `item.getSubtotal()`. When a `Customers` is attached, discount is calculated via `customer.calculateDiscount(subtotal)` and deducted to determine `finalAmount`.
+   - An `Order` owns a collection of `OrderDetail` items. Subtotal is computed by summing `item.getSubtotal()`. When a `Customer` is attached, discount is calculated via `customer.calculateDiscount(subtotal)` and deducted to determine `finalAmount`.
 3. **Decoupled Flat CSV Storage:**
    - `orders.csv`: Stores transaction header info (`orderId`, `customerId`, `orderDate`, `subtotal`, `discountAmount`, `finalAmount`).
    - `order_details.csv`: Stores child line items linked via `orderId` (`orderId`, `productId`, `productName`, `unit`, `unitPrice`, `quantity`).
