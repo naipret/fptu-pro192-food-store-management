@@ -81,7 +81,7 @@ public class OrderModuleTest {
             runnable.run();
             System.err.printf("  [FAIL] %s: Expected exception but none was thrown\n", testName);
             totalFailed++;
-        } catch (IllegalArgumentException | UnsupportedOperationException e) {
+        } catch (IllegalArgumentException | UnsupportedOperationException | IllegalStateException e) {
             System.out.printf("  [PASS] %s\n", testName);
             totalPassed++;
         } catch (Exception e) {
@@ -131,6 +131,26 @@ public class OrderModuleTest {
         assertThrows("Null product cannot be added to order", () -> {
             new OrderDetail("ORD003", (Food) null, 1);
         });
+
+        // BR1, BR3, BR4: String fields non-null and non-blank
+        assertThrows("Null productId throws IllegalArgumentException (BR1)", () -> {
+            new OrderDetail("ORD003", null, "Item", "Cai", 10000.0, 1);
+        });
+        assertThrows("Blank productId throws IllegalArgumentException (BR1)", () -> {
+            new OrderDetail("ORD003", "   ", "Item", "Cai", 10000.0, 1);
+        });
+        assertThrows("Null productName throws IllegalArgumentException (BR3)", () -> {
+            new OrderDetail("ORD003", "P00001", null, "Cai", 10000.0, 1);
+        });
+        assertThrows("Blank productName throws IllegalArgumentException (BR3)", () -> {
+            new OrderDetail("ORD003", "P00001", "   ", "Cai", 10000.0, 1);
+        });
+        assertThrows("Null unit throws IllegalArgumentException (BR4)", () -> {
+            new OrderDetail("ORD003", "P00001", "Item", null, 10000.0, 1);
+        });
+        assertThrows("Blank unit throws IllegalArgumentException (BR4)", () -> {
+            new OrderDetail("ORD003", "P00001", "Item", "   ", 10000.0, 1);
+        });
     }
 
     private static void testOrderTotalAndCustomerDiscountCalculations() {
@@ -169,6 +189,18 @@ public class OrderModuleTest {
         order.calculateTotals(null);
         assertEquals("Guest customer discount is 0", 0.0, order.getDiscountAmount(), 0.001);
         assertEquals("Guest customer final amount is 60,000", 60000.0, order.getFinalAmount(), 0.001);
+
+        // BR12: Empty order cannot be completed
+        Order emptyOrder = new Order("ORD_EMPTY", "C00001", LocalDate.now());
+        assertThrows("Empty order cannot be completed (BR12)", () -> {
+            emptyOrder.setCompleted(true);
+        });
+
+        // Cascading orderId update to items
+        order.setOrderId("NEW_ORD_001");
+        assertEquals("Order ID updated on parent order", "NEW_ORD_001", order.getOrderId());
+        assertEquals("Order ID cascaded to first item", "NEW_ORD_001", order.getItems().get(0).getOrderId());
+        assertEquals("Order ID cascaded to second item", "NEW_ORD_001", order.getItems().get(1).getOrderId());
     }
 
     private static void testTransactionCreationAndLinking() {
@@ -261,6 +293,25 @@ public class OrderModuleTest {
             // Check transactions list
             List<Transaction> txList = reloaded.findAllTransactions();
             assertEquals("2 transactions reconstructed on reload", 2, txList.size());
+
+            // Check updating completed order totals synchronizes in-memory transaction totalPaid
+            reloadedO1.setFinalAmount(50000.0);
+            reloaded.saveOrder(reloadedO1);
+            assertEquals("Transaction totalPaid updated after re-saving order", 50000.0,
+                    reloaded.findAllTransactions().get(0).getTotalPaid(), 0.001);
+
+            // BR23: Uncompleting an order removes its transaction from memory
+            Order reloadedO2 = reloaded.findById("ORD002");
+            reloadedO2.setCompleted(false);
+            reloaded.saveOrder(reloadedO2);
+            assertEquals("Uncompleted order transaction removed from memory (BR23)", 1,
+                    reloaded.findAllTransactions().size());
+
+            // Empty/blank customer ID lookup
+            assertEquals("Blank customer ID returns empty list", 0,
+                    reloaded.findByCustomerId("   ").size());
+            assertEquals("Null customer ID returns empty list", 0,
+                    reloaded.findByCustomerId(null).size());
 
         } finally {
             new File(ordersTestPath).delete();

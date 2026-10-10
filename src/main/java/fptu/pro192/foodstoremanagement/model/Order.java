@@ -150,7 +150,7 @@ public class Order {
     }
 
     /**
-     * Sets the unique order identifier and cascades to items if unset.
+     * Sets the unique order identifier and cascades to all contained items.
      *
      * @param orderId The order ID to set
      */
@@ -158,9 +158,7 @@ public class Order {
         this.orderId = orderId;
         if (orderId != null) {
             for (OrderDetail item : items) {
-                if (item.getOrderId() == null || item.getOrderId().trim().isEmpty()) {
-                    item.setOrderId(orderId);
-                }
+                item.setOrderId(orderId);
             }
         }
     }
@@ -297,10 +295,16 @@ public class Order {
     /**
      * Sets the completion status of the order.
      *
+     * BR12: An order must contain at least one product item to be completed.
+     *
      * @param completed True if completed, false otherwise
+     * @throws IllegalStateException If attempting to complete an order without line items
      */
     public void setCompleted(boolean completed) {
-        isCompleted = completed;
+        if (completed && items.isEmpty()) {
+            throw new IllegalStateException("An order must contain at least one product item to be completed (BR12)");
+        }
+        this.isCompleted = completed;
     }
 
     @Override

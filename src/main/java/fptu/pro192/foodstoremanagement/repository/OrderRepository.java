@@ -200,17 +200,29 @@ public class OrderRepository {
             orders.add(order);
         }
 
-        // If order is completed, ensure transaction exists in memory (BR23)
+        // If order is completed, ensure transaction exists in memory and is synchronized (BR23)
         if (order.isCompleted()) {
             boolean hasTx = false;
             for (Transaction tx : transactions) {
                 if (tx.getOrderId() != null && tx.getOrderId().equalsIgnoreCase(order.getOrderId())) {
+                    tx.setTotalPaid(order.getFinalAmount());
+                    tx.setCustomerId(order.getCustomerId());
+                    tx.setTransactionDate((order.getOrderDate() != null) ? order.getOrderDate() : LocalDate.now());
                     hasTx = true;
                     break;
                 }
             }
             if (!hasTx) {
                 transactions.add(new Transaction("TX-" + order.getOrderId(), order, "CASH"));
+            }
+        } else {
+            // BR23: Total revenue is calculated exclusively from completed sales transactions.
+            // If order was uncompleted or cancelled, remove transaction from memory.
+            for (int i = transactions.size() - 1; i >= 0; i--) {
+                Transaction tx = transactions.get(i);
+                if (tx.getOrderId() != null && tx.getOrderId().equalsIgnoreCase(order.getOrderId())) {
+                    transactions.remove(i);
+                }
             }
         }
 
@@ -295,7 +307,7 @@ public class OrderRepository {
      */
     public synchronized List<Order> findByCustomerId(String customerId) {
         List<Order> result = new ArrayList<>();
-        if (customerId == null) {
+        if (customerId == null || customerId.trim().isEmpty()) {
             return Collections.unmodifiableList(result);
         }
         for (Order order : orders) {

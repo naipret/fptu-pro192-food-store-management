@@ -40,6 +40,15 @@ public class OrderDetail {
      * @throws IllegalArgumentException If quantity is less than or equal to zero or unitPrice is less than or equal to zero
      */
     public OrderDetail(String orderId, String productId, String productName, String unit, double unitPrice, int quantity) {
+        if (productId == null || productId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Product ID cannot be null or empty (BR1)");
+        }
+        if (productName == null || productName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Product name cannot be null or empty (BR3)");
+        }
+        if (unit == null || unit.trim().isEmpty()) {
+            throw new IllegalArgumentException("Product unit cannot be null or empty (BR4)");
+        }
         if (quantity <= 0) {
             throw new IllegalArgumentException("Sold quantity must be greater than zero (BR9, BR26)");
         }
@@ -47,9 +56,9 @@ public class OrderDetail {
             throw new IllegalArgumentException("Product unit price must be greater than zero (BR5)");
         }
         this.orderId = orderId;
-        this.productId = productId;
-        this.productName = productName;
-        this.unit = unit;
+        this.productId = productId.trim();
+        this.productName = productName.trim();
+        this.unit = unit.trim();
         this.unitPrice = unitPrice;
         this.quantity = quantity;
     }
@@ -122,10 +131,16 @@ public class OrderDetail {
     /**
      * Sets the product ID.
      *
+     * BR1: Product ID cannot be null or empty.
+     *
      * @param productId The product ID to set
+     * @throws IllegalArgumentException If productId is null or empty
      */
     public void setProductId(String productId) {
-        this.productId = productId;
+        if (productId == null || productId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Product ID cannot be null or empty (BR1)");
+        }
+        this.productId = productId.trim();
     }
 
     /**
@@ -140,10 +155,16 @@ public class OrderDetail {
     /**
      * Sets the snapshot product name.
      *
+     * BR3: Product name cannot be null or empty.
+     *
      * @param productName The product name to set
+     * @throws IllegalArgumentException If productName is null or empty
      */
     public void setProductName(String productName) {
-        this.productName = productName;
+        if (productName == null || productName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Product name cannot be null or empty (BR3)");
+        }
+        this.productName = productName.trim();
     }
 
     /**
@@ -158,10 +179,16 @@ public class OrderDetail {
     /**
      * Sets the unit of measurement.
      *
+     * BR4: Product unit cannot be null or empty.
+     *
      * @param unit The product unit to set
+     * @throws IllegalArgumentException If unit is null or empty
      */
     public void setUnit(String unit) {
-        this.unit = unit;
+        if (unit == null || unit.trim().isEmpty()) {
+            throw new IllegalArgumentException("Product unit cannot be null or empty (BR4)");
+        }
+        this.unit = unit.trim();
     }
 
     /**
