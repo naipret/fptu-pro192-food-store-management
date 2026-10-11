@@ -58,7 +58,7 @@ public class CustomerRepository {
                 boolean isDeleted = Boolean.parseBoolean(row[5].trim());
 
                 customers
-                        .add(CustomerFactory.create(type, id, fullName, phone, address, isDeleted));
+                        .add(CustomerFactory.create(type, id, fullName, phone, address));
             }
         }
     }
