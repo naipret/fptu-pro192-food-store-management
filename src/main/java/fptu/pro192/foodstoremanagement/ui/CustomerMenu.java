@@ -33,7 +33,7 @@ public class CustomerMenu extends AbstractMenu {
     }
 
     private String getTitle() {
-        return "";
+        return title;
     }
 
     @Override

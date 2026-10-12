@@ -6,6 +6,7 @@ import fptu.pro192.foodstoremanagement.repository.CustomerRepository;
 import fptu.pro192.foodstoremanagement.util.InputValidator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 public class CustomerService {
 
@@ -29,9 +30,11 @@ public class CustomerService {
         // Chuẩn hóa số điện thoại bằng lớp tiện ích InputValidator
         String normalizedPhone = InputValidator.normalizePhone(rawPhone);
 
-        // Kiểm tra xem có khách hàng nào đang hoạt động sử dụng số điện thoại này chưa
         boolean phoneExists = getAllActive().stream()
-            .anyMatch(c -> c.getPhone().equals(normalizedPhone));
+            // Đảm bảo c không null trước khi kiểm tra số điện thoại
+            .filter(c -> c != null)
+            // Dùng Objects.equals để an toàn dù cả 2 bên đều null
+            .anyMatch(c -> java.util.Objects.equals(c.getPhone(), normalizedPhone));
         if (phoneExists) {
             throw new IllegalArgumentException("Số điện thoại đã được sử dụng bởi một khách hàng đang hoạt động.");
         }
@@ -88,8 +91,7 @@ public class CustomerService {
 
         // Lọc danh sách khách hàng đang hoạt động dựa trên tên hoặc số điện thoại chứa từ khóa
         return getAllActive().stream()
-            .filter(c -> c.getFullName().toLowerCase().contains(lowerKeyword) ||
-                c.getPhone().contains(keyword))
+            .filter(c -> c.getFullName().toLowerCase().contains(lowerKeyword) || c.getPhone().contains(keyword))
             .collect(Collectors.toList());
     }
 }
