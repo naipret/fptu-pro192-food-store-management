@@ -5,15 +5,11 @@ import fptu.pro192.foodstoremanagement.model.Food;
 import fptu.pro192.foodstoremanagement.repository.ProductRepository;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
- * Core business service orchestrating inventory business rules and catalog operations.
- * <p>
- * Enforces business rules: BR1, BR3-BR7, BR10, BR11, BR14, BR19, BR20, BR20.1, BR20.2, BR24, BR27.
+ * Core business service orchestrating inventory management and catalog operations.
  */
 public class ProductService {
 
@@ -39,7 +35,7 @@ public class ProductService {
     }
 
     /**
-     * BR1, BR3-BR7, BR20.1, BR20.2: Adds a new product to the catalog with its initial inventory batch.
+     * Adds a new product to the catalog with its initial inventory batch.
      *
      * @param product The food product to register
      * @param initialBatch The initial inventory batch (can be null if registered without stock)
@@ -50,7 +46,7 @@ public class ProductService {
             throw new IllegalArgumentException("Product cannot be null");
         }
         if (productRepo.findById(product.getId()) != null) {
-            throw new IllegalArgumentException("Product with ID " + product.getId() + " already exists (BR1).");
+            throw new IllegalArgumentException("Product with ID " + product.getId() + " already exists.");
         }
 
         if (initialBatch != null) {
@@ -61,7 +57,7 @@ public class ProductService {
     }
 
     /**
-     * BR10, BR11, BR14, BR24: Deducts stock from inventory batches using the First Expired, First Out (FEFO) algorithm.
+     * Deducts stock from inventory batches using the First Expired, First Out (FEFO) algorithm.
      * <p>
      * Batches expiring earlier are deducted first. Depleted batches are reduced to 0, and the remaining requested
      * quantity cascades to subsequent earliest expiring batches.
@@ -69,7 +65,7 @@ public class ProductService {
      * @param productId The 6-character product ID (P00001 - P99999)
      * @param quantity The integer quantity to deduct (must be > 0)
      * @param today Reference system date for evaluating batch expiration
-     * @throws InsufficientStockException If requested quantity exceeds active stock (BR10)
+     * @throws InsufficientStockException If requested quantity exceeds active stock
      * @throws IllegalArgumentException If product does not exist or is deleted, or quantity <= 0
      */
     public synchronized void deductStockFEFO(String productId, int quantity, LocalDate today) {
@@ -77,20 +73,20 @@ public class ProductService {
             throw new IllegalArgumentException("Product ID cannot be null or empty.");
         }
         if (quantity <= 0) {
-            throw new IllegalArgumentException("Deduction quantity must be greater than zero (BR9, BR26). Got: " + quantity);
+            throw new IllegalArgumentException("Deduction quantity must be greater than zero. Got: " + quantity);
         }
 
         LocalDate refDate = (today != null) ? today : LocalDate.now();
         Food product = productRepo.findById(productId);
         if (product == null) {
-            throw new IllegalArgumentException("Product not found or marked deleted: " + productId + " (BR8)");
+            throw new IllegalArgumentException("Product not found or marked deleted: " + productId);
         }
 
         int availableStock = product.getTotalStock(refDate);
         if (availableStock < quantity) {
             throw new InsufficientStockException(
                     "Insufficient active stock for product " + product.getName() + " (" + productId + "). "
-                            + "Requested: " + quantity + ", available active stock: " + availableStock + " (BR10).");
+                            + "Requested: " + quantity + ", available active stock: " + availableStock + ".");
         }
 
         List<Batch> activeBatches = product.getActiveBatches(refDate);
@@ -111,7 +107,7 @@ public class ProductService {
             }
         }
 
-        // BR14: Stock quantity is reduced immediately and persisted atomically
+        // Stock quantity is reduced immediately and persisted atomically
         productRepo.saveToCsv();
     }
 
@@ -126,7 +122,7 @@ public class ProductService {
     }
 
     /**
-     * BR19: Returns all active products whose total active inventory stock is <= 5 units (low stock threshold).
+     * Returns all active products whose total active inventory stock is <= 5 units (low stock threshold).
      *
      * @return List of products with low stock
      */
@@ -142,7 +138,7 @@ public class ProductService {
     }
 
     /**
-     * BR11, BR11.1: Returns all batches across active products that have expired relative to reference date.
+     * Returns all batches across active products that have expired relative to reference date.
      *
      * @param today Reference system date
      * @return List of expired batches
@@ -161,7 +157,7 @@ public class ProductService {
     }
 
     /**
-     * BR20: Returns all active (non-expired) batches with remaining stock that expire within 7 days of reference date.
+     * Returns all active (non-expired) batches with remaining stock that expire within 7 days of reference date.
      *
      * @param today Reference system date
      * @return List of near-expiry batches
@@ -295,7 +291,7 @@ public class ProductService {
     }
 
     /**
-     * BR1: Retrieves active product by unique ID.
+     * Retrieves active product by unique ID.
      *
      * @param id The product ID
      * @return Product if found; null otherwise
@@ -305,7 +301,7 @@ public class ProductService {
     }
 
     /**
-     * BR27: Soft-deletes a product by ID, preserving physical data integrity.
+     * Soft-deletes a product by ID, preserving physical data integrity.
      *
      * @param id The product ID
      * @return true if deleted successfully; false otherwise
