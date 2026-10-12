@@ -22,6 +22,7 @@ public final class CustomerFactory {
     public static Customer create(String type, String id, String fullName, String phone,
             String address) {
         Customer customer;
+        boolean isDeleted = false;
         if (type != null && type.trim().equalsIgnoreCase("VIP")) {
             customer = new VIPCustomer(id, fullName, phone, address, isDeleted);
         } else {
