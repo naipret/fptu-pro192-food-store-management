@@ -1,9 +1,11 @@
 package fptu.pro192.foodstoremanagement.ui;
 
 import fptu.pro192.foodstoremanagement.model.Customer;
+import fptu.pro192.foodstoremanagement.service.CustomerService;
 import fptu.pro192.foodstoremanagement.util.ConsoleUtil;
 import java.util.List;
 import java.util.Scanner;
+import fptu.pro192.foodstoremanagement.util.TableFormatter;
 
 public class CustomerMenu extends AbstractMenu {
 
@@ -17,7 +19,7 @@ public class CustomerMenu extends AbstractMenu {
     }
 
     @Override
-    public void displayMenu() {
+    protected void renderBody() {
         ConsoleUtil.clearScreen();
         System.out.println("================================================================================");
         System.out.println("                              " + getTitle());
@@ -37,7 +39,7 @@ public class CustomerMenu extends AbstractMenu {
     }
 
     @Override
-    public boolean processOption(int choice) {
+    protected boolean handleOption(int choice) {
         switch (choice) {
             case 1:
                 addNewCustomer();
@@ -67,66 +69,117 @@ public class CustomerMenu extends AbstractMenu {
     }
 
     private void showCustomerList() {
-        // (Giả sử bạn vẫn có ConsoleUtil.clearScreen(), nếu không có thì xóa dòng này)
-        // ConsoleUtil.clearScreen();
-
-        System.out.println("--- DANH SÁCH KHÁCH HÀNG ---");
         List<Customer> activeCustomers = customerService.getAllActive();
+        String border = "+--------+---------------------------+--------------+-----------------+--------+";
 
-        if (activeCustomers.isEmpty()) {
-            System.out.println("Chưa có dữ liệu khách hàng nào.");
+        // 1. Vẽ đường viền trên
+        System.out.println(border);
+
+        // 2. Vẽ tiêu đề (Tổng đúng 80 ký tự tính cả các dấu | và khoảng trắng)
+        System.out.printf("| %-6s | %-25s | %-12s | %-15s | %-6s |\n",
+            "Ma KH", "Ho Va Ten", "So DT", "Dia Chi", "Hang");
+
+        // 3. Vẽ đường viền ngăn cách
+        System.out.println(border);
+
+        // 4. Lặp và in dữ liệu bằng TableFormatter.fit()
+        for (Customer c : activeCustomers) {
+            String tier = (c.getClass().getSimpleName().contains("VIP")) ? "VIP" : "Regular";
+
+            System.out.printf("| %-6s | %-25s | %-12s | %-15s | %-6s |\n",
+                TableFormatter.fit(c.getId(), 6),
+                TableFormatter.fit(c.getFullName(), 25),
+                TableFormatter.fit(c.getPhone(), 12),
+                TableFormatter.fit(c.getAddress(), 15),
+                TableFormatter.fit(tier, 6)
+            );
+        }
+
+        // 5. Vẽ đường viền dưới cùng
+        System.out.println(border);
+    }
+    private void addNewCustomer() {
+        ConsoleUtil.clearScreen();
+        System.out.println("--- THÊM KHÁCH HÀNG MỚI ---");
+        try {
+            System.out.print("Nhập loại khách hàng (VIP/Regular): ");
+            String type = scanner.nextLine();
+            System.out.print("Nhập ID (Định dạng Cxxxxx): ");
+            String id = scanner.nextLine();
+            System.out.print("Nhập Họ Tên: ");
+            String fullName = scanner.nextLine();
+            System.out.print("Nhập Số điện thoại: ");
+            String phone = scanner.nextLine();
+            System.out.print("Nhập Địa chỉ: ");
+            String address = scanner.nextLine();
+
+            // Gọi hàm addCustomer từ service để xử lý logic và lưu
+            customerService.addCustomer(id, fullName, phone, address, type);
+            System.out.println("Thêm khách hàng thành công!");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Lỗi: " + e.getMessage());
+        }
+    }
+
+    private void updateCustomer() {
+        ConsoleUtil.clearScreen();
+        System.out.println("--- CẬP NHẬT THÔNG TIN ---");
+        try {
+            System.out.print("Nhập ID khách hàng cần cập nhật: ");
+            String id = scanner.nextLine();
+
+            System.out.println("(Để trống nếu không muốn thay đổi)");
+            System.out.print("Nhập số điện thoại mới: ");
+            String newPhone = scanner.nextLine();
+            System.out.print("Nhập địa chỉ mới: ");
+            String newAddress = scanner.nextLine();
+
+            customerService.updateCustomer(id, newPhone, newAddress);
+            System.out.println("Cập nhật thành công!");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Lỗi: " + e.getMessage());
+        }
+    }
+
+    private void searchCustomer() {
+        ConsoleUtil.clearScreen();
+        System.out.println("--- TÌM KIẾM KHÁCH HÀNG ---");
+        System.out.print("Nhập tên hoặc số điện thoại: ");
+        String keyword = scanner.nextLine();
+
+        List<Customer> results = customerService.search(keyword);
+
+        if (results.isEmpty()) {
+            System.out.println("Không tìm thấy khách hàng nào khớp với từ khóa.");
         } else {
-            // 1. Vẽ đường viền trên của bảng (đảm bảo tổng chiều dài < 80 ký tự)
-            System.out.println("+--------+----------------------+-----------------+-------------------------+");
-
-            // 2. Vẽ dòng tiêu đề cột
-            System.out.printf("| %-6s | %-20s | %-15s | %-23s |\n", "ID", "Họ Tên", "Số ĐT", "Địa chỉ");
-
-            // 3. Vẽ đường viền ngăn cách tiêu đề và nội dung
-            System.out.println("+--------+----------------------+-----------------+-------------------------+");
-
-            // 4. Lặp qua từng khách hàng và in dữ liệu
-            for (Customer c : activeCustomers) {
-                System.out.printf("| %-6s | %-20s | %-15s | %-23s |\n",
-                    c.getId(),
-                    truncateText(c.getFullName(), 20), // Cắt bớt nếu tên quá dài
-                    c.getPhone(),
-                    truncateText(c.getAddress(), 23)   // Cắt bớt nếu địa chỉ quá dài
-                );
+            // Hiển thị kết quả tìm được bằng bảng (có thể tái sử dụng logic vẽ bảng ở hàm showCustomerList)
+            System.out.println("Tìm thấy " + results.size() + " kết quả:");
+            // Ở đây tạm in ra dạng thô, nếu có TableRenderer thì gọi TableRenderer.renderCustomerTable(results);
+            for (Customer c : results) {
+                System.out.println(c.getId() + " - " + c.getFullName() + " - " + c.getPhone());
             }
-
-            // 5. Vẽ đường viền dưới cùng của bảng
-            System.out.println("+--------+----------------------+-----------------+-------------------------+");
         }
     }
 
-    // Hàm hỗ trợ: Cắt chuỗi nếu dài hơn mức cho phép để không làm vỡ khung bảng
-    private String truncateText(String text, int maxLength) {
-        if (text == null) {
-            return "";
+    private void deleteCustomer() {
+        ConsoleUtil.clearScreen();
+        System.out.println("--- XÓA KHÁCH HÀNG ---");
+        try {
+            System.out.print("Nhập ID khách hàng cần xóa: ");
+            String id = scanner.nextLine();
+
+            System.out.print("Bạn có chắc chắn muốn xóa khách hàng " + id + "? (Y/N): ");
+            String confirm = scanner.nextLine();
+
+            if (confirm.equalsIgnoreCase("Y")) {
+                customerService.deleteCustomer(id);
+                System.out.println("Xóa khách hàng thành công.");
+            } else {
+                System.out.println("Đã hủy thao tác xóa.");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Lỗi: " + e.getMessage());
         }
-        if (text.length() <= maxLength) {
-            return text;
-        }
-        // Nếu dài quá, cắt lấy phần đầu và thêm "..." ở cuối
-        return text.substring(0, maxLength - 3) + "...";
     }
 
-    // Các hàm addNewCustomer, updateCustomer, searchCustomer, deleteCustomer
-    // sẽ gọi các hàm tương ứng trong CustomerService và xử lý nhập liệu.
-    // (Lược bớt chi tiết nhập liệu để tập trung vào cấu trúc Menu theo yêu cầu)
-    private void addNewCustomer() { /* Logic nhập liệu và gọi customerService.addCustomer */ }
-    private void updateCustomer() { /* Logic nhập liệu và gọi customerService.updateCustomer */ }
-    private void searchCustomer() { /* Logic nhập liệu và gọi customerService.search */ }
-    private void deleteCustomer() { /* Logic nhập liệu và gọi customerService.deleteCustomer */ }
-
-    @Override
-    protected void renderBody() {
-
-    }
-
-    @Override
-    protected boolean handleOption(int choice) {
-        return false;
-    }
 }

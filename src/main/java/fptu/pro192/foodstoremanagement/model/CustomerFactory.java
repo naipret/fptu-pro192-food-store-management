@@ -19,15 +19,20 @@ public final class CustomerFactory {
      * @param address  The address
      * @return Concrete Customer instance (VIPCustomer or RegularCustomer)
      */
-    public static Customer create(String type, String id, String fullName, String phone,
-            String address) {
+    // Hàm 1: Hàm tạo đầy đủ tham số (Dành cho việc đọc dữ liệu từ file CSV)
+    public static Customer create(String type, String id, String fullName, String phone, String address, boolean isDeleted) {
         Customer customer;
-        boolean isDeleted = false;
         if (type != null && type.trim().equalsIgnoreCase("VIP")) {
             customer = new VIPCustomer(id, fullName, phone, address, isDeleted);
         } else {
             customer = new RegularCustomer(id, fullName, phone, address, isDeleted);
         }
         return customer;
+    }
+
+    // Hàm 2: Hàm tạo nạp chồng (Overloaded) rút gọn (Dành cho thêm khách hàng mới)
+    public static Customer create(String type, String id, String fullName, String phone, String address) {
+        // Tái sử dụng Hàm 1 bằng cách gọi lại nó và truyền mặc định tham số cuối là false
+        return create(type, id, fullName, phone, address, false);
     }
 }

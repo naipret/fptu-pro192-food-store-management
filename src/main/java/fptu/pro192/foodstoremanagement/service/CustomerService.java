@@ -1,4 +1,4 @@
-package fptu.pro192.foodstoremanagement.ui;
+package fptu.pro192.foodstoremanagement.service;
 
 import fptu.pro192.foodstoremanagement.model.Customer;
 import fptu.pro192.foodstoremanagement.model.CustomerFactory;
@@ -6,7 +6,6 @@ import fptu.pro192.foodstoremanagement.repository.CustomerRepository;
 import fptu.pro192.foodstoremanagement.util.InputValidator;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.Objects;
 
 public class CustomerService {
 
@@ -40,7 +39,7 @@ public class CustomerService {
         }
 
         // Tạo đối tượng khách hàng mới thông qua CustomerFactory
-        Customer newCustomer = CustomerFactory.create(id, fullName, normalizedPhone, address, type);
+        Customer newCustomer = CustomerFactory.create(type,id, fullName, normalizedPhone, address);
         customerRepo.save(newCustomer);
     }
 
