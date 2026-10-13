@@ -16,10 +16,6 @@ public abstract class Customer {
 
     public Customer() {}
 
-    public Customer(String id, String fullName, String phone, String address) {
-        this(id, fullName, phone, address, false);
-    }
-
     public Customer(String id, String fullName, String phone, String address, boolean isDeleted) {
         this.id = id;
         this.fullName = fullName;

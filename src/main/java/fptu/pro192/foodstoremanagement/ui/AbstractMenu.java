@@ -75,9 +75,6 @@ public abstract class AbstractMenu {
         System.out.println("=" + TableFormatter.repeat('=', MENU_WIDTH - 2) + "=");
     }
 
-    public abstract void displayMenu();
-
-    public abstract boolean processOption(int choice);
 
     /**
      * Renders the body content containing menu options.
