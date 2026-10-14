@@ -8,7 +8,6 @@ import fptu.pro192.foodstoremanagement.repository.CustomerRepository;
 import fptu.pro192.foodstoremanagement.util.InputValidator;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * Verification test suite for Task #3 (Customer Domain Models, Normalization, & Repository). Pure
@@ -134,13 +133,16 @@ public class CustomerModuleTest {
     private static void testCustomerFactory() {
         System.out.println("\n--- 4. Testing Customer Factory ---");
         Customer c1 =
-                CustomerFactory.create("VIP", "C00001", "Le Van VIP", "0901234567", "HCM", false);
+                CustomerFactory.create("VIP", "C00001", "Le Van VIP", "0901234567", "HCM");
         Customer c2 = CustomerFactory.create("regular", "C00002", "Tran Van Reg", "0987654321",
-                "HN", false);
+                "HN");
 
         assertTrue("Factory creates VIPCustomer when type is 'VIP'", c1 instanceof VIPCustomer);
         assertTrue("Factory creates RegularCustomer when type is 'regular'",
                 c2 instanceof RegularCustomer);
+
+        Customer c3 = CustomerFactory.create("VIP", "C00003", "Nguyen Deleted", "0912345678", "DN", true);
+        assertTrue("Factory creates customer with isDeleted = true", c3.isDeleted());
     }
 
     private static void testRepositoryPersistenceAndCrud() {
