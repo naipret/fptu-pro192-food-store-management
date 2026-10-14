@@ -140,6 +140,9 @@ public class CustomerModuleTest {
         assertTrue("Factory creates VIPCustomer when type is 'VIP'", c1 instanceof VIPCustomer);
         assertTrue("Factory creates RegularCustomer when type is 'regular'",
                 c2 instanceof RegularCustomer);
+
+        Customer c3 = CustomerFactory.create("VIP", "C00003", "Nguyen Deleted", "0912345678", "DN", true);
+        assertTrue("Factory creates customer with isDeleted = true", c3.isDeleted());
     }
 
     private static void testRepositoryPersistenceAndCrud() {
