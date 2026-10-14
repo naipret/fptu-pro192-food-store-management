@@ -4,9 +4,20 @@ import fptu.pro192.foodstoremanagement.model.Customer;
 import fptu.pro192.foodstoremanagement.model.CustomerFactory;
 import fptu.pro192.foodstoremanagement.repository.CustomerRepository;
 import fptu.pro192.foodstoremanagement.util.InputValidator;
+
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Service class handling customer management business rules.
+ *
+ * BR2: Unique Customer ID format C00001–C99999.
+ * BR18: User input validation prior to persistence.
+ * BR25: Vietnamese phone normalization before persistence/lookup.
+ * BR27: Soft delete (isDeleted = true), preserving historical records.
+ */
 public class CustomerService {
 
     private final CustomerRepository customerRepo;
@@ -15,82 +26,117 @@ public class CustomerService {
         this.customerRepo = customerRepo;
     }
 
-    // BR2, BR18, BR25: Thêm khách hàng với chuẩn hóa số điện thoại và kiểm tra trùng lặp
+    /**
+     * Adds a new customer with validation and phone normalization.
+     *
+     * BR2: ID format C00001–C99999, unique and immutable.
+     * BR18: Input validation.
+     * BR25: Normalize phone number and verify uniqueness among active customers.
+     *
+     * @param id The customer ID (Cxxxxx)
+     * @param fullName The full name
+     * @param rawPhone The raw input phone string
+     * @param address The address
+     * @param type Customer tier type ("VIP" or "Regular")
+     * @throws IllegalArgumentException If any input is invalid or duplicated
+     */
     public void addCustomer(String id, String fullName, String rawPhone, String address, String type) {
-        if (!id.matches("^C\\d{5}$")) {
+        if (id == null || !id.matches("^C\\d{5}$")) {
             throw new IllegalArgumentException("ID không hợp lệ. Định dạng yêu cầu: Cxxxxx (x là số).");
         }
 
-        // Kiểm tra xem ID đã tồn tại trong repository chưa
         if (customerRepo.findById(id) != null) {
             throw new IllegalArgumentException("ID khách hàng đã tồn tại.");
         }
 
-        // Chuẩn hóa số điện thoại bằng lớp tiện ích InputValidator
+        if (fullName == null || fullName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Họ tên không được để trống.");
+        }
+
         String normalizedPhone = InputValidator.normalizePhone(rawPhone);
 
         boolean phoneExists = getAllActive().stream()
-            // Đảm bảo c không null trước khi kiểm tra số điện thoại
-            .filter(c -> c != null)
-            // Dùng Objects.equals để an toàn dù cả 2 bên đều null
-            .anyMatch(c -> java.util.Objects.equals(c.getPhone(), normalizedPhone));
+                .filter(Objects::nonNull)
+                .anyMatch(c -> Objects.equals(c.getPhone(), normalizedPhone));
         if (phoneExists) {
             throw new IllegalArgumentException("Số điện thoại đã được sử dụng bởi một khách hàng đang hoạt động.");
         }
 
-        // Tạo đối tượng khách hàng mới thông qua CustomerFactory
-        Customer newCustomer = CustomerFactory.create(type,id, fullName, normalizedPhone, address);
+        Customer newCustomer = CustomerFactory.create(type, id, fullName.trim(), normalizedPhone, address != null ? address.trim() : "");
         customerRepo.save(newCustomer);
     }
 
-    // Task B6: Cập nhật thông tin có chọn lọc
+    /**
+     * Selectively updates customer phone and address.
+     * Task B6: Selective update - blank inputs retain existing values.
+     *
+     * @param id The customer ID to update
+     * @param newPhone New phone number (blank to skip)
+     * @param newAddress New address (blank to skip)
+     * @throws IllegalArgumentException If customer not found or new phone is duplicated
+     */
     public void updateCustomer(String id, String newPhone, String newAddress) {
         Customer customer = customerRepo.findById(id);
         if (customer == null) {
             throw new IllegalArgumentException("Không tìm thấy khách hàng với ID: " + id);
         }
 
-        // Nếu số điện thoại mới không null và không rỗng, tiến hành chuẩn hóa và cập nhật
         if (newPhone != null && !newPhone.trim().isEmpty()) {
             String normalizedPhone = InputValidator.normalizePhone(newPhone);
+            boolean phoneExists = getAllActive().stream()
+                    .filter(c -> c != null && !c.getId().equalsIgnoreCase(id))
+                    .anyMatch(c -> Objects.equals(c.getPhone(), normalizedPhone));
+            if (phoneExists) {
+                throw new IllegalArgumentException("Số điện thoại đã được sử dụng bởi một khách hàng đang hoạt động.");
+            }
             customer.setPhone(normalizedPhone);
         }
 
-        // Nếu địa chỉ mới không null và không rỗng, tiến hành cập nhật
         if (newAddress != null && !newAddress.trim().isEmpty()) {
-            customer.setAddress(newAddress);
+            customer.setAddress(newAddress.trim());
         }
 
-        // Lưu thay đổi vào file CSV
         customerRepo.saveToCsv();
     }
 
-    // BR27: Xóa mềm (Soft delete)
+    /**
+     * Soft deletes customer by ID (BR27).
+     *
+     * @param id The customer ID to delete
+     * @throws IllegalArgumentException If customer not found
+     */
     public void deleteCustomer(String id) {
-        // Tìm khách hàng theo ID
         Customer customer = customerRepo.findById(id);
-        if (customer != null) {
-            // Đánh dấu khách hàng là đã bị xóa thay vì xóa hoàn toàn khỏi cơ sở dữ liệu
-            customer.setDeleted(true);
-            customerRepo.saveToCsv(); // Thường cần lưu lại thay đổi sau khi cập nhật trạng thái
+        if (customer == null) {
+            throw new IllegalArgumentException("Không tìm thấy khách hàng với ID: " + id);
         }
+        customerRepo.delete(id);
     }
 
-    // Lấy danh sách tất cả khách hàng đang hoạt động (chưa bị xóa)
+    /**
+     * Returns all active (non-deleted) customers.
+     *
+     * @return List of active customers
+     */
     public List<Customer> getAllActive() {
-        // Lấy tất cả khách hàng từ repo, lọc những người có deleted = false và gom lại thành List
-        return customerRepo.findAll().stream()
-            .filter(c -> !c.isDeleted())
-            .collect(Collectors.toList());
+        return customerRepo.findAll();
     }
 
-    // Tìm kiếm khách hàng theo tên (không phân biệt hoa thường) hoặc số điện thoại
+    /**
+     * Searches active customers by name substring (case-insensitive) or phone number.
+     *
+     * @param keyword The search keyword
+     * @return List of matching active customers
+     */
     public List<Customer> search(String keyword) {
-        String lowerKeyword = keyword.toLowerCase();
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllActive();
+        }
 
-        // Lọc danh sách khách hàng đang hoạt động dựa trên tên hoặc số điện thoại chứa từ khóa
+        String lowerKeyword = keyword.trim().toLowerCase();
         return getAllActive().stream()
-            .filter(c -> c.getFullName().toLowerCase().contains(lowerKeyword) || c.getPhone().contains(keyword))
-            .collect(Collectors.toList());
+                .filter(c -> (c.getFullName() != null && c.getFullName().toLowerCase().contains(lowerKeyword))
+                        || (c.getPhone() != null && c.getPhone().contains(lowerKeyword)))
+                .collect(Collectors.toList());
     }
 }
