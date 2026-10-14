@@ -1,41 +1,49 @@
 package fptu.pro192.foodstoremanagement.ui;
 
 import fptu.pro192.foodstoremanagement.model.Customer;
+import fptu.pro192.foodstoremanagement.model.VIPCustomer;
 import fptu.pro192.foodstoremanagement.service.CustomerService;
 import fptu.pro192.foodstoremanagement.util.ConsoleUtil;
-import java.util.List;
-import java.util.Scanner;
+import fptu.pro192.foodstoremanagement.util.ScannerManager;
 import fptu.pro192.foodstoremanagement.util.TableFormatter;
 
+import java.util.List;
+import java.util.Scanner;
+
+/**
+ * Console user interface menu for managing customer operations.
+ * Conforms strictly to 80-column ASCII terminal layout and Template Method Pattern.
+ */
 public class CustomerMenu extends AbstractMenu {
 
     private final CustomerService customerService;
     private final Scanner scanner;
 
+    private static final String TABLE_BORDER =
+            "+--------+---------------------------+--------------+-----------------+--------+";
+
+    public CustomerMenu(CustomerService customerService) {
+        this(customerService, ScannerManager.getInstance().getScanner());
+    }
+
     public CustomerMenu(CustomerService customerService, Scanner scanner) {
         super("QUẢN LÝ KHÁCH HÀNG");
         this.customerService = customerService;
-        this.scanner = scanner;
+        this.scanner = scanner != null ? scanner : ScannerManager.getInstance().getScanner();
     }
 
     @Override
     protected void renderBody() {
-        ConsoleUtil.clearScreen();
-        System.out.println("================================================================================");
-        System.out.println("                              " + getTitle());
-        System.out.println("================================================================================");
         System.out.println("  1. Thêm khách hàng mới");
         System.out.println("  2. Cập nhật thông tin khách hàng");
         System.out.println("  3. Xem danh sách khách hàng");
         System.out.println("  4. Tìm kiếm khách hàng theo Tên / SĐT");
         System.out.println("  5. Xóa khách hàng (Soft Delete)");
-        System.out.println("  0. Quay lại Menu chính");
-        System.out.println("================================================================================");
-        System.out.print("Vui lòng chọn chức năng (0-5): ");
     }
 
-    private String getTitle() {
-        return title;
+    @Override
+    protected int getMaxOption() {
+        return 5;
     }
 
     @Override
@@ -56,48 +64,49 @@ public class CustomerMenu extends AbstractMenu {
             case 5:
                 deleteCustomer();
                 break;
-            case 0:
-                System.out.println("Đang quay lại Menu chính...");
-                return false;
             default:
-                System.out.println("Lựa chọn không hợp lệ. Vui lòng chọn từ 0 đến 5.");
+                return false;
         }
-
-        System.out.println("\nNhấn Enter để tiếp tục...");
-        scanner.nextLine();
         return true;
     }
 
-    private void showCustomerList() {
-        List<Customer> activeCustomers = customerService.getAllActive();
-        String border = "+--------+---------------------------+--------------+-----------------+--------+";
-
-        // 1. Vẽ đường viền trên
-        System.out.println(border);
-
-        // 2. Vẽ tiêu đề (Tổng đúng 80 ký tự tính cả các dấu | và khoảng trắng)
-        System.out.printf("| %-6s | %-25s | %-12s | %-15s | %-6s |\n",
-            "Ma KH", "Ho Va Ten", "So DT", "Dia Chi", "Hang");
-
-        // 3. Vẽ đường viền ngăn cách
-        System.out.println(border);
-
-        // 4. Lặp và in dữ liệu bằng TableFormatter.fit()
-        for (Customer c : activeCustomers) {
-            String tier = (c.getClass().getSimpleName().contains("VIP")) ? "VIP" : "Regular";
-
-            System.out.printf("| %-6s | %-25s | %-12s | %-15s | %-6s |\n",
-                TableFormatter.fit(c.getId(), 6),
-                TableFormatter.fit(c.getFullName(), 25),
-                TableFormatter.fit(c.getPhone(), 12),
-                TableFormatter.fit(c.getAddress(), 15),
-                TableFormatter.fit(tier, 6)
-            );
+    /**
+     * Renders customer collection conforming strictly to 80-column ASCII table layout.
+     * Section 5.2.2: | Mã KH (6) | Họ Và Tên (25) | Số ĐT (12) | Địa Chỉ (15) | Hạng (6) |
+     *
+     * @param customerList The list of customers to display
+     */
+    private void renderCustomerTable(List<Customer> customerList) {
+        if (customerList == null || customerList.isEmpty()) {
+            System.out.println("Chưa có dữ liệu khách hàng nào.");
+            return;
         }
 
-        // 5. Vẽ đường viền dưới cùng
-        System.out.println(border);
+        System.out.println(TABLE_BORDER);
+        System.out.printf("| %-6s | %-25s | %-12s | %-15s | %-6s |\n",
+                "Mã KH", "Họ Và Tên", "Số ĐT", "Địa Chỉ", "Hạng");
+        System.out.println(TABLE_BORDER);
+
+        for (Customer c : customerList) {
+            String tier = (c instanceof VIPCustomer) ? "VIP" : "Regular";
+            System.out.printf("| %-6s | %-25s | %-12s | %-15s | %-6s |\n",
+                    TableFormatter.fit(c.getId(), 6),
+                    TableFormatter.fit(c.getFullName(), 25),
+                    TableFormatter.fit(c.getPhone(), 12),
+                    TableFormatter.fit(c.getAddress(), 15),
+                    TableFormatter.fit(tier, 6));
+        }
+
+        System.out.println(TABLE_BORDER);
     }
+
+    private void showCustomerList() {
+        ConsoleUtil.clearScreen();
+        System.out.println("--- DANH SÁCH KHÁCH HÀNG ---");
+        List<Customer> activeCustomers = customerService.getAllActive();
+        renderCustomerTable(activeCustomers);
+    }
+
     private void addNewCustomer() {
         ConsoleUtil.clearScreen();
         System.out.println("--- THÊM KHÁCH HÀNG MỚI ---");
@@ -113,7 +122,6 @@ public class CustomerMenu extends AbstractMenu {
             System.out.print("Nhập Địa chỉ: ");
             String address = scanner.nextLine();
 
-            // Gọi hàm addCustomer từ service để xử lý logic và lưu
             customerService.addCustomer(id, fullName, phone, address, type);
             System.out.println("Thêm khách hàng thành công!");
         } catch (IllegalArgumentException e) {
@@ -123,7 +131,7 @@ public class CustomerMenu extends AbstractMenu {
 
     private void updateCustomer() {
         ConsoleUtil.clearScreen();
-        System.out.println("--- CẬP NHẬT THÔNG TIN ---");
+        System.out.println("--- CẬP NHẬT THÔNG TIN KHÁCH HÀNG ---");
         try {
             System.out.print("Nhập ID khách hàng cần cập nhật: ");
             String id = scanner.nextLine();
@@ -148,16 +156,11 @@ public class CustomerMenu extends AbstractMenu {
         String keyword = scanner.nextLine();
 
         List<Customer> results = customerService.search(keyword);
-
         if (results.isEmpty()) {
-            System.out.println("Không tìm thấy khách hàng nào khớp với từ khóa.");
+            System.out.println("Không tìm thấy khách hàng nào khớp với từ khóa: " + keyword);
         } else {
-            // Hiển thị kết quả tìm được bằng bảng (có thể tái sử dụng logic vẽ bảng ở hàm showCustomerList)
-            System.out.println("Tìm thấy " + results.size() + " kết quả:");
-            // Ở đây tạm in ra dạng thô, nếu có TableRenderer thì gọi TableRenderer.renderCustomerTable(results);
-            for (Customer c : results) {
-                System.out.println(c.getId() + " - " + c.getFullName() + " - " + c.getPhone());
-            }
+            System.out.println("Tìm thấy " + results.size() + " khách hàng:");
+            renderCustomerTable(results);
         }
     }
 
@@ -171,7 +174,7 @@ public class CustomerMenu extends AbstractMenu {
             System.out.print("Bạn có chắc chắn muốn xóa khách hàng " + id + "? (Y/N): ");
             String confirm = scanner.nextLine();
 
-            if (confirm.equalsIgnoreCase("Y")) {
+            if (confirm.trim().equalsIgnoreCase("Y")) {
                 customerService.deleteCustomer(id);
                 System.out.println("Xóa khách hàng thành công.");
             } else {
@@ -181,5 +184,4 @@ public class CustomerMenu extends AbstractMenu {
             System.out.println("Lỗi: " + e.getMessage());
         }
     }
-
 }
