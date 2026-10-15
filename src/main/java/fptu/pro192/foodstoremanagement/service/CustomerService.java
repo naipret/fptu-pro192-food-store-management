@@ -139,4 +139,23 @@ public class CustomerService {
                         || (c.getPhone() != null && c.getPhone().contains(lowerKeyword)))
                 .collect(Collectors.toList());
     }
+
+    /**
+     * Finds active customer by ID.
+     *
+     * @param id The customer ID
+     * @return Customer if found and active, null otherwise
+     */
+    public Customer findById(String id) {
+        return customerRepo.findById(id);
+    }
+
+    /**
+     * Returns underlying CustomerRepository instance.
+     *
+     * @return CustomerRepository
+     */
+    public CustomerRepository getCustomerRepo() {
+        return customerRepo;
+    }
 }
