@@ -5,7 +5,6 @@ import fptu.pro192.foodstoremanagement.model.Customer;
 import fptu.pro192.foodstoremanagement.model.DryFood;
 import fptu.pro192.foodstoremanagement.model.Food;
 import fptu.pro192.foodstoremanagement.model.Order;
-import fptu.pro192.foodstoremanagement.model.OrderDetail;
 import fptu.pro192.foodstoremanagement.model.RegularCustomer;
 import fptu.pro192.foodstoremanagement.model.Transaction;
 import fptu.pro192.foodstoremanagement.model.VIPCustomer;
@@ -19,7 +18,6 @@ import fptu.pro192.foodstoremanagement.service.ProductService;
 
 import java.io.File;
 import java.time.LocalDate;
-import java.util.List;
 
 /**
  * Comprehensive verification test suite for Task #7 (Sales Checkout Flow and SalesMenu).
@@ -503,3 +501,4 @@ public class SalesModuleTest {
         }
     }
 }
+

@@ -8,7 +8,6 @@ import fptu.pro192.foodstoremanagement.model.OrderDetail;
 import fptu.pro192.foodstoremanagement.model.Transaction;
 import fptu.pro192.foodstoremanagement.repository.CustomerRepository;
 import fptu.pro192.foodstoremanagement.repository.OrderRepository;
-import fptu.pro192.foodstoremanagement.repository.ProductRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -341,3 +340,4 @@ public class OrderService {
         return customerService;
     }
 }
+

@@ -329,4 +329,14 @@ public class SalesMenu extends AbstractMenu {
                 order.isCompleted() ? "Đã hoàn thành" : "Nháp");
         renderBillSummary(order, customer);
     }
+
+    /**
+     * Returns the underlying Scanner instance.
+     *
+     * @return The scanner
+     */
+    public Scanner getScanner() {
+        return scanner;
+    }
 }
+

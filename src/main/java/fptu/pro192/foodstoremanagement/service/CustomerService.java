@@ -5,7 +5,6 @@ import fptu.pro192.foodstoremanagement.model.CustomerFactory;
 import fptu.pro192.foodstoremanagement.repository.CustomerRepository;
 import fptu.pro192.foodstoremanagement.util.InputValidator;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
