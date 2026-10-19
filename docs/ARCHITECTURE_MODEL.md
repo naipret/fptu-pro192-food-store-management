@@ -1,88 +1,94 @@
-# Architecture & Domain Model Specification
+# Architecture and Data Model Specification
 
-This document outlines the architectural blueprint, domain models, object-oriented design decisions, and design principles applied in the **Food Store Management System**.
+This document defines the 3-tier Model-View-Controller (`MVC`) architecture, the package organization, the domain and architectural UML class diagram, the Java Collections Framework usage, and the CSV file schemas for the Food Store Management System.
 
 ---
 
-## 1. Architectural Paradigm: Layered MVC (3-Tier Architecture)
+## 1. Standard 3-Tier MVC Architecture
 
-The system adheres to a **Layered Model-View-Controller (Layered MVC)** paradigm, structured into a clean **3-Tier Layered Architecture** with high cohesion and strict unidirectional dependencies:
+The application is structured into three core architectural tiers (`view`, `controller`, `model`) supported by a stateless utility package (`util`) under the root package `fptu.pro192.foodstoremanagement`.
 
-```markdown
-[ Presentation Layer / View (ui: AbstractMenu, Views, TableFormatter, ConsoleUtil) ]
-                                      │
-                                      ▼
-[ Business Logic / Controller (service: ProductService, CustomerService, OrderService) ]
-                                      │
-                                      ▼
-[ Data Access / Repository (repository: ProductRepository, CustomerRepository, MiniCsv) ]
-                                      │
-                                      ▼
-[ Domain Model Layer (model: Food, Batch, Customer, Order, OrderDetail, Transaction) ]
+```mermaid
+flowchart TD
+    Main["Main (Application Entry Point)"]
+    subgraph ViewTier["View Tier (fptu.pro192.foodstoremanagement.view)"]
+        Menu["Menu (Abstract Base Class)"]
+        MainMenu["MainMenu"]
+        ProductMenu["ProductMenu"]
+        InventoryMenu["InventoryMenu"]
+        CustomerMenu["CustomerMenu"]
+        SalesMenu["SalesMenu"]
+        ReportMenu["ReportMenu"]
+    end
+
+    subgraph ControllerTier["Controller Tier (fptu.pro192.foodstoremanagement.controller)"]
+        ProductController["ProductController"]
+        CustomerController["CustomerController"]
+        OrderController["OrderController"]
+        ReportController["ReportController"]
+    end
+
+    subgraph ModelTier["Model Tier (fptu.pro192.foodstoremanagement.model)"]
+        Product["Product"]
+        Batch["Batch"]
+        Customer["Customer / RegularCustomer / VIPCustomer"]
+        Order["Order / OrderDetail"]
+    end
+
+    subgraph UtilPackage["Utility Package (fptu.pro192.foodstoremanagement.util)"]
+        CsvUtil["CsvUtil"]
+        InputValidator["InputValidator"]
+        ConsoleUtil["ConsoleUtil / TableFormatter / ScannerManager"]
+    end
+
+    Main --> MainMenu
+    Main --> ControllerTier
+    ViewTier --> ControllerTier
+    ViewTier --> ModelTier
+    ViewTier --> ConsoleUtil
+    ViewTier --> InputValidator
+    ControllerTier --> ModelTier
+    ControllerTier --> CsvUtil
+    ControllerTier --> InputValidator
+    ModelTier --> InputValidator
 ```
 
-### 1.1. Mapping Classic MVC to Project Packages
+### Tier Responsibilities and Dependency Boundaries
 
-| MVC Component | Target Package | Realization & Architectural Responsibility |
+| Package | Architectural Role | Allowed Outgoing Dependencies |
 | :--- | :--- | :--- |
-| **View** | `fptu.pro192.foodstore.ui` | Formats and renders the 80-column ASCII terminal user interface, draws aligned tables, displays success/failure feedback, and captures raw keyboard input. Completely decoupled from business rules and file I/O. |
-| **Controller** | `fptu.pro192.foodstore.service` | Coordinates user actions received from the View. Enforces business rules (BR1–BR27), executes algorithmic calculations (FEFO batch deduction, VIP discount computation), and manages state transitions. |
-| **Model** | `fptu.pro192.foodstore.model`<br>& `fptu.pro192.foodstore.repository` | **Domain Entities (`model`)**: Encapsulates state and polymorphic behaviors (`Food` hierarchy, `Customer` hierarchy).<br>**Data Persistence (`repository`)**: Manages in-memory object collections and coordinates atomic CSV serialization via `MiniCsv`. |
+| `view` | Renders 80-column ASCII menus and tables, prompts the user for input via `ConsoleUtil`, catches domain exceptions, and prints status messages. Contains zero business calculation or file I/O logic. | `controller`, `model`, `util` |
+| `controller` | Enforces stateful business rules (`BR1` through `BR27`), maintains in-memory `List`, `Map`, and `Set` collections, executes `FEFO` inventory deduction, and coordinates atomic CSV persistence via `CsvUtil`. Contains zero `System.out` or `Scanner` calls. | `model`, `util` |
+| `model` | Encapsulates domain state, object relationships (`Product` to `Batch`, `Order` to `OrderDetail`), polymorphic behavior (`Customer.calculateDiscount`), and constructor/setter invariant checks via `InputValidator`. | `util` (`InputValidator`) |
+| `util` | Provides reusable, stateless infrastructure for RFC 4180 CSV parsing and atomic file writing (`CsvUtil`), field validation and normalization (`InputValidator`), 80-column formatting (`TableFormatter`), console I/O (`ConsoleUtil`), and singleton stream management (`ScannerManager`). | Standard JDK 8 APIs only |
 
-### 1.2. Architectural Rationale: Preventing the "Fat Controller" Anti-Pattern
-
-In standard academic MVC implementations, developers frequently collapse business rules, inventory algorithms, and physical file persistence directly into monolithic Controller classes. This leads to the **Fat Controller** anti-pattern, violating the **Single Responsibility Principle (SRP)** and making testing or modifications error-prone.
-
-By adopting **Layered MVC**:
-
-1. **Dedicated Service Layer (`service`)**: Contains all domain validation and business algorithms. Services are completely agnostic of whether output is rendered on a console, GUI, or web browser.
-2. **Dedicated Repository Layer (`repository`)**: Encapsulates collection state and file persistence. Services never interact directly with file streams, file paths, or serialization parsing.
-3. **Template-Driven Presentation (`ui`)**: Uses the Template Method pattern (`AbstractMenu`) to manage the terminal screen lifecycle without contaminating business services with console printing code.
-
-### 1.3. Oral Defense / Presentation Summary
-
-When explaining the system architecture during examination or project defense:
-> *"Our project implements a **3-Tier Layered Architecture derived from the MVC pattern (Layered MVC)**. The **View** is encapsulated in `fptu.pro192.foodstore.ui` (handling 80-column console rendering). The **Controller** logic is separated into a dedicated **Service Layer** in `fptu.pro192.foodstore.service` (managing business rules and FEFO inventory deduction), while the **Model** is partitioned into domain entities (`model`) and data access repositories (`repository`). This separation strictly upholds the **Single Responsibility** and **Separation of Concerns** principles."*
+Consolidating business coordination and CSV persistence inside the `controller` tier keeps the architecture accessible for a four-member student team while avoiding "Fat Controllers" by delegating low-level CSV parsing and atomic file replacement to `CsvUtil` and stateless field validation to `InputValidator`.
 
 ---
 
-## 2. Object-Oriented Domain Hierarchy
+## 2. UML Class Diagram
+
+The class diagram below reflects the exact classes, fields, and method signatures in the codebase.
 
 ```mermaid
 classDiagram
-    class Food {
-        <<abstract>>
-        #String id
-        #String name
-        #String category
-        #String unit
-        #double price
-        #double minTemperature
-        #double maxTemperature
-        #double minHumidity
-        #double maxHumidity
-        #boolean isDeleted
-        #List~Batch~ batches
-        +abstract getStorageInstructions() String
-        +abstract getDaysBeforeExpiryWarning() int
+    direction TB
+
+    class Product {
+        -String id
+        -String name
+        -String category
+        -String unit
+        -double price
+        -List~Batch~ batches
+        -boolean isDeleted
+        +Product(String id, String name, String category, String unit, double price)
+        +Product(String id, String name, String category, String unit, double price, boolean isDeleted)
+        +addBatch(Batch batch) void
+        +getBatches() List~Batch~
         +getTotalStock() int
-        +getActiveBatches(LocalDate currentDate) List~Batch~
-        +deductStockFEFO(int quantity, LocalDate currentDate) void
-    }
-
-    class FrozenFood {
-        +getStorageInstructions() String
-        +getDaysBeforeExpiryWarning() int
-    }
-
-    class ChilledFood {
-        +getStorageInstructions() String
-        +getDaysBeforeExpiryWarning() int
-    }
-
-    class DryFood {
-        +getStorageInstructions() String
-        +getDaysBeforeExpiryWarning() int
+        +getAvailableStock() int
+        +isLowStock(int threshold) boolean
     }
 
     class Batch {
@@ -92,160 +98,227 @@ classDiagram
         -LocalDate productionDate
         -LocalDate expirationDate
         -int quantity
-        +isExpired(LocalDate currentDate) boolean
-        +isCloseToExpiry(LocalDate currentDate, int warningDays) boolean
-        +deduct(int amount) void
+        +Batch(String batchId, String productId, LocalDate importDate, LocalDate productionDate, LocalDate expirationDate, int quantity)
+        +isExpired() boolean
+        +isNearExpiry(int daysThreshold) boolean
+        +setQuantity(int quantity) void
     }
 
     class Customer {
         <<abstract>>
-        #String id
-        #String fullName
-        #String alias
-        #String phone
-        #String address
-        #boolean isDeleted
-        +abstract getDiscountRate() double
-        +calculateDiscount(double amount) double
+        -String id
+        -String fullName
+        -String phone
+        -String address
+        -boolean isDeleted
+        #Customer(String id, String fullName, String phone, String address, boolean isDeleted)
+        +create(String type, String id, String fullName, String phone, String address, boolean isDeleted)$ Customer
+        +calculateDiscount(double amount)* double
+        +getCustomerType()* String
     }
 
     class RegularCustomer {
-        +getDiscountRate() double
+        +RegularCustomer(String id, String fullName, String phone, String address, boolean isDeleted)
+        +calculateDiscount(double amount) double
+        +getCustomerType() String
     }
 
     class VIPCustomer {
-        +getDiscountRate() double
-    }
-
-    class OrderDetail {
-        -String productId
-        -String productName
-        -String unit
-        -double unitPrice
-        -int quantity
-        +getSubtotal() double
+        + DISCOUNT_RATE : double = 0.10$
+        +VIPCustomer(String id, String fullName, String phone, String address, boolean isDeleted)
+        +calculateDiscount(double amount) double
+        +getCustomerType() String
     }
 
     class Order {
         -String orderId
         -String customerId
-        -LocalDate orderDate
+        -LocalDateTime orderDate
         -List~OrderDetail~ items
-        -double subtotal
-        -double discountAmount
+        -double totalAmount
+        -double discount
         -double finalAmount
-        +addItem(Food product, int quantity) void
+        +Order(String orderId, String customerId, LocalDateTime orderDate)
+        +Order(String orderId, String customerId, LocalDateTime orderDate, List~OrderDetail~ items, double totalAmount, double discount, double finalAmount)
+        +addItem(OrderDetail item) void
         +calculateTotals(Customer customer) void
     }
 
-    class Transaction {
-        -String transactionId
+    class OrderDetail {
         -String orderId
-        -String customerId
-        -LocalDate transactionDate
-        -double totalPaid
-        -String paymentMethod
+        -String productId
+        -int quantity
+        -double unitPrice
+        +OrderDetail(String orderId, String productId, int quantity, double unitPrice)
+        +getSubTotal() double
     }
 
-    Food <|-- FrozenFood
-    Food <|-- ChilledFood
-    Food <|-- DryFood
-    Food "1" *-- "0..*" Batch : aggregates
-    Customer <|-- RegularCustomer
-    Customer <|-- VIPCustomer
+    class ProductController {
+        -Path productCsvPath
+        -Path batchCsvPath
+        -List~Product~ products
+        -Set~String~ categories
+        -Set~String~ units
+        +loadFromCsv() void
+        +saveToCsv() void
+        +addProduct(Product product) void
+        +updateProduct(String id, String name, String category, String unit, double price) void
+        +deleteProduct(String id) boolean
+        +addBatchToProduct(String productId, Batch batch) void
+        +deductStockFEFO(String productId, int requestedQuantity) void
+        +findById(String id) Product
+        +findByIdIncludeDeleted(String id) Product
+        +searchByName(String keyword) List~Product~
+        +searchByCategory(String category) List~Product~
+        +searchByExpirationDate(LocalDate targetDate) List~Product~
+        +getAvailableProducts() List~Product~
+        +getLowStockProducts(int threshold) List~Product~
+        +getExpiredBatches() List~Batch~
+        +getNearExpiryBatches(int daysThreshold) List~Batch~
+    }
+
+    class CustomerController {
+        -Path csvPath
+        -List~Customer~ customers
+        +loadFromCsv() void
+        +saveToCsv() void
+        +registerCustomer(String id, String fullName, String phone, String address, String type) Customer
+        +updateCustomer(String id, String newName, String newPhone, String newAddress, String newType) Customer
+        +deleteCustomer(String id) void
+        +findById(String id) Customer
+        +findByIdIncludeDeleted(String id) Customer
+        +findByPhone(String rawPhone) Customer
+        +searchByName(String keyword) List~Customer~
+    }
+
+    class OrderController {
+        -Path ordersCsvPath
+        -Path detailsCsvPath
+        -List~Order~ orders
+        -ProductController productController
+        -CustomerController customerController
+        +loadFromCsv() void
+        +saveToCsv() void
+        +createDraftOrder(String customerId) Order
+        +addItemToDraft(Order draft, String productId, int quantity) void
+        +finalizeOrder(Order draft) Order
+        +getAllOrders() List~Order~
+    }
+
+    class ReportController {
+        -OrderController orderController
+        -ProductController productController
+        -CustomerController customerController
+        +getOrdersByDate(LocalDate date) List~Order~
+        +getDailyRevenue(LocalDate date) double
+        +getOrdersByMonth(YearMonth month) List~Order~
+        +getMonthlyRevenue(YearMonth month) double
+        +getTopSellingProducts(int limit) List~ProductSalesSummary~
+        +getCustomerSpendingSummary() List~CustomerSpendingSummary~
+        +getLowStockProducts(int threshold) List~Product~
+        +getExpiredBatches() List~Batch~
+        +getNearExpiryBatches(int daysThreshold) List~Batch~
+    }
+
+    class Menu {
+        <<abstract>>
+        #String title
+        #String[] options
+        +display() void
+        #handleChoice(int choice)* void
+        #shouldPauseAfterAction() boolean
+    }
+
+    Product "1" *-- "0..*" Batch : contains
+    Customer <|-- RegularCustomer : extends
+    Customer <|-- VIPCustomer : extends
     Order "1" *-- "1..*" OrderDetail : contains
-    Transaction "1" --> "1" Order : references
+    Order ..> Customer : referencescustomerId
+    OrderDetail ..> Product : references productId
+    OrderController --> ProductController : coordinates FEFO
+    OrderController --> CustomerController : resolves customer
+    ReportController --> OrderController : queries orders
+    ReportController --> ProductController : queries products
+    ReportController --> CustomerController : queries customers
 ```
 
 ---
 
-## 3. Subclasses for Product Classification
+## 3. Java Collections Framework Usage
 
-While a simple `CategoryType` enum could record the food category, our architecture **explicitly employs 3 distinct subclasses** (`FrozenFood`, `ChilledFood`, `DryFood`):
+The project utilizes all three primary Java Collections interfaces (`List`, `Set`, and `Map`) across the model and controller layers:
 
-1. **Coursework & Academic Rubric (PRO192 Java OOP)**:
-   * The grading criteria specifically evaluate deep object-oriented principles: **Inheritance**, **Polymorphism**, and **Method Overriding**.
-   * Replacing product subclasses with an enum would eliminate one of the primary inheritance hierarchies in the project.
-2. **Open-Closed Principle (OCP)**:
-   * Polymorphic behavior: each subclass overrides `getStorageInstructions()` and `getDaysBeforeExpiryWarning()` (14 days for frozen, 1 day for chilled, 7 days for dry).
-   * Adding a fourth category (e.g., `CannedFood` or `Beverage`) requires creating an additional subclass without modifying existing conditional logic.
-
----
-
-## 4. Temperature & Humidity Bounds (HACCP Food Safety Standards)
-
-All three product categories enforce standard safety thresholds:
-
-| Category | Class | Temperature Range ($^\circ\text{C}$) | Humidity Range ($\%$) | Expiry Warning Threshold |
-| --- | --- | --- | --- | --- |
-| **Frozen Food** | `FrozenFood` | $-25.0 \le T \le -18.0$ | $85.0 \le H \le 95.0$ | 14 days |
-| **Chilled Food** | `ChilledFood` | $0.0 \le T \le 4.0$ | $75.0 \le H \le 85.0$ | 1 day (BR20.1) |
-| **Dry Food** | `DryFood` | $15.0 \le T \le 25.0$ | $30.0 \le H \le 60.0$ | 7 days (BR20.2) |
+| Collection Interface | Concrete Implementation | Usage in Codebase |
+| :--- | :--- | :--- |
+| `List<E>` | `ArrayList<E>` | Stores ordered collections of `Product` entities, `Batch` records inside each `Product`, `Customer` records, `Order` histories, and `OrderDetail` line items inside each `Order`. |
+| `Set<E>` | `LinkedHashSet<String>` | Maintains duplicate-free, insertion-ordered registries of product `categories` and measurement `units` inside `ProductController` (`BR5`). Pre-populated with default retail grocery categories and units, and expanded dynamically when products with custom categories or units are loaded or added. |
+| `Map<K, V>` | `HashMap<K, V>` / `LinkedHashMap<K, V>` | Groups `Batch` records by `productId` and `OrderDetail` records by `orderId` during CSV loading (`O(N)` join reconstruction), and aggregates product quantities and customer spending totals in `ReportController`. |
 
 ---
 
-## 5. Terminal User Interface (TUI) Standards
+## 4. CSV Data Storage Schemas
 
-* **Screen Width**: Fixed at **80 columns** (Standard VT100 / IBM 80-character line width).
-* **Character Set**: Pure basic ASCII (`+`, `-`, `=`, `|`, `[ ]`, `*`) to guarantee cross-platform compatibility across Windows CMD (CP437, CP1252) and UTF-8 terminals.
-* **Language Policy**:
-  * **User Interface**: **Vietnamese** (Menus, table headers, error prompts, confirmations).
-  * **Source Code & Documentation**: **English** (Class names, methods, comments, documentation).
-* **Navigation Conventions**:
-  * Option `0`: Always denotes Cancel / Return / Exit.
-  * Screen transitions: Execute `ConsoleUtil.clearScreen()` upon navigation after confirmation.
-  * Enter key: Always prompts user to press Enter to acknowledge and return.
+All persistent data is stored in UTF-8 encoded CSV files inside the `data/` directory. Every CSV file writes a fixed header row at line 0 during save operations and skips that header row during load operations. All writes are performed atomically via `CsvUtil.writeAtomic` using a temporary sibling file (`.tmp`) and `Files.move` with `ATOMIC_MOVE` and `REPLACE_EXISTING`.
 
-### 5.1. Text Truncation & Monospace Fit Rule
+### 4.1. `data/products.csv`
 
-To prevent lines from overflowing or distorting the 80-column ASCII borders, all displayed strings are formatted using a deterministic truncation helper `TableFormatter.fit(text, width)`:
+Header row: `id,name,category,unit,price,isDeleted`
 
-* If `text.length() > width`, the string is cleanly cut to `width - 2` characters and appended with `..` (or clipped at exact boundary).
-* The string is right-padded with whitespace to ensure exact width alignment.
+| Column Index | Field Name | Data Type | Format and Constraints |
+| :--- | :--- | :--- | :--- |
+| `0` | `id` | `String` | Primary key (`P00001` through `P99999`, `BR1`) |
+| `1` | `name` | `String` | Non-empty product name (`BR3`) |
+| `2` | `category` | `String` | Single-word retail category registered in `ProductController` (`BR5`) |
+| `3` | `unit` | `String` | Measurement unit registered in `ProductController` (`BR5`) |
+| `4` | `price` | `double` | Positive selling price in VND (`> 0`, `BR4`) |
+| `5` | `isDeleted` | `boolean` | `true` if soft-deleted, `false` if active (`BR27`) |
 
-### 5.2. Pre-Calculated 80-Column Table Layouts
+### 4.2. `data/batches.csv`
 
-#### 1. Product Table (80 columns total)
+Header row: `batchId,productId,importDate,productionDate,expirationDate,quantity`
 
-* Borders: 7 `|` borders + 12 padding spaces = 19 characters.
-* Columns: ID (6) + Name (22) + Category (9) + Unit (6) + Price (11) + Stock (7) = 61 characters.
-* **Total Width: $19 + 61 = 80$ characters.**
+| Column Index | Field Name | Data Type | Format and Constraints |
+| :--- | :--- | :--- | :--- |
+| `0` | `batchId` | `String` | Primary key (`B00001` through `B99999`, `BR6`) |
+| `1` | `productId` | `String` | Foreign key referencing `products.csv(id)` (`BR18`) |
+| `2` | `importDate` | `LocalDate` | ISO-8601 date `yyyy-MM-dd` (`BR7`) |
+| `3` | `productionDate` | `LocalDate` | ISO-8601 date `yyyy-MM-dd`, `<= expirationDate` (`BR7`) |
+| `4` | `expirationDate` | `LocalDate` | ISO-8601 date `yyyy-MM-dd`, `>= productionDate` (`BR7`) |
+| `5` | `quantity` | `int` | Remaining non-negative integer stock (`>= 0`, `BR6`, `BR26`) |
 
-```text
-+--------+------------------------+-----------+--------+-------------+---------+
-| Mã SP  | Tên Sản Phẩm           | Phân Loại | ĐVT    | Đơn Giá     | Tồn Kho |
-+--------+------------------------+-----------+--------+-------------+---------+
-| P00001 | Mi Hao Hao Tom Chua Cay| DRY       | Goi    |   8,000 VND |     120 |
-| P00002 | Sua Tuoi Tiet Trung 1L | CHILLED   | Hop    |  35,000 VND |      30 |
-+--------+------------------------+-----------+--------+-------------+---------+
-```
+### 4.3. `data/customers.csv`
 
-#### 2. Customer Table (80 columns total)
+Header row: `type,id,fullName,phone,address,isDeleted`
 
-* Borders: 6 `|` borders + 10 padding spaces = 16 characters.
-* Columns: ID (6) + Name (25) + Phone (12) + Address (15) + Tier (6) = 64 characters.
-* **Total Width: $16 + 64 = 80$ characters.**
+| Column Index | Field Name | Data Type | Format and Constraints |
+| :--- | :--- | :--- | :--- |
+| `0` | `type` | `String` | Subclass discriminator (`Regular` or `VIP`, `BR15`) |
+| `1` | `id` | `String` | Primary key (`C00001` through `C99999`, `BR2`) |
+| `2` | `fullName` | `String` | Non-empty customer full name (`BR3`) |
+| `3` | `phone` | `String` | Normalized 10-digit Vietnamese phone number (`0[35789]xxxxxxxx`, `BR25`) |
+| `4` | `address` | `String` | Non-empty residential or delivery address (`BR3`) |
+| `5` | `isDeleted` | `boolean` | `true` if soft-deleted, `false` if active (`BR27`) |
 
-```text
-+--------+---------------------------+--------------+-----------------+--------+
-| Mã KH  | Họ Và Tên                 | Số ĐT        | Địa Chỉ         | Hạng   |
-+--------+---------------------------+--------------+-----------------+--------+
-| C00001 | Nguyen Van An             | 0901234567   | Ho Chi Minh     | VIP    |
-| C00002 | Tran Thi Hoa              | 0987654321   | Binh Duong      | Regular|
-+--------+---------------------------+--------------+-----------------+--------+
-```
+### 4.4. `data/orders.csv`
 
-#### 3. Invoice Summary / Cart Table (80 columns total)
+Header row: `orderId,customerId,orderDate,totalAmount,discount,finalAmount`
 
-* Borders: 6 `|` borders + 10 padding spaces = 16 characters.
-* Columns: No (3) + Product Name (28) + Qty (5) + Unit Price (14) + Subtotal (14) = 64 characters.
-* **Total Width: $16 + 64 = 80$ characters.**
+| Column Index | Field Name | Data Type | Format and Constraints |
+| :--- | :--- | :--- | :--- |
+| `0` | `orderId` | `String` | Primary key (`O00001` through `O99999`, `BR8`) |
+| `1` | `customerId` | `String` | Foreign key referencing `customers.csv(id)`, or `GUEST` for walk-in buyers (`BR16`) |
+| `2` | `orderDate` | `LocalDateTime` | ISO-8601 timestamp (`yyyy-MM-ddTHH:mm:ss`) |
+| `3` | `totalAmount` | `double` | Pre-discount gross total (`>= 0`, `BR13`) |
+| `4` | `discount` | `double` | Discount amount deducted (`>= 0`, `BR13`, `BR15`) |
+| `5` | `finalAmount` | `double` | Net payable amount (`totalAmount - discount`, `BR13`) |
 
-```text
-+-----+------------------------------+-------+----------------+----------------+
-| STT | Tên Sản Phẩm                 | SL    | Đơn Giá        | Thành Tiền     |
-+-----+------------------------------+-------+----------------+----------------+
-|   1 | Mi Hao Hao Tom Chua Cay      |     5 |      8,000 VND |     40,000 VND |
-|   2 | Sua Tuoi Tiet Trung 1L       |     2 |     35,000 VND |     70,000 VND |
-+-----+------------------------------+-------+----------------+----------------+
-```
+### 4.5. `data/order_details.csv`
+
+Header row: `orderId,productId,quantity,unitPrice`
+
+| Column Index | Field Name | Data Type | Format and Constraints |
+| :--- | :--- | :--- | :--- |
+| `0` | `orderId` | `String` | Foreign key referencing `orders.csv(orderId)` (`BR8`, `BR18`) |
+| `1` | `productId` | `String` | Foreign key referencing `products.csv(id)` (`BR18`) |
+| `2` | `quantity` | `int` | Positive integer units purchased (`> 0`, `BR9`, `BR26`) |
+| `3` | `unitPrice` | `double` | Historical unit selling price snapshot at checkout (`> 0`, `BR12`) |

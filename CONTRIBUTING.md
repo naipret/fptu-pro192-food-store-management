@@ -1,98 +1,88 @@
 # Contributing Guidelines
 
-This document defines the development workflow, commit standards, and coding conventions for all team members.
+This document defines the version control, branching, commit message, issue tracking, and pull request workflow for the Food Store Management System (`PRO192`). Coding standards, naming conventions, and architectural specifications are documented separately in the [`docs/`](docs/) directory.
 
 ---
 
 ## 1. Git Branching Strategy
 
-We follow a simplified GitHub Flow model centered around the `main` branch:
+The `main` branch holds stable, compilable, and reviewed code. Direct pushes to `main` are prohibited. All development work must take place on dedicated branches created from the latest `main` branch.
 
-```markdown
-[feature/<module>] ---> Pull Request ---> [main]
+Branch names use a prefix that reflects the nature of the change, followed by a short hyphen-separated identifier:
+
+| Branch Prefix | Purpose | Example |
+| :--- | :--- | :--- |
+| `feature/<module>` | New functional module or user-facing capability | `feature/product-catalog` |
+| `fix/<issue>` | Bug fix for a specific defect | `fix/fefo-stock-deduction` |
+| `refactor/<scope>` | Structural code improvement without changing external behavior | `refactor/mvc-and-retail-domain` |
+| `docs/<topic>` | Documentation creations or updates | `docs/standardize-specifications` |
+| `chore/<task>` | Build configuration, seed data, or release maintenance | `chore/seed-retail-data` |
+
+### Standard Branch Lifecycle
+
+```bash
+git checkout main
+git pull origin main
+git checkout -b feature/<short-description>
 ```
 
-* **`main`**: The primary, production-ready branch. **Direct pushes are strictly prohibited.** All code must be merged via Pull Requests.
-* **`feature/<module>`**: Short-lived feature branches branched directly off `main`.
-  * Example: `feature/food-products`, `feature/customer-mgmt`, `feature/sales-reporting`
+Keep branches short-lived and focused on a single issue so changes remain easy to review and merge without conflicts.
 
 ---
 
-## 2. Commit Message Standards (Conventional Commits)
+## 2. Commit Message Standards
 
-All commit messages must follow the [Conventional Commits v1.0.0](https://www.conventionalcommits.org/) specification.\
-Also strictly atomic commits are required, meaning each commit should encapsulate a single logical change.
+All commit messages follow the Conventional Commits specification:
 
-```markdown
-<type>(<scope>): <short description>
+```text
+<type>(<scope>): <concise summary in imperative mood>
+
+<optional body explaining the rationale and context of the change>
+
+Refs: #<issue-number>
 ```
 
-### Allowed Types
+### Allowed Commit Types
 
-* `feat`: A new feature (e.g., `feat(product): implement FrozenFood and batch deduction`)
-* `fix`: A bug fix (e.g., `fix(phone): correct regex normalization for +84 prefix`)
-* `docs`: Documentation updates only (e.g., `docs(br): update BR24 FEFO definition`)
-* `style`: Code style, formatting, white-space changes (no production code change)
-* `refactor`: Code restructuring without bug fixes or new features
-* `test`: Adding or refactoring tests
-* `chore`: Maintenance, repository setup, GitHub Actions updates
+| Type | When to Use |
+| :--- | :--- |
+| `feat` | Introducing a new domain model, controller capability, or console menu view |
+| `fix` | Resolving a logic bug, validation defect, or runtime error |
+| `refactor` | Restructuring classes or methods for clarity without altering system behavior |
+| `docs` | Creating or updating Markdown documentation and Javadoc specifications |
+| `test` | Adding or updating automated verification tests under `src/test/java` |
+| `chore` | Updating build scripts, IDE metadata, `.gitignore`, or seed CSV datasets |
 
----
+### Commit Message Rules
 
-## 3. Mandatory In-Code Business Rules (BR) Documentation
+1. Write the subject line in English using the imperative mood (`add`, `fix`, `update`, not `added` or `adds`).
+2. Start the description after the colon with a lowercase letter and omit trailing periods.
+3. Keep the subject line under 72 characters.
+4. Make each commit atomic so that every commit leaves the project in a compilable state.
 
-Developers **must** annotate every business-critical method with corresponding BR codes:
+### Examples
 
-```java
-/**
- * Deducts stock from batches based on the First Expired, First Out (FEFO) principle.
- *
- * BR10: The quantity sold cannot exceed the available active stock of the product.
- * BR11: Expired food products cannot be sold under any circumstances.
- * BR14: Stock quantity is reduced immediately after a sales transaction is successfully confirmed.
- * BR24: When confirming a sale, stock must be deducted automatically from the active batch with the earliest valid expiration date. Depleted batches are closed, and remaining quantities cascade to subsequent earliest batches. Using FEFO (First Expired, First Out) inventory allocation.
- *
- * @param productId The 6-character product ID
- * @param quantity The integer quantity to deduct
- * @throws InsufficientStockException If requested quantity exceeds stock
- * @throws ExpiredProductException If active batches are expired
- */
-public void deductStockFEFO(String productId, int quantity)
-        throws InsufficientStockException, ExpiredProductException {
-    // ...
-}
+```text
+feat(model): implement Product and Batch composition with FEFO helpers
+fix(controller): exclude expired batches when calculating available stock
+docs(spec): define 80-column ASCII table layout formulas in UI_SPECIFICATION
 ```
 
 ---
 
-## 4. GitHub Project Issues Convention
+## 3. GitHub Issues and Pull Request Workflow
 
-All development tasks on GitHub Projects must be tracked as Issues.
+Every code or documentation change must be tracked by a GitHub Issue and merged through a reviewed Pull Request.
 
-### Issue Title Format
+### Issue Tracking
 
-Must follow the Conventional Commits format.
+1. Before starting work on a task, verify that a corresponding GitHub Issue exists and is assigned to the responsible team member.
+2. Each issue must state its objective, target files, enforced business rules (`BR1` through `BR27` where applicable), and testable acceptance criteria.
 
-### Issue Body Template
+### Pull Request Process
 
-Every issue must specify:
-
-1. **Assignee**
-2. **Reviewer**
-3. **Module**
-4. **Target Business Rules**: Specific `BR-*` identifiers
-5. **Technical Tasks & Files**: List of specific files to create or modify
-6. **Acceptance Criteria**: Verifiable checklist
-
----
-
-## 5. Coding Standards
-
-* **Java Version Compatibility**: Strictly Java 8.
-* **Naming Conventions**:
-  * Classes / Interfaces: `PascalCase` (`Food`, `ProductDao`)
-  * Methods / Variables: `camelCase` (`calculateTotal`, `productPrice`)
-  * Constants: `UPPER_SNAKE_CASE` (`MAX_COLUMN_WIDTH`, `DEFAULT_PAGE_SIZE`)
-* **Javadoc**: Full Javadoc on all public classes and methods (`@param`, `@return`, `@throws`).
-* **Console UI Language**: Vietnamese for all prompts, menus, and table columns.
-* **Console UI Formatting**: Strictly within **80 columns width**, using basic ASCII characters only.
+1. Rebase or merge the latest `main` branch into your working branch and resolve any conflicts locally.
+2. Verify that the project compiles cleanly on Java 8 (`ant clean compile test`) with zero errors and zero warnings.
+3. Push the branch to the remote repository and open a Pull Request targeting `main`.
+4. Link the Pull Request to its corresponding issue using `Closes #<issue-number>` in the description.
+5. At least one team review (or project leader approval) is required before merging into `main`. Delete the working branch after the Pull Request is merged.

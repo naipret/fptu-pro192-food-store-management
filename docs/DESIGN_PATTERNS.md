@@ -1,329 +1,128 @@
 # Design Patterns Specification
 
-This document details the software design patterns implemented in the **Food Store Management System**, providing architectural justifications and concrete Java 8 implementations for team members.
+This document describes the five software design patterns implemented in the Food Store Management System, detailing the specific problem each pattern solves, its implementation in the codebase, and its trade-offs.
 
 ---
 
 ## 1. Factory Method Pattern
 
-### Purpose & Problem Solved
+### 1.1. Context and Problem
 
-When reading flat CSV records from disk, the application must instantiate the correct subclass (`FrozenFood`, `ChilledFood`, or `DryFood`; `RegularCustomer` or `VIPCustomer`) based on a type identifier string without coupling data access objects to concrete constructors.
+When loading customer records from `data/customers.csv` or registering a new customer in `CustomerController`, the application reads a string discriminator (`"Regular"` or `"VIP"`) and must instantiate the corresponding concrete subclass (`RegularCustomer` or `VIPCustomer`). Scattering `if-else` or `switch` instantiation logic across controllers and menus couples callers to every concrete subclass.
 
-### Class Diagram
+### 1.2. Implementation in Codebase
 
-```mermaid
-classDiagram
-    class Product {
-        +createProduct(String type, Map~String, String~ data) Food
-    }
-    class Food {
-        <<abstract>>
-    }
-    class FrozenFood
-    class ChilledFood
-    class DryFood
-
-    Product ..> Food : creates
-    Food <|-- FrozenFood
-    Food <|-- ChilledFood
-    Food <|-- DryFood
-```
-
-### Java 8 Implementation Example
+The abstract base class `Customer` provides a static factory method `Customer.create(String type, String id, String fullName, String phone, String address, boolean isDeleted)`:
 
 ```java
-public class Product {
-    public static Food createProduct(
-            String type,
-            String id,
-            String name,
-            String category,
-            String unit,
-            double price,
-            double minTemperature,
-            double maxTemperature,
-            double minHumidity,
-            double maxHumidity,
-            boolean isDeleted) {
-        switch (type.trim().toUpperCase()) {
-            case "FROZEN":
-                return new FrozenFood(id, name, category, unit, price,
-                        minTemperature, maxTemperature, minHumidity, maxHumidity, isDeleted);
-            case "CHILLED":
-                return new ChilledFood(id, name, category, unit, price,
-                        minTemperature, maxTemperature, minHumidity, maxHumidity, isDeleted);
-            case "DRY":
-                return new DryFood(id, name, category, unit, price,
-                        minTemperature, maxTemperature, minHumidity, maxHumidity, isDeleted);
-            default:
-                throw new IllegalArgumentException("Unknown product category type: " + type);
-        }
+public static Customer create(String type, String id, String fullName,
+        String phone, String address, boolean isDeleted) {
+    if (type == null || type.trim().isEmpty()) {
+        throw new IllegalArgumentException("Customer type cannot be empty.");
     }
+    String normalizedType = type.trim();
+    if ("Regular".equalsIgnoreCase(normalizedType)) {
+        return new RegularCustomer(id, fullName, phone, address, isDeleted);
+    }
+    if ("VIP".equalsIgnoreCase(normalizedType)) {
+        return new VIPCustomer(id, fullName, phone, address, isDeleted);
+    }
+    throw new IllegalArgumentException("Unsupported customer type: " + type);
 }
 ```
+
+Placing the factory method directly on `Customer` (following the standard Java convention of `LocalDate.of` or `Collections.unmodifiableList`) centralizes subclass selection without introducing a separate single-method `CustomerFactory` class.
 
 ---
 
-## 2. Lightweight Repository Pattern
+## 2. Atomic CSV Persistence Pattern
 
-### Purpose & Problem Solved
+### 2.1. Context and Problem
 
-Decouples domain business services (`ProductService`, `CustomerService`, `OrderService`) from physical CSV file reading and writing without the excessive overhead of generic DAO interfaces and complex transaction management.
+Writing directly to a live data file (`data/products.csv` or `data/orders.csv`) using a standard `FileWriter` truncates the existing file immediately. If an `IOException`, power loss, or unexpected termination occurs mid-write, the CSV file is left half-written and corrupted.
 
-Each repository maintains an in-memory collection (`List<T>`) for high-speed CRUD queries and exposes straightforward `loadFromCsv()` and `saveToCsv()` methods. Persistence is handled atomically using a temporary file (`.tmp`) and `Files.move(..., ATOMIC_MOVE)` via `MiniCsv`.
+### 2.2. Implementation in Codebase
 
-### Class Diagram
+`CsvUtil.writeAtomic(Path targetPath, List<String[]> rows)` implements a two-phase atomic write protocol:
 
-```mermaid
-classDiagram
-    class ProductRepository {
-        -List~Food~ products
-        -String productFilePath
-        -String batchFilePath
-        +loadFromCsv() void
-        +saveToCsv() void
-        +findById(String id) Food
-        +findAll() List~Food~
-        +add(Food food) void
-        +update(Food food) void
-        +delete(String id) void
-    }
-```
+1. Ensure the parent directory (`data/`) exists and write all escaped CSV rows (starting with the header row at index 0) to a sibling temporary file (`<filename>.csv.tmp`), flushing the UTF-8 buffered stream completely.
+2. Replace the target file in a single operation using `Files.move(tempPath, targetPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)`, falling back to `StandardCopyOption.REPLACE_EXISTING` if the underlying filesystem does not support atomic move semantics.
 
-### Implementation Example (`ProductRepository.java`)
-
-```java
-public class ProductRepository {
-    private final String productFilePath;
-    private final String batchFilePath;
-    private final List<Food> products = new ArrayList<>();
-
-    public ProductRepository(String productFilePath, String batchFilePath) {
-        this.productFilePath = productFilePath;
-        this.batchFilePath = batchFilePath;
-        loadFromCsv();
-    }
-
-    public Food findById(String id) {
-        for (Food food : products) {
-            if (food.getId().equalsIgnoreCase(id) && !food.isDeleted()) {
-                return food;
-            }
-        }
-        return null;
-    }
-
-    public List<Food> findAll() {
-        List<Food> active = new ArrayList<>();
-        for (Food food : products) {
-            if (!food.isDeleted()) {
-                active.add(food);
-            }
-        }
-        return Collections.unmodifiableList(active);
-    }
-
-    public void add(Food food) {
-        products.add(food);
-        saveToCsv();
-    }
-
-    // Atomic CSV persistence via MiniCsv and Java 8 NIO
-    public synchronized void saveToCsv() {
-        Path tempPath = Paths.get(productFilePath + ".tmp");
-        Path targetPath = Paths.get(productFilePath);
-
-        // 1. Serialize records to temp file via MiniCsv
-        // 2. Atomically replace target file
-        // Files.move(tempPath, targetPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-    }
-}
-```
+Each domain controller (`ProductController`, `CustomerController`, `OrderController`) pairs in-memory collection updates with `saveToCsv()` calls that delegate to `CsvUtil.writeAtomic`, guaranteeing that on-disk files always contain complete, valid snapshots.
 
 ---
 
 ## 3. Singleton Pattern
 
-### Purpose & Problem Solved
+### 3.1. Context and Problem
 
-1. **`ScannerManager`**: Creating multiple `java.util.Scanner(System.in)` instances or closing one prematurely breaks the underlying standard input stream, throwing `NoSuchElementException`. A Singleton guarantees a single, application-wide managed scanner.
-2. **`IdGenerator`**: Prevents sequence collisions and race conditions during ID generation across concurrent operations.
+In Java console applications, instantiating multiple `new Scanner(System.in)` objects across different menus and utility classes causes shared input buffer conflicts, skipped lines, and `NoSuchElementException` errors. Moreover, closing any wrapper `Scanner` closes the underlying `System.in` stream permanently for the entire JVM process.
 
-### Java 8 Implementation (`ScannerManager.java`)
+### 3.2. Implementation in Codebase
+
+`ScannerManager` implements an eager, thread-safe Singleton that owns the single `Scanner(System.in, "UTF-8")` instance for the lifetime of the application:
 
 ```java
-public class ScannerManager {
-    private static ScannerManager instance;
-    private final Scanner scanner;
+public final class ScannerManager {
+
+    private static final Scanner INSTANCE = new Scanner(System.in, "UTF-8");
 
     private ScannerManager() {
-        this.scanner = new Scanner(System.in);
     }
 
-    public static synchronized ScannerManager getInstance() {
-        if (instance == null) {
-            instance = new ScannerManager();
-        }
-        return instance;
-    }
-
-    public Scanner getScanner() {
-        return scanner;
+    public static Scanner getInstance() {
+        return INSTANCE;
     }
 }
 ```
+
+`ConsoleUtil` retrieves the shared `Scanner` exclusively through `ScannerManager.getInstance()`, ensuring consistent UTF-8 line reading across all menus.
 
 ---
 
-## 4. Strategy Pattern (Polymorphic Discount Calculation)
+## 4. Strategy Pattern (via Subclass Polymorphism)
 
-### Purpose & Problem Solved
+### 4.1. Context and Problem
 
-Different customer tiers (`RegularCustomer` vs `VIPCustomer`) require distinct pricing and discount calculation strategies. Rather than scattering conditional `if-else` blocks throughout `OrderService`, the discount calculation strategy is encapsulated directly within the polymorphic customer domain model.
+Different customer loyalty tiers apply different discount calculation rules during checkout (`BR15`): `Regular` customers pay full price (`0%` discount), while `VIP` customers receive a `10%` discount on the order subtotal.
 
-### Implementation
+### 4.2. Implementation in Codebase
 
-```java
-public abstract class Customer {
-    protected String id;
-    protected String fullName;
-    protected String alias;
-    protected String phone;
-    protected String address;
-    protected boolean isDeleted;
+`Customer` declares the abstract discount calculation contract `public abstract double calculateDiscount(double amount)`. Concrete subclasses encapsulate the tier-specific pricing algorithm:
 
-    public abstract double getDiscountRate();
+1. `RegularCustomer.calculateDiscount(double amount)` validates that `amount >= 0` and returns `0.0`.
+2. `VIPCustomer.calculateDiscount(double amount)` validates that `amount >= 0` and returns `amount * DISCOUNT_RATE` (`0.10`).
 
-    public double calculateDiscount(double subtotal) {
-        return subtotal * getDiscountRate();
-    }
-}
-
-public class RegularCustomer extends Customer {
-    @Override
-    public double getDiscountRate() {
-        return 0.0; // BR15: Regular customers receive 0% discount
-    }
-}
-
-public class VIPCustomer extends Customer {
-    @Override
-    public double getDiscountRate() {
-        return 0.10; // BR16: VIP customers receive 10% discount
-    }
-}
-```
+During checkout, `Order.calculateTotals(Customer customer)` delegates discount calculation to the passed `Customer` strategy object (`double calculatedDiscount = (customer == null) ? 0.0 : customer.calculateDiscount(sum)`), keeping `Order` independent of loyalty tier rules.
 
 ---
 
-## 5. Template Method Pattern (Console UI & Menu Lifecycle)
+## 5. Template Method Pattern
 
-### Purpose & Problem Solved
+### 5.1. Context and Problem
 
-The console user interface requires strict consistency across all feature menus:
+Every interactive console screen (`MainMenu`, `ProductMenu`, `InventoryMenu`, `CustomerMenu`, `SalesMenu`, `ReportMenu`) follows the same interaction loop: render the 80-column header Banner, list numbered options (`[1]..[N]` and `[0]` Back/Exit), read a validated integer choice, dispatch the selected action, optionally pause for the user to press `Enter`, and repeat until `0` is chosen. Duplicating this `while` loop across six menu classes violates `DRY` and leads to inconsistent navigation behavior.
 
-* Uniform **80-column** standard width with fixed ASCII borders (`+`, `-`, `=`, `|`).
-* Automatic screen clearing (`ConsoleUtil.clearScreen()`) before displaying a new screen.
-* Standardized header with screen title and footer with navigation instructions (`[0] Quay lại / Hủy`).
-* Uniform input validation and confirmation loops.
-* Table Actions: Keys `[N]` (Next Page), `[P]` (Previous Page), `[S]` (Search sub-menu), `[O]` (Sort sub-menu), `[0]` (Back).
-* Enter key: Always prompts user to press Enter to acknowledge and return.
+### 5.2. Implementation in Codebase
 
-Rather than duplicating this layout and lifecycle boilerplate across every menu class, the **Template Method Pattern** defines the invariant skeleton of a console screen in an abstract base class (`Menu` / `BaseView`), letting concrete subclasses implement only the specific body options and input handling logic.
-
-### Class Diagram
-
-```mermaid
-classDiagram
-    class Menu {
-        <<abstract>>
-        #String title
-        +display() void
-        #renderHeader() void
-        #abstract renderBody() void
-        #renderFooter() void
-        #abstract handleOption(int choice) boolean
-    }
-    class MainMenu {
-        #renderBody() void
-        #handleOption(int choice) boolean
-    }
-    class ProductMenu {
-        #renderBody() void
-        #handleOption(int choice) boolean
-    }
-    class CustomerMenu {
-        #renderBody() void
-        #handleOption(int choice) boolean
-    }
-    class SalesMenu {
-        #renderBody() void
-        #handleOption(int choice) boolean
-    }
-
-    Menu <|-- MainMenu
-    Menu <|-- ProductMenu
-    Menu <|-- CustomerMenu
-    Menu <|-- SalesMenu
-```
-
-### Implementation Example (`Menu.java`)
+The abstract class `Menu` defines the `final` template method `display()`:
 
 ```java
-public abstract class Menu {
-    protected final String title;
-    protected static final int MENU_WIDTH = 80;
-
-    public Menu(String title) {
-        this.title = title;
-    }
-
-    /**
-     * The Template Method defining the execution lifecycle of a menu.
-     */
-    public void display() {
-        boolean running = true;
-        while (running) {
-            ConsoleUtil.clearScreen();
-            renderHeader();
-            renderBody();
-            renderFooter();
-            int choice = ConsoleUtil.readInt("Chon chuc nang: ", 0, 9);
-            if (choice == 0) {
-                break; // Standard option 0: Cancel / Back / Exit
-            }
-            running = handleOption(choice);
-            if (running) {
+public final void display() {
+    boolean running = true;
+    while (running) {
+        renderMenuFrame();
+        int choice = ConsoleUtil.readInt("Enter your choice [0-" + options.length + "]: ", 0, options.length);
+        if (choice == 0) {
+            running = false;
+        } else {
+            handleChoice(choice);
+            if (shouldPauseAfterAction()) {
                 ConsoleUtil.pressEnterToContinue();
             }
         }
     }
-
-    protected void renderHeader() {
-        System.out.println("=" + repeatChar('=', MENU_WIDTH - 2) + "=");
-        System.out.println(TableFormatter.centerText(title.toUpperCase(), MENU_WIDTH));
-        System.out.println("=" + repeatChar('=', MENU_WIDTH - 2) + "=");
-    }
-
-    protected abstract void renderBody();
-
-    protected void renderFooter() {
-        System.out.println("-" + repeatChar('-', MENU_WIDTH - 2) + "-");
-        System.out.println("[0] Quay lai / Huy | Nhan phim so tuong ung de chon");
-        System.out.println("-" + repeatChar('-', MENU_WIDTH - 2) + "-");
-    }
-
-    protected abstract boolean handleOption(int choice);
-
-    private String repeatChar(char c, int count) {
-        StringBuilder sb = new StringBuilder(count);
-        for (int i = 0; i < count; i++) sb.append(c);
-        return sb.toString();
-    }
 }
 ```
 
-> [!TIP]
-> **Submenu Navigation & Pause Control (Tasks #5, #6, #7, #9):**
-> When a menu option dispatches to a nested sub-menu view (e.g. `MainMenu` invoking `ProductMenu.display()`), returning from the sub-menu triggers `ConsoleUtil.pressEnterToContinue()` in the parent loop if `handleOption(choice)` returns `true`. If the sub-menu already finished its own interaction and no additional output was printed by the parent menu, developers may consider checking or configuring a pause suppression mechanism to ensure seamless transitions between menus without redundant Enter prompts.
+Subclasses implement the abstract primitive operation `protected abstract void handleChoice(int choice)` and may override the hook method `protected boolean shouldPauseAfterAction()` (which defaults to `true` in `Menu` for leaf action screens and returns `false` in `MainMenu` so returning from a submenu does not trigger a redundant `Press Enter` prompt).
