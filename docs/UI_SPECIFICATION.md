@@ -9,7 +9,7 @@ This document defines the terminal layout constraints, localization policy, navi
 | Attribute | Standard |
 | :--- | :--- |
 | Maximum Line Width | Strictly `80` characters per line (`TableFormatter.SCREEN_WIDTH = 80`) |
-| Border Character Set | Basic 7-bit ASCII characters only (`+`, `-`, `=`, `|`, `*`). Box-drawing Unicode characters are prohibited to prevent garbled output in the NetBeans 13 Output window and Windows `cmd.exe`. |
+| Border Character Set | Basic 7-bit ASCII characters only (`+`, `-`, `=`, `\|`, `*`). Box-drawing Unicode characters are prohibited to prevent garbled output in the NetBeans 13 Output window and Windows `cmd.exe`. |
 | Interface Language | Full English across all menu titles, prompts, table headers, status messages, categories, and units |
 | Proper Name Support | Full Unicode letter support (`\p{L}`) for user-entered product names, customer names, and addresses |
 | Date Format | `dd/MM/yyyy` for all console prompts and table columns (converted to ISO `yyyy-MM-dd` only when reading/writing CSV files) |
@@ -54,7 +54,7 @@ To prevent long product names, customer names, or addresses from wrapping past c
 
 ## 4. 80-Column Table Width Layouts
 
-Every ASCII table is constructed so the sum of its column content widths plus border separators (`| ` and ` |`) never exceeds `80` columns.
+Every ASCII table is constructed so the sum of its column content widths plus border separators (`|` and `|`) never exceeds `80` columns.
 
 ### 4.1. Standard Menu Frame (`80` Columns)
 
@@ -69,7 +69,7 @@ Every ASCII table is constructed so the sum of its column content widths plus bo
   [5] Analytical & Revenue Reports
   [0] Exit Application
 --------------------------------------------------------------------------------
-Enter your choice [0-5]: 
+Enter your choice [0-5]:
 ```
 
 ### 4.2. Product Catalog Table (`79` Columns)

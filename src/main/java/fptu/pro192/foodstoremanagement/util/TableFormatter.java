@@ -22,9 +22,10 @@ public final class TableFormatter {
      * right-padding shorter values with spaces, or truncating longer values
      * with a two-dot suffix.
      *
-     * @param text the input text to format, may be null
+     * @param text  the input text to format, may be null
      * @param width the exact target character width
-     * @return a formatted string of length equal to width, or empty if width is non-positive
+     * @return a formatted string of length equal to width, or empty if width is
+     *         non-positive
      */
     public static String fit(String text, int width) {
         if (width <= 0) {
@@ -53,7 +54,7 @@ public final class TableFormatter {
     /**
      * Right-aligns a string within an exact column width, truncating if needed.
      *
-     * @param text the input text to right-align, may be null
+     * @param text  the input text to right-align, may be null
      * @param width the exact target character width
      * @return a right-aligned string of length equal to width
      */
@@ -77,7 +78,7 @@ public final class TableFormatter {
     /**
      * Centers a string within an exact column width using space padding.
      *
-     * @param text the input text to center, may be null
+     * @param text  the input text to center, may be null
      * @param width the exact target character width
      * @return a centered string of length equal to width
      */
@@ -106,7 +107,7 @@ public final class TableFormatter {
     /**
      * Repeats an ASCII character a specified number of times.
      *
-     * @param ch the character to repeat
+     * @param ch    the character to repeat
      * @param count the number of repetitions
      * @return a string containing ch repeated count times
      */

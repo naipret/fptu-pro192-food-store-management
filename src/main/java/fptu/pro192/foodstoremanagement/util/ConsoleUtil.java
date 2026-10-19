@@ -4,7 +4,8 @@ import java.time.LocalDate;
 import java.util.Scanner;
 
 /**
- * Stateless utility for interactive console input reading, range-checked numeric
+ * Stateless utility for interactive console input reading, range-checked
+ * numeric
  * prompts, date prompts, confirmation prompts, and screen navigation pauses.
  */
 public final class ConsoleUtil {
@@ -62,8 +63,8 @@ public final class ConsoleUtil {
      * from min to max is entered (BR26).
      *
      * @param prompt the prompt message displayed to the user
-     * @param min the minimum allowed integer value (inclusive)
-     * @param max the maximum allowed integer value (inclusive)
+     * @param min    the minimum allowed integer value (inclusive)
+     * @param max    the maximum allowed integer value (inclusive)
      * @return the validated integer within [min, max]
      * @throws IllegalArgumentException if min is greater than max
      */
@@ -91,8 +92,9 @@ public final class ConsoleUtil {
      * Repeatedly prompts the user until a positive integer greater than zero
      * (or zero if allowZeroToCancel is true) is entered (BR6, BR9, BR26).
      *
-     * @param prompt the prompt message displayed to the user
-     * @param allowZeroToCancel true if entering 0 is allowed to cancel the operation
+     * @param prompt            the prompt message displayed to the user
+     * @param allowZeroToCancel true if entering 0 is allowed to cancel the
+     *                          operation
      * @return a positive integer, or 0 if cancellation is allowed and selected
      */
     public static int readPositiveInt(String prompt, boolean allowZeroToCancel) {
@@ -104,8 +106,8 @@ public final class ConsoleUtil {
      * Repeatedly prompts the user until a decimal number greater than or equal
      * to min is entered (BR4).
      *
-     * @param prompt the prompt message displayed to the user
-     * @param min the minimum allowed value
+     * @param prompt          the prompt message displayed to the user
+     * @param min             the minimum allowed value
      * @param strictlyGreater true if the value must be strictly greater than min
      * @return the validated double value
      */
@@ -131,7 +133,8 @@ public final class ConsoleUtil {
     }
 
     /**
-     * Repeatedly prompts the user until a valid date in dd/MM/yyyy format is entered (BR7).
+     * Repeatedly prompts the user until a valid date in dd/MM/yyyy format is
+     * entered (BR7).
      *
      * @param prompt the prompt message displayed to the user
      * @return the parsed LocalDate instance

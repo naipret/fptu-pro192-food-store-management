@@ -5,7 +5,8 @@ import fptu.pro192.foodstoremanagement.util.InputValidator;
 /**
  * Abstract base class representing a registered store customer (BR2, BR3,
  * BR15, BR25, BR27). Subclasses define loyalty-tier discount strategies via
- * polymorphism, and the static create method implements the Factory Method pattern.
+ * polymorphism, and the static create method implements the Factory Method
+ * pattern.
  */
 public abstract class Customer {
 
@@ -18,10 +19,10 @@ public abstract class Customer {
     /**
      * Constructs an active Customer instance (BR2, BR3, BR25).
      *
-     * @param id the unique 6-character customer identifier (C00001-C99999)
+     * @param id       the unique 6-character customer identifier (C00001-C99999)
      * @param fullName the customer's full name
-     * @param phone the customer's Vietnamese mobile phone number
-     * @param address the customer's residential or delivery address
+     * @param phone    the customer's Vietnamese mobile phone number
+     * @param address  the customer's residential or delivery address
      * @throws IllegalArgumentException if any field violates domain invariants
      */
     protected Customer(String id, String fullName, String phone, String address) {
@@ -29,12 +30,13 @@ public abstract class Customer {
     }
 
     /**
-     * Constructs a Customer instance with an explicit soft-delete flag (BR2, BR3, BR25, BR27).
+     * Constructs a Customer instance with an explicit soft-delete flag (BR2, BR3,
+     * BR25, BR27).
      *
-     * @param id the unique 6-character customer identifier (C00001-C99999)
-     * @param fullName the customer's full name
-     * @param phone the customer's Vietnamese mobile phone number
-     * @param address the customer's residential or delivery address
+     * @param id        the unique 6-character customer identifier (C00001-C99999)
+     * @param fullName  the customer's full name
+     * @param phone     the customer's Vietnamese mobile phone number
+     * @param address   the customer's residential or delivery address
      * @param isDeleted true if soft-deleted, false if active
      * @throws IllegalArgumentException if any field violates domain invariants
      */
@@ -50,11 +52,11 @@ public abstract class Customer {
      * Factory Method that instantiates the concrete Customer subclass matching
      * the provided loyalty tier discriminator (BR15).
      *
-     * @param type the customer tier ("Regular" or "VIP", case-insensitive)
-     * @param id the 6-character customer ID (C00001-C99999)
+     * @param type     the customer tier ("Regular" or "VIP", case-insensitive)
+     * @param id       the 6-character customer ID (C00001-C99999)
      * @param fullName the customer's full name
-     * @param phone the customer's phone number
-     * @param address the customer's address
+     * @param phone    the customer's phone number
+     * @param address  the customer's address
      * @return a RegularCustomer or VIPCustomer instance
      * @throws IllegalArgumentException if type or any attribute is invalid
      */
@@ -67,11 +69,11 @@ public abstract class Customer {
      * Factory Method that instantiates the concrete Customer subclass matching
      * the provided loyalty tier discriminator and soft-delete state (BR15, BR27).
      *
-     * @param type the customer tier ("Regular" or "VIP", case-insensitive)
-     * @param id the 6-character customer ID (C00001-C99999)
-     * @param fullName the customer's full name
-     * @param phone the customer's phone number
-     * @param address the customer's address
+     * @param type      the customer tier ("Regular" or "VIP", case-insensitive)
+     * @param id        the 6-character customer ID (C00001-C99999)
+     * @param fullName  the customer's full name
+     * @param phone     the customer's phone number
+     * @param address   the customer's address
      * @param isDeleted true if soft-deleted, false if active
      * @return a RegularCustomer or VIPCustomer instance
      * @throws IllegalArgumentException if type or any attribute is invalid
@@ -93,7 +95,8 @@ public abstract class Customer {
     }
 
     /**
-     * Calculates the monetary discount amount for a given pre-discount order subtotal (BR15).
+     * Calculates the monetary discount amount for a given pre-discount order
+     * subtotal (BR15).
      *
      * @param amount the pre-discount order subtotal in VND
      * @return the discount amount in VND
@@ -166,7 +169,8 @@ public abstract class Customer {
      * Normalizes and sets the customer's Vietnamese mobile phone number (BR25).
      *
      * @param phone the raw phone number string
-     * @throws IllegalArgumentException if phone cannot be normalized to a valid 10-digit number
+     * @throws IllegalArgumentException if phone cannot be normalized to a valid
+     *                                  10-digit number
      */
     public final void setPhone(String phone) {
         this.phone = InputValidator.normalizePhone(phone);

@@ -14,11 +14,11 @@ import fptu.pro192.foodstoremanagement.controller.ReportController;
 public class MainMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
-        "Product Catalog Management",
-        "Customer Management",
-        "Sales & Checkout Management",
-        "Inventory & Batch Management",
-        "Analytical & Revenue Reports"
+            "Product Catalog Management",
+            "Customer Management",
+            "Sales & Checkout Management",
+            "Inventory & Batch Management",
+            "Analytical & Revenue Reports"
     };
 
     private final ProductMenu productMenu;
@@ -39,8 +39,7 @@ public class MainMenu extends Menu {
         this(
                 productController,
                 customerController,
-                new OrderController(productController, customerController)
-        );
+                new OrderController(productController, customerController));
     }
 
     private MainMenu(ProductController productController,
@@ -51,18 +50,17 @@ public class MainMenu extends Menu {
                 new CustomerMenu(customerController),
                 new SalesMenu(orderController, productController, customerController),
                 new InventoryMenu(productController),
-                new ReportMenu(new ReportController(orderController, productController, customerController))
-        );
+                new ReportMenu(new ReportController(orderController, productController, customerController)));
     }
 
     /**
      * Constructs a MainMenu with explicitly injected submenus.
      *
-     * @param productMenu the Product Catalog submenu
-     * @param customerMenu the Customer Management submenu
-     * @param salesMenu the Sales and Checkout submenu
+     * @param productMenu   the Product Catalog submenu
+     * @param customerMenu  the Customer Management submenu
+     * @param salesMenu     the Sales and Checkout submenu
      * @param inventoryMenu the Inventory and Batch submenu
-     * @param reportMenu the Analytical and Revenue Reports submenu
+     * @param reportMenu    the Analytical and Revenue Reports submenu
      * @throws IllegalArgumentException if any submenu is null
      */
     public MainMenu(ProductMenu productMenu,

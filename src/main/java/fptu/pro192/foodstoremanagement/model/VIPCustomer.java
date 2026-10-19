@@ -14,22 +14,23 @@ public class VIPCustomer extends Customer {
     /**
      * Constructs an active VIPCustomer (BR2, BR3, BR15, BR25).
      *
-     * @param id the 6-character customer ID (C00001-C99999)
+     * @param id       the 6-character customer ID (C00001-C99999)
      * @param fullName the customer's full name
-     * @param phone the customer's phone number
-     * @param address the customer's address
+     * @param phone    the customer's phone number
+     * @param address  the customer's address
      */
     public VIPCustomer(String id, String fullName, String phone, String address) {
         super(id, fullName, phone, address, false);
     }
 
     /**
-     * Constructs a VIPCustomer with an explicit soft-delete state (BR2, BR3, BR15, BR25, BR27).
+     * Constructs a VIPCustomer with an explicit soft-delete state (BR2, BR3, BR15,
+     * BR25, BR27).
      *
-     * @param id the 6-character customer ID (C00001-C99999)
-     * @param fullName the customer's full name
-     * @param phone the customer's phone number
-     * @param address the customer's address
+     * @param id        the 6-character customer ID (C00001-C99999)
+     * @param fullName  the customer's full name
+     * @param phone     the customer's phone number
+     * @param address   the customer's address
      * @param isDeleted true if soft-deleted, false if active
      */
     public VIPCustomer(String id, String fullName, String phone, String address, boolean isDeleted) {

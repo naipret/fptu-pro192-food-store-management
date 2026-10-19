@@ -1,52 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="fptu-pro192-food-store-management" default="default" basedir=".">
     <description>Builds, tests, and runs the project fptu-pro192-food-store-management.</description>
-    <import file="nbproject/build-impl.xml"/>
+    <import file="nbproject/build-impl.xml" />
 
     <target depends="init,compile-test,-pre-test-run" if="have.tests" name="-do-test-run">
-        <java classname="fptu.pro192.foodstoremanagement.util.CoreInfrastructureTest" fork="true" failonerror="true">
+        <java classname="fptu.pro192.foodstoremanagement.util.CoreInfrastructureTest" fork="true"
+            failonerror="true">
             <classpath>
-                <path path="${run.test.classpath}"/>
+                <path path="${run.test.classpath}" />
             </classpath>
         </java>
-        <java classname="fptu.pro192.foodstoremanagement.product.ProductModuleTest" fork="true" failonerror="true">
+        <java classname="fptu.pro192.foodstoremanagement.product.ProductModuleTest" fork="true"
+            failonerror="true">
             <classpath>
-                <path path="${run.test.classpath}"/>
+                <path path="${run.test.classpath}" />
             </classpath>
         </java>
-        <java classname="fptu.pro192.foodstoremanagement.product.ProductServiceTest" fork="true" failonerror="true">
+        <java classname="fptu.pro192.foodstoremanagement.product.ProductServiceTest" fork="true"
+            failonerror="true">
             <classpath>
-                <path path="${run.test.classpath}"/>
+                <path path="${run.test.classpath}" />
             </classpath>
         </java>
-        <java classname="fptu.pro192.foodstoremanagement.customer.CustomerModuleTest" fork="true" failonerror="true">
+        <java classname="fptu.pro192.foodstoremanagement.customer.CustomerModuleTest" fork="true"
+            failonerror="true">
             <classpath>
-                <path path="${run.test.classpath}"/>
+                <path path="${run.test.classpath}" />
             </classpath>
         </java>
-        <java classname="fptu.pro192.foodstoremanagement.customer.CustomerServiceTest" fork="true" failonerror="true">
+        <java classname="fptu.pro192.foodstoremanagement.customer.CustomerServiceTest" fork="true"
+            failonerror="true">
             <classpath>
-                <path path="${run.test.classpath}"/>
+                <path path="${run.test.classpath}" />
             </classpath>
         </java>
-        <java classname="fptu.pro192.foodstoremanagement.order.OrderModuleTest" fork="true" failonerror="true">
+        <java classname="fptu.pro192.foodstoremanagement.order.OrderModuleTest" fork="true"
+            failonerror="true">
             <classpath>
-                <path path="${run.test.classpath}"/>
+                <path path="${run.test.classpath}" />
             </classpath>
         </java>
-        <java classname="fptu.pro192.foodstoremanagement.sales.SalesModuleTest" fork="true" failonerror="true">
+        <java classname="fptu.pro192.foodstoremanagement.sales.SalesModuleTest" fork="true"
+            failonerror="true">
             <classpath>
-                <path path="${run.test.classpath}"/>
+                <path path="${run.test.classpath}" />
             </classpath>
         </java>
-        <java classname="fptu.pro192.foodstoremanagement.report.ReportModuleTest" fork="true" failonerror="true">
+        <java classname="fptu.pro192.foodstoremanagement.report.ReportModuleTest" fork="true"
+            failonerror="true">
             <classpath>
-                <path path="${run.test.classpath}"/>
+                <path path="${run.test.classpath}" />
             </classpath>
         </java>
-        <java classname="fptu.pro192.foodstoremanagement.core.MainMenuIntegrationTest" fork="true" failonerror="true">
+        <java classname="fptu.pro192.foodstoremanagement.core.MainMenuIntegrationTest" fork="true"
+            failonerror="true">
             <classpath>
-                <path path="${run.test.classpath}"/>
+                <path path="${run.test.classpath}" />
             </classpath>
         </java>
     </target>

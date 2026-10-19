@@ -27,7 +27,7 @@ public abstract class Menu {
     /**
      * Constructs a Menu with a title and an array of option labels.
      *
-     * @param title the non-empty menu title
+     * @param title   the non-empty menu title
      * @param options the non-empty array of option descriptions for choices 1..N
      * @throws IllegalArgumentException if title is blank or options is null/empty
      */

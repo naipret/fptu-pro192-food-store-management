@@ -30,8 +30,8 @@ public class ReportController {
     /**
      * Constructs a ReportController with explicitly injected domain controllers.
      *
-     * @param orderController the shared OrderController instance
-     * @param productController the shared ProductController instance
+     * @param orderController    the shared OrderController instance
+     * @param productController  the shared ProductController instance
      * @param customerController the shared CustomerController instance
      * @throws IllegalArgumentException if any controller argument is null
      */
@@ -53,7 +53,8 @@ public class ReportController {
     }
 
     /**
-     * Returns all completed orders whose order date matches the specified calendar date (BR21).
+     * Returns all completed orders whose order date matches the specified calendar
+     * date (BR21).
      *
      * @param date the target calendar date
      * @return an unmodifiable list of orders placed on date
@@ -73,7 +74,8 @@ public class ReportController {
     }
 
     /**
-     * Calculates the total net revenue (sum of finalAmount) for a specific calendar date (BR21).
+     * Calculates the total net revenue (sum of finalAmount) for a specific calendar
+     * date (BR21).
      *
      * @param date the target calendar date
      * @return the net revenue in VND for that date
@@ -87,7 +89,8 @@ public class ReportController {
     }
 
     /**
-     * Returns all completed orders whose order date falls within the specified YearMonth (BR21).
+     * Returns all completed orders whose order date falls within the specified
+     * YearMonth (BR21).
      *
      * @param month the target YearMonth
      * @return an unmodifiable list of orders placed in that month
@@ -107,7 +110,8 @@ public class ReportController {
     }
 
     /**
-     * Calculates the total net revenue (sum of finalAmount) for a specific YearMonth (BR21).
+     * Calculates the total net revenue (sum of finalAmount) for a specific
+     * YearMonth (BR21).
      *
      * @param month the target YearMonth
      * @return the net revenue in VND for that month
@@ -121,12 +125,15 @@ public class ReportController {
     }
 
     /**
-     * Builds a comprehensive monthly sales summary for the specified month and year (BR21).
+     * Builds a comprehensive monthly sales summary for the specified month and year
+     * (BR21).
      *
      * @param month the calendar month (1 through 12)
-     * @param year the positive four-digit year
-     * @return a MonthlySalesSummary containing order count, units sold, and net revenue
-     * @throws IllegalArgumentException if month is outside 1..12 or year is not positive
+     * @param year  the positive four-digit year
+     * @return a MonthlySalesSummary containing order count, units sold, and net
+     *         revenue
+     * @throws IllegalArgumentException if month is outside 1..12 or year is not
+     *                                  positive
      */
     public MonthlySalesSummary getMonthlySalesReport(int month, int year) {
         if (month < 1 || month > 12) {
@@ -159,7 +166,8 @@ public class ReportController {
      * sorted by total quantity sold descending, then gross revenue descending,
      * then product ID ascending (BR18, BR22, BR27).
      *
-     * @param limit the maximum number of top products to return (or zero or negative for all)
+     * @param limit the maximum number of top products to return (or zero or
+     *              negative for all)
      * @return an unmodifiable list of ProductSalesSummary objects
      */
     public List<ProductSalesSummary> getTopSellingProducts(int limit) {
@@ -235,9 +243,11 @@ public class ReportController {
 
     /**
      * Aggregates and ranks registered customer spending up to the specified limit
-     * (or all customers with orders if limit is zero or negative) (BR16, BR18, BR23, BR27).
+     * (or all customers with orders if limit is zero or negative) (BR16, BR18,
+     * BR23, BR27).
      *
-     * @param limit the maximum number of customers to return (or zero or negative for all)
+     * @param limit the maximum number of customers to return (or zero or negative
+     *              for all)
      * @return an unmodifiable list of CustomerSpendingSummary objects
      */
     public List<CustomerSpendingSummary> getHighestSpendingCustomers(int limit) {
@@ -265,7 +275,8 @@ public class ReportController {
 
             Customer customer = this.customerController.findByIdIncludeDeleted(customerId);
             String customerName = (customer != null)
-                    ? customer.getFullName() : "Unknown (" + customerId + ")";
+                    ? customer.getFullName()
+                    : "Unknown (" + customerId + ")";
             String tier = (customer != null) ? customer.getCustomerType() : "Regular";
 
             summaries.add(new CustomerSpendingSummary(customerId, customerName, tier, orderCount, totalSpent));
@@ -314,7 +325,8 @@ public class ReportController {
     }
 
     /**
-     * Returns all expired batches with positive stock across active products (BR11).
+     * Returns all expired batches with positive stock across active products
+     * (BR11).
      *
      * @return an unmodifiable list of expired batches
      */
@@ -376,13 +388,13 @@ public class ReportController {
         /**
          * Constructs a MonthlySalesSummary instance.
          *
-         * @param month the calendar month (1-12)
-         * @param year the four-digit year
+         * @param month             the calendar month (1-12)
+         * @param year              the four-digit year
          * @param totalTransactions the count of completed orders
-         * @param totalItemsSold the total integer units sold
-         * @param grossAmount the pre-discount gross sales total
-         * @param totalDiscount the total VIP discounts granted
-         * @param totalRevenue the net revenue collected
+         * @param totalItemsSold    the total integer units sold
+         * @param grossAmount       the pre-discount gross sales total
+         * @param totalDiscount     the total VIP discounts granted
+         * @param totalRevenue      the net revenue collected
          */
         public MonthlySalesSummary(int month, int year, int totalTransactions,
                 int totalItemsSold, double grossAmount, double totalDiscount, double totalRevenue) {
@@ -475,10 +487,10 @@ public class ReportController {
         /**
          * Constructs a ProductSalesSummary instance.
          *
-         * @param productId the 6-character product ID
-         * @param productName the resolved product name
-         * @param category the resolved product category
-         * @param unit the resolved measurement unit
+         * @param productId    the 6-character product ID
+         * @param productName  the resolved product name
+         * @param category     the resolved product category
+         * @param unit         the resolved measurement unit
          * @param quantitySold the total integer units sold
          * @param grossRevenue the cumulative line-item subtotal revenue
          */
@@ -562,11 +574,11 @@ public class ReportController {
         /**
          * Constructs a CustomerSpendingSummary instance.
          *
-         * @param customerId the 6-character customer ID
+         * @param customerId   the 6-character customer ID
          * @param customerName the resolved customer full name
          * @param customerType the loyalty tier ("Regular" or "VIP")
-         * @param orderCount the number of completed orders placed
-         * @param totalSpent the cumulative net amount spent in VND
+         * @param orderCount   the number of completed orders placed
+         * @param totalSpent   the cumulative net amount spent in VND
          */
         public CustomerSpendingSummary(String customerId, String customerName,
                 String customerType, int orderCount, double totalSpent) {

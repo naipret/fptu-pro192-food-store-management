@@ -19,18 +19,16 @@ import java.util.List;
 public class ProductMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
-        "Add New Product",
-        "Update Product Catalog Information",
-        "Delete Product (Soft Delete)",
-        "View All Active Products",
-        "View Available In-Stock Products",
-        "Search Products (by Name, Category, or Expiry Date)"
+            "Add New Product",
+            "Update Product Catalog Information",
+            "Delete Product (Soft Delete)",
+            "View All Active Products",
+            "View Available In-Stock Products",
+            "Search Products (by Name, Category, or Expiry Date)"
     };
 
-    private static final String PRODUCT_TABLE_BORDER =
-            "+--------+------------------------+--------------+--------+------------+------+";
-    private static final String PRODUCT_TABLE_HEADER =
-            "| ID     | Product Name           | Category     | Unit   | Price(VND) |Stock |";
+    private static final String PRODUCT_TABLE_BORDER = "+--------+------------------------+--------------+--------+------------+------+";
+    private static final String PRODUCT_TABLE_HEADER = "| ID     | Product Name           | Category     | Unit   | Price(VND) |Stock |";
 
     private final ProductController productController;
 

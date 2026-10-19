@@ -142,9 +142,9 @@ public class CoreInfrastructureTest {
         Path csvFile = tempDir.resolve("sample.csv");
 
         List<String[]> rows = new ArrayList<>();
-        rows.add(new String[]{"id", "name", "address"});
-        rows.add(new String[]{"C00001", "Trần Thị Bình", "123 Lê Lợi, District 1, HCMC"});
-        rows.add(new String[]{"C00002", "Nguyễn Văn An", "Quote \"Test\" Inside"});
+        rows.add(new String[] { "id", "name", "address" });
+        rows.add(new String[] { "C00001", "Trần Thị Bình", "123 Lê Lợi, District 1, HCMC" });
+        rows.add(new String[] { "C00002", "Nguyễn Văn An", "Quote \"Test\" Inside" });
 
         CsvUtil.writeAtomic(csvFile, rows);
         assertTrue(Files.exists(csvFile), "CSV file must exist after atomic write");
@@ -165,8 +165,8 @@ public class CoreInfrastructureTest {
         ScannerManager.getInstance().setInputStream(
                 new ByteArrayInputStream(simulatedInput.getBytes(StandardCharsets.UTF_8)));
 
-        final int[] handledChoice = {0};
-        Menu sampleMenu = new Menu("SAMPLE TEST MENU", new String[]{"Action One"}) {
+        final int[] handledChoice = { 0 };
+        Menu sampleMenu = new Menu("SAMPLE TEST MENU", new String[] { "Action One" }) {
             @Override
             protected void handleChoice(int choice) {
                 handledChoice[0] = choice;

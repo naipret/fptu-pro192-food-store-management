@@ -49,17 +49,22 @@ public final class InputValidator {
 
     /**
      * Validates and normalizes an entity identifier to the canonical 6-character
-     * format consisting of the uppercase prefix followed by 5 digits (BR1, BR2, BR6, BR8).
+     * format consisting of the uppercase prefix followed by 5 digits (BR1, BR2,
+     * BR6, BR8).
      * Accepts shorthand numeric input such as "1" or "P1" and pads it to "P00001".
      * Rejects identifiers whose numeric portion is outside 1..99999 or that use a
-     * non-canonical digit count when a prefix is already supplied (unless shorthand padding
+     * non-canonical digit count when a prefix is already supplied (unless shorthand
+     * padding
      * is explicitly enabled).
      *
-     * @param raw the raw identifier string
-     * @param expectedPrefix the required uppercase prefix ('P', 'B', 'C', or 'O')
-     * @param allowShorthandPadding true to auto-pad shorthand inputs like "1" or "P1"
+     * @param raw                   the raw identifier string
+     * @param expectedPrefix        the required uppercase prefix ('P', 'B', 'C', or
+     *                              'O')
+     * @param allowShorthandPadding true to auto-pad shorthand inputs like "1" or
+     *                              "P1"
      * @return the normalized 6-character identifier (for example, "P00001")
-     * @throws IllegalArgumentException if raw is null, blank, or does not match the prefix and range
+     * @throws IllegalArgumentException if raw is null, blank, or does not match the
+     *                                  prefix and range
      */
     public static String normalizeId(String raw, char expectedPrefix, boolean allowShorthandPadding) {
         char prefix = Character.toUpperCase(expectedPrefix);
@@ -113,7 +118,8 @@ public final class InputValidator {
     }
 
     /**
-     * Normalizes a user-entered Product ID (accepting shorthand like "1" or "P1" to "P00001") (BR1).
+     * Normalizes a user-entered Product ID (accepting shorthand like "1" or "P1" to
+     * "P00001") (BR1).
      *
      * @param raw the raw product ID input
      * @return the canonical 6-character product ID
@@ -135,7 +141,8 @@ public final class InputValidator {
     }
 
     /**
-     * Normalizes a user-entered Batch ID (accepting shorthand like "1" or "B1" to "B00001") (BR6).
+     * Normalizes a user-entered Batch ID (accepting shorthand like "1" or "B1" to
+     * "B00001") (BR6).
      *
      * @param raw the raw batch ID input
      * @return the canonical 6-character batch ID
@@ -157,7 +164,8 @@ public final class InputValidator {
     }
 
     /**
-     * Normalizes a user-entered Customer ID (accepting shorthand like "1" or "C1" to "C00001") (BR2).
+     * Normalizes a user-entered Customer ID (accepting shorthand like "1" or "C1"
+     * to "C00001") (BR2).
      *
      * @param raw the raw customer ID input
      * @return the canonical 6-character customer ID
@@ -179,7 +187,8 @@ public final class InputValidator {
     }
 
     /**
-     * Normalizes a user-entered Order ID (accepting shorthand like "1" or "O1" to "O00001") (BR8).
+     * Normalizes a user-entered Order ID (accepting shorthand like "1" or "O1" to
+     * "O00001") (BR8).
      *
      * @param raw the raw order ID input
      * @return the canonical 6-character order ID
@@ -195,10 +204,11 @@ public final class InputValidator {
      * contains at least one Unicode letter (\p{L}), does not start with a CSV
      * formula trigger ('=', '+', '-', '@'), and contains only safe characters.
      *
-     * @param raw the raw text string
+     * @param raw       the raw text string
      * @param fieldName the descriptive name of the field for error reporting
      * @return the trimmed, normalized text string
-     * @throws IllegalArgumentException if the text is blank, purely numeric, or unsafe
+     * @throws IllegalArgumentException if the text is blank, purely numeric, or
+     *                                  unsafe
      */
     public static String normalizeText(String raw, String fieldName) {
         String label = (fieldName == null || fieldName.trim().isEmpty()) ? "Text field" : fieldName.trim();
@@ -225,10 +235,11 @@ public final class InputValidator {
      * Disallows slashes or multi-concept separators so each category and unit
      * represents a single atomic concept.
      *
-     * @param raw the raw category or unit string
+     * @param raw       the raw category or unit string
      * @param fieldName the descriptive name of the field ("Category" or "Unit")
      * @return the trimmed, title-cased token
-     * @throws IllegalArgumentException if the token is empty or contains invalid characters
+     * @throws IllegalArgumentException if the token is empty or contains invalid
+     *                                  characters
      */
     public static String normalizeSingleWordToken(String raw, String fieldName) {
         String label = (fieldName == null || fieldName.trim().isEmpty()) ? "Token" : fieldName.trim();
@@ -273,7 +284,8 @@ public final class InputValidator {
         }
         if (!PHONE_REGEX.matcher(cleaned).matches()) {
             throw new IllegalArgumentException(
-                    "Invalid Vietnamese mobile phone number: '" + raw + "'. Expected 10 digits starting with 03, 05, 07, 08, or 09.");
+                    "Invalid Vietnamese mobile phone number: '" + raw
+                            + "'. Expected 10 digits starting with 03, 05, 07, 08, or 09.");
         }
         return cleaned;
     }
@@ -290,11 +302,13 @@ public final class InputValidator {
     }
 
     /**
-     * Validates that a selling price is finite and strictly greater than zero (BR4).
+     * Validates that a selling price is finite and strictly greater than zero
+     * (BR4).
      *
      * @param price the unit selling price to validate
      * @return the validated price
-     * @throws IllegalArgumentException if price is NaN, infinite, or less than or equal to zero
+     * @throws IllegalArgumentException if price is NaN, infinite, or less than or
+     *                                  equal to zero
      */
     public static double validatePositivePrice(double price) {
         if (Double.isNaN(price) || Double.isInfinite(price) || price <= 0.0) {
@@ -306,7 +320,7 @@ public final class InputValidator {
     /**
      * Validates that an integer quantity is strictly positive (BR6, BR9, BR26).
      *
-     * @param quantity the integer quantity to validate
+     * @param quantity  the integer quantity to validate
      * @param fieldName the field label for error reporting
      * @return the validated positive integer
      * @throws IllegalArgumentException if quantity is less than or equal to zero
@@ -322,7 +336,7 @@ public final class InputValidator {
     /**
      * Validates that an integer quantity is non-negative (BR6, BR26).
      *
-     * @param quantity the integer quantity to validate
+     * @param quantity  the integer quantity to validate
      * @param fieldName the field label for error reporting
      * @return the validated non-negative integer
      * @throws IllegalArgumentException if quantity is negative
@@ -338,10 +352,11 @@ public final class InputValidator {
     /**
      * Parses a strict calendar date in dd/MM/yyyy format (BR7).
      *
-     * @param raw the raw date string in dd/MM/yyyy format
+     * @param raw       the raw date string in dd/MM/yyyy format
      * @param fieldName the descriptive field name for error reporting
      * @return the parsed LocalDate
-     * @throws IllegalArgumentException if the string is blank or not a valid calendar date
+     * @throws IllegalArgumentException if the string is blank or not a valid
+     *                                  calendar date
      */
     public static LocalDate parseDisplayDate(String raw, String fieldName) {
         String label = (fieldName == null || fieldName.trim().isEmpty()) ? "Date" : fieldName.trim();
@@ -353,7 +368,7 @@ public final class InputValidator {
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException(
                     "Invalid " + label.toLowerCase(Locale.ROOT) + " '" + raw
-                    + "'. Please use valid dd/MM/yyyy format.");
+                            + "'. Please use valid dd/MM/yyyy format.");
         }
     }
 
@@ -362,7 +377,8 @@ public final class InputValidator {
      *
      * @param raw the raw month-year string in MM/yyyy format
      * @return the parsed YearMonth
-     * @throws IllegalArgumentException if the string is blank or not a valid MM/yyyy value
+     * @throws IllegalArgumentException if the string is blank or not a valid
+     *                                  MM/yyyy value
      */
     public static YearMonth parseDisplayMonth(String raw) {
         if (raw == null || raw.trim().isEmpty()) {
@@ -392,7 +408,8 @@ public final class InputValidator {
     }
 
     /**
-     * Formats a LocalDate into the standard console display format dd/MM/yyyy (BR7).
+     * Formats a LocalDate into the standard console display format dd/MM/yyyy
+     * (BR7).
      *
      * @param date the LocalDate to format
      * @return the formatted dd/MM/yyyy string, or "N/A" if date is null
@@ -405,11 +422,13 @@ public final class InputValidator {
     }
 
     /**
-     * Validates that a batch's production date is not after its expiration date (BR7).
+     * Validates that a batch's production date is not after its expiration date
+     * (BR7).
      *
      * @param productionDate the batch production date
      * @param expirationDate the batch expiration date
-     * @throws IllegalArgumentException if either date is null or productionDate is after expirationDate
+     * @throws IllegalArgumentException if either date is null or productionDate is
+     *                                  after expirationDate
      */
     public static void validateDateOrder(LocalDate productionDate, LocalDate expirationDate) {
         if (productionDate == null) {
@@ -421,12 +440,13 @@ public final class InputValidator {
         if (productionDate.isAfter(expirationDate)) {
             throw new IllegalArgumentException(
                     "Production date (" + formatDisplayDate(productionDate)
-                    + ") cannot be after expiration date (" + formatDisplayDate(expirationDate) + ").");
+                            + ") cannot be after expiration date (" + formatDisplayDate(expirationDate) + ").");
         }
     }
 
     /**
-     * Formats a numeric VND amount using Locale.US comma separators without decimals.
+     * Formats a numeric VND amount using Locale.US comma separators without
+     * decimals.
      *
      * @param amount the monetary value in VND
      * @return the formatted currency string (for example, "165,000")

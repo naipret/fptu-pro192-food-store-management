@@ -15,7 +15,8 @@ import java.util.List;
 
 /**
  * Automated verification test suite for ProductController operations, search
- * queries, batch replenishment, inventory alerts, ProductMenu, and InventoryMenu
+ * queries, batch replenishment, inventory alerts, ProductMenu, and
+ * InventoryMenu
  * (BR1, BR3, BR4, BR5, BR6, BR7, BR10, BR11, BR19, BR20, BR24, BR26, BR27).
  */
 public class ProductServiceTest {

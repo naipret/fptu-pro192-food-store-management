@@ -24,21 +24,17 @@ import java.util.Locale;
 public class ReportMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
-        "Daily Revenue Report (by Date)",
-        "Monthly Sales & Revenue Report (by Month/Year)",
-        "Best-Selling Products Ranking",
-        "Customer Spending Summary Ranking",
-        "Inventory Health Alerts (Low Stock & Expiry)"
+            "Daily Revenue Report (by Date)",
+            "Monthly Sales & Revenue Report (by Month/Year)",
+            "Best-Selling Products Ranking",
+            "Customer Spending Summary Ranking",
+            "Inventory Health Alerts (Low Stock & Expiry)"
     };
 
-    private static final String TOP_PRODUCTS_BORDER =
-            "+------+--------+------------------------+------------+-------+--------------+";
-    private static final String CUSTOMER_SPEND_BORDER =
-            "+------+--------+------------------------+---------+--------+----------------+";
-    private static final String LOW_STOCK_BORDER =
-            "+--------+------------------------+--------------+--------+------------+------+";
-    private static final String BATCH_ALERT_BORDER =
-            "+--------+--------+------------------+------------+------------+-------+--------+";
+    private static final String TOP_PRODUCTS_BORDER = "+------+--------+------------------------+------------+-------+--------------+";
+    private static final String CUSTOMER_SPEND_BORDER = "+------+--------+------------------------+---------+--------+----------------+";
+    private static final String LOW_STOCK_BORDER = "+--------+------------------------+--------------+--------+------------+------+";
+    private static final String BATCH_ALERT_BORDER = "+--------+--------+------------------+------------+------------+-------+--------+";
 
     private final ReportController reportController;
 
@@ -216,7 +212,8 @@ public class ReportMenu extends Menu {
     }
 
     /**
-     * Displays low-stock products (available stock at or below 5), near-expiry batches
+     * Displays low-stock products (available stock at or below 5), near-expiry
+     * batches
      * (within 7 days), and expired batches still on shelves (BR11, BR19, BR20).
      */
     public void handleInventoryHealthAlerts() {

@@ -20,7 +20,7 @@ public class InsufficientStockException extends Exception {
      * Constructs an InsufficientStockException with a message and root cause.
      *
      * @param message the detail message explaining the stock shortage
-     * @param cause the underlying cause
+     * @param cause   the underlying cause
      */
     public InsufficientStockException(String message, Throwable cause) {
         super(message, cause);

@@ -58,7 +58,8 @@ public class CustomerServiceTest {
 
         controller.deleteCustomer("C00001");
         assertTrue(controller.findById("C00001") == null, "Soft-deleted customer hidden from active lookup");
-        assertTrue(controller.findByIdIncludeDeleted("C00001") != null, "Soft-deleted customer retained for order history");
+        assertTrue(controller.findByIdIncludeDeleted("C00001") != null,
+                "Soft-deleted customer retained for order history");
 
         Files.deleteIfExists(customersCsv);
         Files.deleteIfExists(tempDir);
