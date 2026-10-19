@@ -9,5 +9,45 @@
                 <path path="${run.test.classpath}"/>
             </classpath>
         </java>
+        <java classname="fptu.pro192.foodstoremanagement.product.ProductModuleTest" fork="true" failonerror="true">
+            <classpath>
+                <path path="${run.test.classpath}"/>
+            </classpath>
+        </java>
+        <java classname="fptu.pro192.foodstoremanagement.product.ProductServiceTest" fork="true" failonerror="true">
+            <classpath>
+                <path path="${run.test.classpath}"/>
+            </classpath>
+        </java>
+        <java classname="fptu.pro192.foodstoremanagement.customer.CustomerModuleTest" fork="true" failonerror="true">
+            <classpath>
+                <path path="${run.test.classpath}"/>
+            </classpath>
+        </java>
+        <java classname="fptu.pro192.foodstoremanagement.customer.CustomerServiceTest" fork="true" failonerror="true">
+            <classpath>
+                <path path="${run.test.classpath}"/>
+            </classpath>
+        </java>
+        <java classname="fptu.pro192.foodstoremanagement.order.OrderModuleTest" fork="true" failonerror="true">
+            <classpath>
+                <path path="${run.test.classpath}"/>
+            </classpath>
+        </java>
+        <java classname="fptu.pro192.foodstoremanagement.sales.SalesModuleTest" fork="true" failonerror="true">
+            <classpath>
+                <path path="${run.test.classpath}"/>
+            </classpath>
+        </java>
+        <java classname="fptu.pro192.foodstoremanagement.report.ReportModuleTest" fork="true" failonerror="true">
+            <classpath>
+                <path path="${run.test.classpath}"/>
+            </classpath>
+        </java>
+        <java classname="fptu.pro192.foodstoremanagement.core.MainMenuIntegrationTest" fork="true" failonerror="true">
+            <classpath>
+                <path path="${run.test.classpath}"/>
+            </classpath>
+        </java>
     </target>
 </project>
