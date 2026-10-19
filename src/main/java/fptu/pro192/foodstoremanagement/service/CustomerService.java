@@ -5,7 +5,6 @@ import fptu.pro192.foodstoremanagement.model.CustomerFactory;
 import fptu.pro192.foodstoremanagement.repository.CustomerRepository;
 import fptu.pro192.foodstoremanagement.util.InputValidator;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -138,5 +137,24 @@ public class CustomerService {
                 .filter(c -> (c.getFullName() != null && c.getFullName().toLowerCase().contains(lowerKeyword))
                         || (c.getPhone() != null && c.getPhone().contains(lowerKeyword)))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Finds active customer by ID.
+     *
+     * @param id The customer ID
+     * @return Customer if found and active, null otherwise
+     */
+    public Customer findById(String id) {
+        return customerRepo.findById(id);
+    }
+
+    /**
+     * Returns underlying CustomerRepository instance.
+     *
+     * @return CustomerRepository
+     */
+    public CustomerRepository getCustomerRepo() {
+        return customerRepo;
     }
 }
