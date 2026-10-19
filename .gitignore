@@ -1,7 +1,7 @@
-# Compiled class file
+# Compiled class files
 *.class
 
-# Log file
+# Log files
 *.log
 
 # BlueJ files
@@ -10,7 +10,7 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files #
+# Package files
 *.jar
 *.war
 *.nar
@@ -19,11 +19,11 @@
 *.tar.gz
 *.rar
 
-# Virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Virtual machine crash logs
 hs_err_pid*
 replay_pid*
 
-# NetBeans IDE outputs and caches
+# NetBeans IDE outputs and private caches
 **/nbproject/private/
 **/nbproject/Makefile-*.mk
 **/nbproject/Package-*.bash
@@ -41,16 +41,18 @@ nbdist/
 !.vscode/extensions.json
 !.vscode/*.code-snippets
 !*.code-workspace
-
-# Built Visual Studio Code Extensions
 *.vsix
+
+# IntelliJ IDEA
+.idea/
+src/main/main.iml
+src/test/test.iml
 
 # Application runtime temporary files
 data/*.tmp
 data/backup/
-*.log
 
-# Operating System temporary and metadata files
+# Operating system temporary and metadata files
 .DS_Store
 .DS_Store?
 ._*
@@ -59,13 +61,3 @@ data/backup/
 ehthumbs.db
 Thumbs.db
 desktop.ini
-
-# BMad Agent workspace outputs
-_bmad
-_bmad-output/
-.agents
-skills-lock.json
-
-.idea/
-src/main/main.iml
-src/test/test.iml
