@@ -1,110 +1,114 @@
 package fptu.pro192.foodstoremanagement.util;
 
 /**
- * Utility class providing text formatting and layout helpers conforming to the rigid 80-column
- * terminal display specification (VT100 standard).
+ * Stateless utility for 80-column ASCII terminal alignment, string truncation,
+ * centering, and horizontal border generation.
  */
 public final class TableFormatter {
 
     /**
-     * Standard screen width in characters (VT100 / IBM 80-column line limit).
+     * Standard VT100 terminal width limit in columns.
      */
     public static final int SCREEN_WIDTH = 80;
 
-    /**
-     * Private constructor to prevent instantiation of utility class.
-     */
-    private TableFormatter() {}
+    private static final String TRUNCATION_SUFFIX = "..";
+
+    private TableFormatter() {
+        throw new AssertionError("TableFormatter cannot be instantiated.");
+    }
 
     /**
-     * Formats a given string to strictly fit within the target column width.
-     * <p>
-     * Behavior:
-     * <ul>
-     * <li>If {@code text} is null, it is treated as an empty string.</li>
-     * <li>If {@code text.length() > width}, it is truncated to {@code width - 2} characters and
-     * suffixed with {@code ".."}.</li>
-     * <li>If {@code text.length() < width}, it is right-padded with whitespace to guarantee the
-     * resulting string has an exact length of {@code width}.</li>
-     * </ul>
+     * Fits a string into an exact column width by trimming surrounding spaces,
+     * right-padding shorter values with spaces, or truncating longer values
+     * with a two-dot suffix.
      *
-     * @param text The original text to format
-     * @param width The target column character width (must be non-negative)
-     * @return The formatted string guaranteed to have exact length of {@code width}
+     * @param text the input text to format, may be null
+     * @param width the exact target character width
+     * @return a formatted string of length equal to width, or empty if width is non-positive
      */
     public static String fit(String text, int width) {
         if (width <= 0) {
             return "";
         }
-        String safeText = (text == null) ? "" : text;
-        int len = safeText.length();
+        String clean = (text == null) ? "" : text.trim();
+        clean = clean.replace('\r', ' ').replace('\n', ' ').replace('\t', ' ');
 
-        if (len > width) {
-            if (width <= 2) {
-                return safeText.substring(0, width);
+        if (clean.length() == width) {
+            return clean;
+        }
+        if (clean.length() < width) {
+            StringBuilder sb = new StringBuilder(width);
+            sb.append(clean);
+            while (sb.length() < width) {
+                sb.append(' ');
             }
-            return safeText.substring(0, width - 2) + "..";
+            return sb.toString();
         }
-
-        if (len == width) {
-            return safeText;
+        if (width <= TRUNCATION_SUFFIX.length()) {
+            return clean.substring(0, width);
         }
+        return clean.substring(0, width - TRUNCATION_SUFFIX.length()) + TRUNCATION_SUFFIX;
+    }
 
+    /**
+     * Right-aligns a string within an exact column width, truncating if needed.
+     *
+     * @param text the input text to right-align, may be null
+     * @param width the exact target character width
+     * @return a right-aligned string of length equal to width
+     */
+    public static String fitRight(String text, int width) {
+        if (width <= 0) {
+            return "";
+        }
+        String clean = (text == null) ? "" : text.trim();
+        if (clean.length() >= width) {
+            return fit(clean, width);
+        }
         StringBuilder sb = new StringBuilder(width);
-        sb.append(safeText);
-        for (int i = len; i < width; i++) {
+        int padding = width - clean.length();
+        for (int i = 0; i < padding; i++) {
             sb.append(' ');
         }
+        sb.append(clean);
         return sb.toString();
     }
 
     /**
-     * Centers text within a column of specified width, with equal flanking whitespace.
+     * Centers a string within an exact column width using space padding.
      *
-     * @param text The text to center
-     * @param width The total column width
-     * @return The centered and padded string with exact length of {@code width}
+     * @param text the input text to center, may be null
+     * @param width the exact target character width
+     * @return a centered string of length equal to width
      */
     public static String center(String text, int width) {
         if (width <= 0) {
             return "";
         }
-        String safeText = (text == null) ? "" : text;
-        if (safeText.length() >= width) {
-            return fit(safeText, width);
+        String clean = (text == null) ? "" : text.trim();
+        if (clean.length() >= width) {
+            return fit(clean, width);
         }
-        int remaining = width - safeText.length();
-        int leftPad = remaining / 2;
-        int rightPad = remaining - leftPad;
-
+        int totalPadding = width - clean.length();
+        int leftPadding = totalPadding / 2;
+        int rightPadding = totalPadding - leftPadding;
         StringBuilder sb = new StringBuilder(width);
-        for (int i = 0; i < leftPad; i++) {
+        for (int i = 0; i < leftPadding; i++) {
             sb.append(' ');
         }
-        sb.append(safeText);
-        for (int i = 0; i < rightPad; i++) {
+        sb.append(clean);
+        for (int i = 0; i < rightPadding; i++) {
             sb.append(' ');
         }
         return sb.toString();
     }
 
     /**
-     * Alias for {@link #center(String, int)} supporting alternative naming conventions.
+     * Repeats an ASCII character a specified number of times.
      *
-     * @param text The text to center
-     * @param width The total column width
-     * @return The centered and padded string
-     */
-    public static String centerText(String text, int width) {
-        return center(text, width);
-    }
-
-    /**
-     * Generates a string composed of a repeated character.
-     *
-     * @param ch The character to repeat
-     * @param count The number of repetitions (must be non-negative)
-     * @return The resulting repeated string, or empty string if {@code count <= 0}
+     * @param ch the character to repeat
+     * @param count the number of repetitions
+     * @return a string containing ch repeated count times
      */
     public static String repeat(char ch, int count) {
         if (count <= 0) {

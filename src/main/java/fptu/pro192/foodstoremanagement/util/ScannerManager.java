@@ -1,44 +1,66 @@
 package fptu.pro192.foodstoremanagement.util;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
- * Singleton manager for the application standard input {@link Scanner}.
- * <p>
- * Centralizes standard input stream reading from {@code System.in} to prevent premature stream
- * closures or descriptor exhaustion caused by creating and closing multiple {@link Scanner}
- * instances throughout the application lifecycle.
+ * Thread-safe Singleton manager providing a single shared Scanner bound to
+ * standard input. Prevents multiple Scanner instances from competing for the
+ * underlying System.in buffer or prematurely closing standard input.
  */
 public final class ScannerManager {
 
-    private static ScannerManager instance;
-    private final Scanner scanner;
+    private static final ScannerManager INSTANCE = new ScannerManager();
 
-    /**
-     * Private constructor initializing the persistent {@link Scanner} bound to {@code System.in}.
-     */
+    private Scanner scanner;
+
     private ScannerManager() {
-        this.scanner = new Scanner(System.in);
+        this.scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
     }
 
     /**
-     * Retrieves the thread-safe singleton instance of {@link ScannerManager}.
+     * Returns the singleton ScannerManager instance.
      *
-     * @return The single application-wide instance of {@link ScannerManager}
+     * @return the shared ScannerManager instance
      */
-    public static synchronized ScannerManager getInstance() {
-        if (instance == null) {
-            instance = new ScannerManager();
-        }
-        return instance;
+    public static ScannerManager getInstance() {
+        return INSTANCE;
     }
 
     /**
-     * Returns the managed {@link Scanner} instance wrapping {@code System.in}.
+     * Returns the shared Scanner instance wrapping standard input.
      *
-     * @return The active {@link Scanner} reference
+     * @return the shared UTF-8 Scanner instance
      */
     public Scanner getScanner() {
-        return scanner;
+        return this.scanner;
+    }
+
+    /**
+     * Rebinds the underlying Scanner to a specified InputStream.
+     * Used by automated integration tests to simulate console input.
+     *
+     * @param inputStream the non-null InputStream to read from
+     */
+    public void setInputStream(InputStream inputStream) {
+        if (inputStream == null) {
+            throw new IllegalArgumentException("Input stream cannot be null.");
+        }
+        this.scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name());
+    }
+
+    /**
+     * Rebinds the underlying Scanner to the current System.in stream.
+     */
+    public void reset() {
+        this.scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
+    }
+
+    /**
+     * Restores the underlying Scanner to System.in after automated tests.
+     */
+    public void resetToStandardInput() {
+        reset();
     }
 }

@@ -1,142 +1,187 @@
 package fptu.pro192.foodstoremanagement.util;
 
+import java.time.LocalDate;
 import java.util.Scanner;
 
 /**
- * Utility class for terminal screen manipulation and defensive console input reading.
- * <p>
- * Enforces business rule BR18 (All user inputs must be validated prior to persistence or business
- * rule processing) by validating user inputs defensively with Vietnamese prompts.
+ * Stateless utility for interactive console input reading, range-checked numeric
+ * prompts, date prompts, confirmation prompts, and screen navigation pauses.
  */
 public final class ConsoleUtil {
 
-    /**
-     * Private constructor to prevent instantiation.
-     */
-    private ConsoleUtil() {}
-
-    /**
-     * Clears the terminal screen.
-     * <p>
-     * Sends ANSI escape sequence {@code \033[H\033[2J} and flushes standard output. In non-ANSI
-     * terminal environments where escape sequences fail or throw an exception, it falls back to
-     * printing 50 blank lines to push prior content out of view.
-     */
-    public static void clearScreen() {
-        try {
-            System.out.print("\033[H\033[2J");
-            System.out.flush();
-        } catch (Exception e) {
-            for (int i = 0; i < 50; i++) {
-                System.out.println();
-            }
-        }
+    private ConsoleUtil() {
+        throw new AssertionError("ConsoleUtil cannot be instantiated.");
     }
 
     /**
-     * Pauses console execution until the user presses the [ENTER] key.
-     * <p>
-     * Displays a standardized Vietnamese acknowledgement prompt.
-     */
-    public static void pressEnterToContinue() {
-        System.out.print("\nNhấn phím [ENTER] để tiếp tục...");
-        try {
-            Scanner scanner = ScannerManager.getInstance().getScanner();
-            scanner.nextLine();
-        } catch (Exception ignored) {
-        }
-    }
-
-    /**
-     * Prompts the user and reads an integer bounded within the inclusive range {@code [min, max]}.
-     * <p>
-     * Continuously prompts until the user enters a valid integer matching the specified range
-     * constraints. Displays informative Vietnamese error messages on invalid formats or range
-     * violations.
+     * Reads a trimmed line of text from standard input after printing a prompt.
+     * Allows empty strings when the caller permits optional input.
      *
-     * @param prompt The display message prompting the user
-     * @param min The minimum acceptable integer value (inclusive)
-     * @param max The maximum acceptable integer value (inclusive)
-     * @return The validated integer within {@code [min, max]}
-     * @throws IllegalArgumentException If {@code min > max}
+     * @param prompt the prompt message displayed to the user
+     * @return the trimmed input string, or an empty string if no input is available
+     */
+    public static String readOptionalString(String prompt) {
+        if (prompt != null && !prompt.isEmpty()) {
+            System.out.print(prompt);
+        }
+        Scanner scanner = ScannerManager.getInstance().getScanner();
+        if (!scanner.hasNextLine()) {
+            return "";
+        }
+        return scanner.nextLine().trim();
+    }
+
+    /**
+     * Repeatedly prompts the user until a non-empty string is entered.
+     *
+     * @param prompt the prompt message displayed to the user
+     * @return a non-empty trimmed string entered by the user
+     */
+    public static String readNonEmptyString(String prompt) {
+        while (true) {
+            String input = readOptionalString(prompt);
+            if (!input.isEmpty()) {
+                return input;
+            }
+            System.out.println("  [ERROR] Input cannot be empty. Please try again.");
+        }
+    }
+
+    /**
+     * Alias for readNonEmptyString for backward compatibility across menu prompts.
+     *
+     * @param prompt the prompt message displayed to the user
+     * @return a non-empty trimmed string entered by the user
+     */
+    public static String readString(String prompt) {
+        return readNonEmptyString(prompt);
+    }
+
+    /**
+     * Repeatedly prompts the user until an integer within the inclusive range
+     * from min to max is entered (BR26).
+     *
+     * @param prompt the prompt message displayed to the user
+     * @param min the minimum allowed integer value (inclusive)
+     * @param max the maximum allowed integer value (inclusive)
+     * @return the validated integer within [min, max]
+     * @throws IllegalArgumentException if min is greater than max
      */
     public static int readInt(String prompt, int min, int max) {
         if (min > max) {
             throw new IllegalArgumentException(
-                    "min (" + min + ") cannot be greater than max (" + max + ")");
+                    "Invalid range: min (" + min + ") cannot exceed max (" + max + ").");
         }
-        Scanner scanner = ScannerManager.getInstance().getScanner();
         while (true) {
-            System.out.print(prompt);
-            String input = "";
+            String raw = readOptionalString(prompt);
             try {
-                input = scanner.nextLine();
-            } catch (Exception e) {
-                // If scanner closed or depleted, return min
-                return min;
-            }
-
-            if (input == null) {
-                System.out.println("Vui lòng nhập giá trị hợp lệ!");
-                continue;
-            }
-
-            String trimmed = input.trim();
-            if (trimmed.isEmpty()) {
-                System.out.println("Giá trị không được để trống. Vui lòng nhập số!");
-                continue;
-            }
-
-            try {
-                int value = Integer.parseInt(trimmed);
-                if (value < min || value > max) {
-                    System.out.printf(
-                            "Giá trị phải nằm trong khoảng [%d - %d]. Vui lòng nhập lại!\n", min,
-                            max);
-                    continue;
+                int value = Integer.parseInt(raw);
+                if (value >= min && value <= max) {
+                    return value;
                 }
-                return value;
+                System.out.printf("  [ERROR] Please enter a whole number between %d and %d.%n", min, max);
             } catch (NumberFormatException e) {
-                System.out.println("Vui lòng nhập số nguyên hợp lệ!");
+                System.out.printf("  [ERROR] Invalid integer. Please enter a number between %d and %d.%n",
+                        min, max);
             }
         }
     }
 
     /**
-     * Prompts the user and reads a line of text input with optional blank guarding.
-     * <p>
-     * If {@code allowEmpty} is false, continuously prompts the user until a non-blank string is
-     * provided.
+     * Repeatedly prompts the user until a positive integer greater than zero
+     * (or zero if allowZeroToCancel is true) is entered (BR6, BR9, BR26).
      *
-     * @param prompt The display message prompting the user
-     * @param allowEmpty Whether an empty or whitespace-only string is considered valid
-     * @return The trimmed user input string
+     * @param prompt the prompt message displayed to the user
+     * @param allowZeroToCancel true if entering 0 is allowed to cancel the operation
+     * @return a positive integer, or 0 if cancellation is allowed and selected
      */
-    public static String readString(String prompt, boolean allowEmpty) {
-        Scanner scanner = ScannerManager.getInstance().getScanner();
+    public static int readPositiveInt(String prompt, boolean allowZeroToCancel) {
+        int min = allowZeroToCancel ? 0 : 1;
+        return readInt(prompt, min, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Repeatedly prompts the user until a decimal number greater than or equal
+     * to min is entered (BR4).
+     *
+     * @param prompt the prompt message displayed to the user
+     * @param min the minimum allowed value
+     * @param strictlyGreater true if the value must be strictly greater than min
+     * @return the validated double value
+     */
+    public static double readDouble(String prompt, double min, boolean strictlyGreater) {
         while (true) {
-            System.out.print(prompt);
-            String input = "";
+            String raw = readOptionalString(prompt);
             try {
-                input = scanner.nextLine();
-            } catch (Exception e) {
-                return "";
-            }
-
-            if (input == null) {
-                if (allowEmpty) {
-                    return "";
+                double value = Double.parseDouble(raw);
+                if (Double.isNaN(value) || Double.isInfinite(value)) {
+                    System.out.println("  [ERROR] Please enter a finite numeric value.");
+                    continue;
                 }
-                System.out.println("Dữ liệu không được để trống. Vui lòng nhập lại!");
-                continue;
+                if (strictlyGreater ? (value > min) : (value >= min)) {
+                    return value;
+                }
+                String relation = strictlyGreater ? "greater than" : "at least";
+                System.out.printf("  [ERROR] Value must be %s %s.%n", relation,
+                        InputValidator.formatCurrency(min));
+            } catch (NumberFormatException e) {
+                System.out.println("  [ERROR] Invalid number format. Please try again.");
             }
-
-            String trimmed = input.trim();
-            if (!allowEmpty && trimmed.isEmpty()) {
-                System.out.println("Dữ liệu không được để trống. Vui lòng nhập lại!");
-                continue;
-            }
-            return trimmed;
         }
+    }
+
+    /**
+     * Repeatedly prompts the user until a valid date in dd/MM/yyyy format is entered (BR7).
+     *
+     * @param prompt the prompt message displayed to the user
+     * @return the parsed LocalDate instance
+     */
+    public static LocalDate readDate(String prompt) {
+        while (true) {
+            String raw = readOptionalString(prompt);
+            try {
+                return InputValidator.parseDisplayDate(raw, "Date");
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Prompts the user for a Yes or No confirmation (Y/N).
+     *
+     * @param prompt the confirmation question displayed to the user
+     * @return true if the user confirms with Y or YES, false if N or NO
+     */
+    public static boolean confirm(String prompt) {
+        while (true) {
+            String raw = readOptionalString(prompt + " [Y/N]: ");
+            if ("Y".equalsIgnoreCase(raw) || "YES".equalsIgnoreCase(raw)) {
+                return true;
+            }
+            if ("N".equalsIgnoreCase(raw) || "NO".equalsIgnoreCase(raw)) {
+                return false;
+            }
+            System.out.println("  [ERROR] Please enter Y for Yes or N for No.");
+        }
+    }
+
+    /**
+     * Prints a blank line to separate console sections cleanly.
+     */
+    public static void clearScreen() {
+        System.out.println();
+    }
+
+    /**
+     * Pauses console execution until the user presses the Enter key.
+     */
+    public static void pressEnterToContinue() {
+        System.out.print("\nPress [Enter] to continue...");
+        Scanner scanner = ScannerManager.getInstance().getScanner();
+        if (scanner.hasNextLine()) {
+            scanner.nextLine();
+        }
+        System.out.println();
     }
 }
