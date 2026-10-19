@@ -6,42 +6,44 @@ labels: ['task']
 assignees: ''
 ---
 
-### 👤 Ownership & Roles
+## Ownership and Scope
 
-- **Assignee:**
-- **Reviewer:**
-- **Target Module:**
+- Assignee:
+- Reviewer:
+- Target Package:
 
 ---
 
-### 🎯 Objective & Summary
+## Objective and Summary
+
 <!-- Describe what needs to be implemented or modified in this task. -->
 
 ---
 
-### 📋 Enforced Business Rules (Mandatory In-Code Comments)
-<!-- List all Business Rules enforced in this task. E.g., BR3, BR7, BR24 -->
-- `BRX`: <!-- Describe rule -->
+## Enforced Business Rules
+
+<!-- List all Business Rules enforced in this task, e.g., BR3, BR7, BR24. -->
+
+- `BRX`:
 
 ---
 
-### 🛠 Technical Specifications & Target Files
-<!-- List specific files to create or modify -->
-1. `src/...`
-2. `src/...`
+## Technical Specifications and Target Files
 
-*Implementation Guidelines:*
+1. `src/main/java/fptu/pro192/foodstoremanagement/...`
 
-- Strictly comply with Java 8 syntax (no `var`, no `List.of()`).
-- Add complete Javadoc comments (`@param`, `@return`, `@throws`).
-- Add explicit `// BRX:` reference comments above business logic methods.
-- Console text must be in Vietnamese, within 80-column width, using basic ASCII characters.
+Implementation requirements:
+
+- Target Java SE 8 strictly (no `var`, `List.of()`, or Java 9+ APIs).
+- Document all classes and methods using plain-text Javadoc (`@param`, `@return`, `@throws`) without HTML tags or single-line `//` comments.
+- Include explicit `BR-*` traceability tags inside the Javadoc of methods that enforce business rules.
+- Ensure all console prompts and table headers are written in English, fit within 80 columns, and use basic ASCII characters.
 
 ---
 
-### ✅ Acceptance Criteria (Checklist)
+## Acceptance Criteria
 
-- [ ] Compiles cleanly in NetBeans 13 with 0 errors and 0 warnings.
-- [ ] Business logic and validations pass all edge cases.
-- [ ] Persistence operations execute atomically via CSV.
-- [ ] PR created targeting `main` branch.
+- [ ] Compiles cleanly on JDK 8 (`ant clean compile test`) with 0 errors and 0 warnings.
+- [ ] Business logic and field validations pass all edge cases.
+- [ ] CSV persistence operations execute atomically with uniform header rows.
+- [ ] Pull Request created targeting the `main` branch.
