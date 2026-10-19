@@ -1,255 +1,149 @@
 package fptu.pro192.foodstoremanagement.model;
 
+import fptu.pro192.foodstoremanagement.util.InputValidator;
+
 /**
- * Domain model capturing individual line items in a sales transaction.
- * Preserves an immutable unit price and product name snapshot at the moment of sale.
- *
- * BR5: Product price must be greater than zero.
- * BR8: A product must exist and not be marked as deleted before being added to an order.
- * BR9: Sold quantity must be greater than zero.
- * BR13: Line item amount = unitPrice * quantity.
- * BR26: Quantity must be a positive integer (int).
+ * Represents a single line item inside a sales Order, capturing an immutable
+ * snapshot of the product's selling price at checkout time (BR8, BR9, BR12,
+ * BR18, BR26).
  */
 public class OrderDetail {
 
     private String orderId;
     private String productId;
-    private String productName;
-    private String unit;
-    private double unitPrice;
     private int quantity;
+    private double unitPrice;
 
     /**
-     * Default constructor for OrderDetail.
-     */
-    public OrderDetail() {}
-
-    /**
-     * Constructs an OrderDetail with explicit line item fields.
+     * Constructs a validated OrderDetail line item (BR8, BR9, BR12, BR18, BR26).
      *
-     * BR5: Product price must be greater than zero.
-     * BR9: Sold quantity must be greater than zero.
-     * BR26: Quantity must be a positive integer (int).
-     *
-     * @param orderId The parent order ID
-     * @param productId The product ID
-     * @param productName The snapshot of the product name
-     * @param unit The snapshot of the product unit
-     * @param unitPrice The snapshot of the unit price (must be greater than zero)
-     * @param quantity The quantity being purchased (must be greater than zero)
-     * @throws IllegalArgumentException If quantity is less than or equal to zero or unitPrice is less than or equal to zero
+     * @param orderId the 6-character order identifier (O00001-O99999)
+     * @param productId the 6-character product identifier (P00001-P99999)
+     * @param quantity the positive integer quantity purchased
+     * @param unitPrice the positive snapshot unit selling price in VND
+     * @throws IllegalArgumentException if any parameter violates domain invariants
      */
-    public OrderDetail(String orderId, String productId, String productName, String unit, double unitPrice, int quantity) {
-        if (productId == null || productId.trim().isEmpty()) {
-            throw new IllegalArgumentException("Product ID cannot be null or empty (BR1)");
-        }
-        if (productName == null || productName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Product name cannot be null or empty (BR3)");
-        }
-        if (unit == null || unit.trim().isEmpty()) {
-            throw new IllegalArgumentException("Product unit cannot be null or empty (BR4)");
-        }
-        if (quantity <= 0) {
-            throw new IllegalArgumentException("Sold quantity must be greater than zero (BR9, BR26)");
-        }
-        if (unitPrice <= 0) {
-            throw new IllegalArgumentException("Product unit price must be greater than zero (BR5)");
-        }
-        this.orderId = orderId;
-        this.productId = productId.trim();
-        this.productName = productName.trim();
-        this.unit = unit.trim();
-        this.unitPrice = unitPrice;
-        this.quantity = quantity;
+    public OrderDetail(String orderId, String productId, int quantity, double unitPrice) {
+        setOrderId(orderId);
+        setProductId(productId);
+        setQuantity(quantity);
+        setUnitPrice(unitPrice);
     }
 
     /**
-     * Snapshot constructor capturing current price and attributes from an active Food entity.
+     * Constructs an OrderDetail by capturing the id and current selling price
+     * of an active Product instance (BR8, BR9, BR12, BR26, BR27).
      *
-     * BR8: Product must exist and not be deleted.
-     * BR9: Sold quantity must be greater than zero.
-     * BR26: Quantity must be a positive integer (int).
-     *
-     * @param orderId The parent order ID
-     * @param product The product being purchased
-     * @param quantity The quantity being purchased
-     * @throws IllegalArgumentException If product is null, deleted, or quantity is less than or equal to zero
+     * @param orderId the 6-character order identifier (O00001-O99999)
+     * @param product the active Product being purchased
+     * @param quantity the positive integer quantity purchased
+     * @throws IllegalArgumentException if product is null, soft-deleted, or quantity is invalid
      */
-    public OrderDetail(String orderId, Food product, int quantity) {
-        if (product == null || product.isDeleted()) {
-            throw new IllegalArgumentException("Product must exist and not be marked as deleted (BR8)");
+    public OrderDetail(String orderId, Product product, int quantity) {
+        if (product == null) {
+            throw new IllegalArgumentException("Product cannot be null.");
         }
-        if (quantity <= 0) {
-            throw new IllegalArgumentException("Sold quantity must be greater than zero (BR9, BR26)");
+        if (product.isDeleted()) {
+            throw new IllegalArgumentException(
+                    "Deleted product (" + product.getId() + ") cannot be added to an order.");
         }
-        this.orderId = orderId;
-        this.productId = product.getId();
-        this.productName = product.getName();
-        this.unit = product.getUnit();
-        this.unitPrice = product.getPrice();
-        this.quantity = quantity;
+        setOrderId(orderId);
+        setProductId(product.getId());
+        setQuantity(quantity);
+        setUnitPrice(product.getPrice());
     }
 
     /**
-     * Calculates line item subtotal amount.
+     * Computes the line-item subtotal as quantity multiplied by unitPrice (BR12).
      *
-     * BR13: Total line item amount = unitPrice * quantity.
+     * @return the line-item subtotal in VND
+     */
+    public double getSubTotal() {
+        return this.quantity * this.unitPrice;
+    }
+
+    /**
+     * Alias for getSubTotal for caller compatibility (BR12).
      *
-     * @return Line item subtotal (unitPrice * quantity)
+     * @return the line-item subtotal in VND
      */
     public double getSubtotal() {
-        return unitPrice * quantity;
+        return getSubTotal();
     }
 
     /**
-     * Retrieves the associated order ID.
+     * Returns the parent order identifier.
      *
-     * @return The order ID
+     * @return the 6-character order ID
      */
     public String getOrderId() {
         return orderId;
     }
 
     /**
-     * Sets the associated order ID.
+     * Sets and validates the parent order identifier (BR8).
      *
-     * @param orderId The order ID to set
+     * @param orderId the 6-character order ID (O00001-O99999)
+     * @throws IllegalArgumentException if orderId is invalid
      */
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
+    public final void setOrderId(String orderId) {
+        this.orderId = InputValidator.validateOrderId(orderId);
     }
 
     /**
-     * Retrieves the product ID.
+     * Returns the purchased product identifier.
      *
-     * @return The product ID
+     * @return the 6-character product ID
      */
     public String getProductId() {
         return productId;
     }
 
     /**
-     * Sets the product ID.
+     * Sets and validates the purchased product identifier (BR1, BR18).
      *
-     * BR1: Product ID cannot be null or empty.
-     *
-     * @param productId The product ID to set
-     * @throws IllegalArgumentException If productId is null or empty
+     * @param productId the 6-character product ID (P00001-P99999)
+     * @throws IllegalArgumentException if productId is invalid
      */
-    public void setProductId(String productId) {
-        if (productId == null || productId.trim().isEmpty()) {
-            throw new IllegalArgumentException("Product ID cannot be null or empty (BR1)");
-        }
-        this.productId = productId.trim();
+    public final void setProductId(String productId) {
+        this.productId = InputValidator.validateProductId(productId);
     }
 
     /**
-     * Retrieves the snapshot product name.
+     * Returns the integer quantity purchased.
      *
-     * @return The product name
-     */
-    public String getProductName() {
-        return productName;
-    }
-
-    /**
-     * Sets the snapshot product name.
-     *
-     * BR3: Product name cannot be null or empty.
-     *
-     * @param productName The product name to set
-     * @throws IllegalArgumentException If productName is null or empty
-     */
-    public void setProductName(String productName) {
-        if (productName == null || productName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Product name cannot be null or empty (BR3)");
-        }
-        this.productName = productName.trim();
-    }
-
-    /**
-     * Retrieves the unit of measurement.
-     *
-     * @return The product unit
-     */
-    public String getUnit() {
-        return unit;
-    }
-
-    /**
-     * Sets the unit of measurement.
-     *
-     * BR4: Product unit cannot be null or empty.
-     *
-     * @param unit The product unit to set
-     * @throws IllegalArgumentException If unit is null or empty
-     */
-    public void setUnit(String unit) {
-        if (unit == null || unit.trim().isEmpty()) {
-            throw new IllegalArgumentException("Product unit cannot be null or empty (BR4)");
-        }
-        this.unit = unit.trim();
-    }
-
-    /**
-     * Retrieves the snapshot unit price.
-     *
-     * @return The unit price
-     */
-    public double getUnitPrice() {
-        return unitPrice;
-    }
-
-    /**
-     * Sets the snapshot unit price.
-     *
-     * BR5: Product price must be greater than zero.
-     *
-     * @param unitPrice The unit price to set (must be greater than zero)
-     * @throws IllegalArgumentException If unitPrice is less than or equal to zero
-     */
-    public void setUnitPrice(double unitPrice) {
-        if (unitPrice <= 0) {
-            throw new IllegalArgumentException("Product unit price must be greater than zero (BR5)");
-        }
-        this.unitPrice = unitPrice;
-    }
-
-    /**
-     * Retrieves the purchased quantity.
-     *
-     * @return The purchased quantity
+     * @return the positive integer quantity
      */
     public int getQuantity() {
         return quantity;
     }
 
     /**
-     * Sets the purchased quantity.
+     * Sets and validates the integer quantity purchased (BR9, BR26).
      *
-     * BR9: Sold quantity must be greater than zero.
-     * BR26: Quantity must be a positive integer (int).
-     *
-     * @param quantity The quantity to set (must be greater than zero)
-     * @throws IllegalArgumentException If quantity is less than or equal to zero
+     * @param quantity the positive integer quantity
+     * @throws IllegalArgumentException if quantity is less than or equal to zero
      */
-    public void setQuantity(int quantity) {
-        if (quantity <= 0) {
-            throw new IllegalArgumentException("Sold quantity must be greater than zero (BR9, BR26)");
-        }
-        this.quantity = quantity;
+    public final void setQuantity(int quantity) {
+        this.quantity = InputValidator.validatePositiveQuantity(quantity, "Order item quantity");
     }
 
-    @Override
-    public String toString() {
-        return "OrderDetail{" +
-                "orderId='" + orderId + '\'' +
-                ", productId='" + productId + '\'' +
-                ", productName='" + productName + '\'' +
-                ", unit='" + unit + '\'' +
-                ", unitPrice=" + unitPrice +
-                ", quantity=" + quantity +
-                ", subtotal=" + getSubtotal() +
-                '}';
+    /**
+     * Returns the historical unit selling price captured at checkout.
+     *
+     * @return the positive unit selling price in VND
+     */
+    public double getUnitPrice() {
+        return unitPrice;
+    }
+
+    /**
+     * Sets and validates the captured unit selling price (BR4, BR12).
+     *
+     * @param unitPrice the positive unit selling price in VND
+     * @throws IllegalArgumentException if unitPrice is not greater than zero
+     */
+    public final void setUnitPrice(double unitPrice) {
+        this.unitPrice = InputValidator.validatePositivePrice(unitPrice);
     }
 }

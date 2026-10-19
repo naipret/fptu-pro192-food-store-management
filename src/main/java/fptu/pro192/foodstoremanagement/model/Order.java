@@ -1,323 +1,344 @@
 package fptu.pro192.foodstoremanagement.model;
 
+import fptu.pro192.foodstoremanagement.util.InputValidator;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Domain model representing a customer order transaction header and item aggregation.
- *
- * BR8: A product must exist and not be marked as deleted before being added to an order.
- * BR9: Sold quantity must be greater than zero.
- * BR12: An order must contain at least one product item upon checkout.
- * BR13: Total Amount (Subtotal) = Sum(Product Unit Price * Quantity).
- * BR15: Regular customers receive 0% discount.
- * BR16: VIP customers receive 10% discount.
- * BR17: Final Amount = Subtotal - Discount Amount.
- * BR26: All quantities must be positive integers.
+ * Represents a customer sales order header and its aggregated OrderDetail
+ * line items (BR8, BR9, BR12, BR13, BR15, BR16, BR17).
  */
 public class Order {
 
+    /**
+     * Canonical CSV discriminator for walk-in guest customers (BR16).
+     */
+    public static final String GUEST_CUSTOMER_ID = "GUEST";
+
     private String orderId;
     private String customerId;
-    private LocalDate orderDate;
-    private final List<OrderDetail> items = new ArrayList<>();
-    private double subtotal;
-    private double discountAmount;
+    private LocalDateTime orderDate;
+    private final List<OrderDetail> items;
+    private double totalAmount;
+    private double discount;
     private double finalAmount;
-    private boolean isCompleted;
 
     /**
-     * Default constructor initializing order date to current system date.
+     * Constructs a new empty draft Order at the specified date and time (BR8, BR16).
+     *
+     * @param orderId the 6-character order identifier (O00001-O99999)
+     * @param customerId the 6-character customer ID (C00001-C99999), or null/GUEST for walk-in guests
+     * @param orderDate the timestamp when the order was created
+     * @throws IllegalArgumentException if orderId or orderDate is invalid
      */
-    public Order() {
-        this.orderDate = LocalDate.now();
-        this.isCompleted = false;
+    public Order(String orderId, String customerId, LocalDateTime orderDate) {
+        this(orderId, customerId, orderDate, new ArrayList<OrderDetail>(), 0.0, 0.0, 0.0);
     }
 
     /**
-     * Constructs a new Order with ID, customer ID, and order date.
+     * Constructs a new empty draft Order at the start of the specified calendar date (BR8, BR16).
      *
-     * @param orderId Unique order identifier
-     * @param customerId Customer ID associated with order (or null for guest customer)
-     * @param orderDate Date the order was placed
+     * @param orderId the 6-character order identifier (O00001-O99999)
+     * @param customerId the 6-character customer ID, or null/GUEST for walk-in guests
+     * @param orderDate the calendar date of the order
+     * @throws IllegalArgumentException if orderId or orderDate is invalid
      */
     public Order(String orderId, String customerId, LocalDate orderDate) {
-        this.orderId = orderId;
-        this.customerId = customerId;
-        this.orderDate = (orderDate != null) ? orderDate : LocalDate.now();
-        this.isCompleted = false;
+        this(orderId, customerId, (orderDate == null) ? null : orderDate.atStartOfDay());
     }
 
     /**
-     * Full constructor initializing all order state.
+     * Reconstructs a persisted Order with pre-loaded line items and financial totals
+     * (BR8, BR13, BR16, BR17).
      *
-     * @param orderId Unique order identifier
-     * @param customerId Customer ID associated with order (or null for guest customer)
-     * @param orderDate Date the order was placed
-     * @param items List of order line items
-     * @param subtotal Subtotal amount before discount
-     * @param discountAmount Discount amount deducted
-     * @param finalAmount Final payable amount after discount
-     * @param isCompleted Status flag indicating completed transaction
+     * @param orderId the 6-character order identifier (O00001-O99999)
+     * @param customerId the 6-character customer ID, or null/GUEST for walk-in guests
+     * @param orderDate the timestamp of the order
+     * @param items the list of OrderDetail line items, may be null or empty for drafts
+     * @param totalAmount the gross pre-discount total in VND
+     * @param discount the loyalty discount amount in VND
+     * @param finalAmount the net payable amount in VND
+     * @throws IllegalArgumentException if any identifier, date, or monetary amount is invalid
      */
-    public Order(String orderId, String customerId, LocalDate orderDate, List<OrderDetail> items,
-                 double subtotal, double discountAmount, double finalAmount, boolean isCompleted) {
-        this.orderId = orderId;
-        this.customerId = customerId;
-        this.orderDate = (orderDate != null) ? orderDate : LocalDate.now();
+    public Order(String orderId, String customerId, LocalDateTime orderDate,
+            List<OrderDetail> items, double totalAmount, double discount, double finalAmount) {
+        setOrderId(orderId);
+        setCustomerId(customerId);
+        setOrderDate(orderDate);
+        this.items = new ArrayList<>();
         if (items != null) {
-            this.items.addAll(items);
+            for (OrderDetail item : items) {
+                addItem(item);
+            }
         }
-        this.subtotal = subtotal;
-        this.discountAmount = discountAmount;
-        this.finalAmount = finalAmount;
-        this.isCompleted = isCompleted;
+        setTotalAmount(totalAmount);
+        setDiscount(discount);
+        setFinalAmount(finalAmount);
     }
 
     /**
-     * Appends a product item line snapshot to the order.
+     * Adds an OrderDetail line item to this order. If a line item for the same
+     * productId already exists in the order, the quantities are merged into the
+     * existing line item (BR8, BR9, BR12).
      *
-     * BR8: Product must exist and not be marked as deleted.
-     * BR9: Sold quantity must be greater than zero.
-     * BR26: All quantities must be positive integers.
-     *
-     * @param product Active non-deleted food product
-     * @param quantity Quantity to purchase (must be greater than zero)
-     * @throws IllegalArgumentException If product is null, deleted, or quantity is less than or equal to zero
+     * @param item the OrderDetail line item to add
+     * @throws IllegalArgumentException if item is null
      */
-    public void addItem(Food product, int quantity) {
-        if (product == null || product.isDeleted()) {
-            throw new IllegalArgumentException("Product must exist and not be deleted (BR8)");
+    public void addItem(OrderDetail item) {
+        if (item == null) {
+            throw new IllegalArgumentException("Order detail item cannot be null.");
         }
-        if (quantity <= 0) {
-            throw new IllegalArgumentException("Sold quantity must be greater than zero (BR9, BR26)");
+        item.setOrderId(this.orderId);
+        for (OrderDetail existing : this.items) {
+            if (existing.getProductId().equalsIgnoreCase(item.getProductId())) {
+                existing.setQuantity(existing.getQuantity() + item.getQuantity());
+                existing.setUnitPrice(item.getUnitPrice());
+                recomputeRawTotal();
+                return;
+            }
         }
-        OrderDetail detail = new OrderDetail(this.orderId, product, quantity);
-        this.items.add(detail);
+        this.items.add(item);
+        recomputeRawTotal();
     }
 
     /**
-     * Appends an OrderDetail line item to the order.
+     * Convenience helper that snapshots a Product's current price and adds the
+     * requested quantity to this order (BR8, BR9, BR12).
      *
-     * @param detail Line item to append
-     * @throws IllegalArgumentException If detail is null
+     * @param product the active Product to add
+     * @param quantity the positive integer quantity
      */
-    public void addItem(OrderDetail detail) {
-        if (detail == null) {
-            throw new IllegalArgumentException("OrderDetail item cannot be null");
-        }
-        if (this.orderId != null && (detail.getOrderId() == null || detail.getOrderId().trim().isEmpty())) {
-            detail.setOrderId(this.orderId);
-        }
-        this.items.add(detail);
+    public void addItem(Product product, int quantity) {
+        addItem(new OrderDetail(this.orderId, product, quantity));
     }
 
     /**
-     * Recomputes subtotal, discount, and final amount based on customer discount strategy.
+     * Clears all line items and resets financial totals to zero when cancelling a draft.
+     */
+    public void clearItems() {
+        this.items.clear();
+        this.totalAmount = 0.0;
+        this.discount = 0.0;
+        this.finalAmount = 0.0;
+    }
+
+    /**
+     * Recomputes totalAmount, discount, and finalAmount using the polymorphic
+     * discount strategy of the associated Customer (or 0.0 for guest orders)
+     * (BR12, BR13, BR15, BR16).
      *
-     * BR13: Total Amount = Sum(Product Unit Price * Quantity).
-     * BR15: Regular customers receive 0% discount.
-     * BR16: VIP customers receive 10% discount.
-     * BR17: Final Amount = Total Amount - Discount Amount.
-     *
-     * @param customer Customer associated with the order (or null for guest customer)
+     * @param customer the associated Customer instance, or null for guest checkout
      */
     public void calculateTotals(Customer customer) {
         double sum = 0.0;
-        for (OrderDetail item : items) {
-            sum += item.getSubtotal(); // BR13
+        for (OrderDetail item : this.items) {
+            sum += item.getSubTotal();
         }
-        this.subtotal = sum;
-
-        if (customer != null && !customer.isDeleted()) {
-            this.discountAmount = customer.calculateDiscount(this.subtotal); // BR15, BR16
-        } else {
-            this.discountAmount = 0.0;
+        this.totalAmount = sum;
+        double calculatedDiscount = (customer == null) ? 0.0 : customer.calculateDiscount(sum);
+        if (calculatedDiscount < 0.0) {
+            calculatedDiscount = 0.0;
         }
+        if (calculatedDiscount > sum) {
+            calculatedDiscount = sum;
+        }
+        this.discount = calculatedDiscount;
+        this.finalAmount = Math.max(0.0, this.totalAmount - this.discount);
+    }
 
-        this.finalAmount = Math.max(0.0, this.subtotal - this.discountAmount); // BR17
+    private void recomputeRawTotal() {
+        double sum = 0.0;
+        for (OrderDetail item : this.items) {
+            sum += item.getSubTotal();
+        }
+        this.totalAmount = sum;
+        this.finalAmount = Math.max(0.0, this.totalAmount - this.discount);
     }
 
     /**
-     * Retrieves the unique order identifier.
+     * Returns the total integer quantity of a specific product currently in this order.
      *
-     * @return The order ID
+     * @param productId the product ID to inspect
+     * @return the quantity already in the order, or 0 if not present
+     */
+    public int getQuantityForProduct(String productId) {
+        if (productId == null) {
+            return 0;
+        }
+        for (OrderDetail item : this.items) {
+            if (item.getProductId().equalsIgnoreCase(productId.trim())) {
+                return item.getQuantity();
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Returns the unique order identifier.
+     *
+     * @return the 6-character order ID
      */
     public String getOrderId() {
         return orderId;
     }
 
     /**
-     * Sets the unique order identifier and cascades to all contained items.
+     * Sets and validates the order identifier, cascading the update to any
+     * attached line items (BR8).
      *
-     * @param orderId The order ID to set
+     * @param orderId the 6-character order ID (O00001-O99999)
+     * @throws IllegalArgumentException if orderId is invalid
      */
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
-        if (orderId != null) {
-            for (OrderDetail item : items) {
-                item.setOrderId(orderId);
+    public final void setOrderId(String orderId) {
+        String normalized = InputValidator.validateOrderId(orderId);
+        this.orderId = normalized;
+        if (this.items != null) {
+            for (OrderDetail item : this.items) {
+                item.setOrderId(normalized);
             }
         }
     }
 
     /**
-     * Retrieves the associated customer ID.
+     * Returns the associated customer identifier, or null for walk-in guest orders.
      *
-     * @return The customer ID (or null for guest)
+     * @return the 6-character customer ID, or null if guest
      */
     public String getCustomerId() {
         return customerId;
     }
 
     /**
-     * Sets the associated customer ID.
+     * Sets the associated customer identifier (BR2, BR16). Null, blank, or
+     * "GUEST" values are stored as null in memory to represent a walk-in guest.
      *
-     * @param customerId The customer ID to set
+     * @param customerId the 6-character customer ID, or null/GUEST
+     * @throws IllegalArgumentException if non-guest customerId is invalid
      */
-    public void setCustomerId(String customerId) {
-        this.customerId = customerId;
+    public final void setCustomerId(String customerId) {
+        if (customerId == null || customerId.trim().isEmpty()
+                || GUEST_CUSTOMER_ID.equalsIgnoreCase(customerId.trim())) {
+            this.customerId = null;
+            return;
+        }
+        this.customerId = InputValidator.validateCustomerId(customerId);
     }
 
     /**
-     * Retrieves the order placement date.
+     * Returns the timestamp when the order was created.
      *
-     * @return The order date
+     * @return the order LocalDateTime
      */
-    public LocalDate getOrderDate() {
+    public LocalDateTime getOrderDate() {
         return orderDate;
     }
 
     /**
-     * Sets the order placement date.
+     * Sets the timestamp of the order.
      *
-     * @param orderDate The order date to set
+     * @param orderDate the non-null order LocalDateTime
+     * @throws IllegalArgumentException if orderDate is null
      */
-    public void setOrderDate(LocalDate orderDate) {
+    public final void setOrderDate(LocalDateTime orderDate) {
+        if (orderDate == null) {
+            throw new IllegalArgumentException("Order date cannot be null.");
+        }
         this.orderDate = orderDate;
     }
 
     /**
-     * Returns an unmodifiable list of line items in this order.
+     * Returns an unmodifiable list of the line items in this order.
      *
-     * @return Unmodifiable list of OrderDetail items
+     * @return an unmodifiable list of OrderDetail objects
      */
     public List<OrderDetail> getItems() {
-        return Collections.unmodifiableList(items);
+        return Collections.unmodifiableList(this.items);
     }
 
     /**
-     * Replaces line items in this order.
+     * Returns the pre-discount gross total amount in VND (BR13).
      *
-     * @param newItems List of line items to set
+     * @return the gross total amount
      */
-    public void setItems(List<OrderDetail> newItems) {
-        this.items.clear();
-        if (newItems != null) {
-            for (OrderDetail item : newItems) {
-                addItem(item);
-            }
-        }
+    public double getTotalAmount() {
+        return totalAmount;
     }
 
     /**
-     * Clears all line items from the order.
-     */
-    public void clearItems() {
-        this.items.clear();
-    }
-
-    /**
-     * Retrieves the subtotal amount before discount.
+     * Alias for getTotalAmount for caller compatibility (BR13).
      *
-     * @return The subtotal amount
+     * @return the gross total amount
      */
     public double getSubtotal() {
-        return subtotal;
+        return totalAmount;
     }
 
     /**
-     * Sets the subtotal amount.
+     * Sets the pre-discount gross total amount (BR13).
      *
-     * @param subtotal The subtotal to set
+     * @param totalAmount the non-negative gross total amount
+     * @throws IllegalArgumentException if totalAmount is negative
      */
-    public void setSubtotal(double subtotal) {
-        this.subtotal = subtotal;
+    public final void setTotalAmount(double totalAmount) {
+        if (Double.isNaN(totalAmount) || Double.isInfinite(totalAmount) || totalAmount < 0.0) {
+            throw new IllegalArgumentException("Order total amount cannot be negative.");
+        }
+        this.totalAmount = totalAmount;
     }
 
     /**
-     * Retrieves the calculated discount amount.
+     * Returns the loyalty discount amount in VND (BR13, BR15).
      *
-     * @return The discount amount
+     * @return the discount amount
+     */
+    public double getDiscount() {
+        return discount;
+    }
+
+    /**
+     * Alias for getDiscount for caller compatibility (BR13, BR15).
+     *
+     * @return the discount amount
      */
     public double getDiscountAmount() {
-        return discountAmount;
+        return discount;
     }
 
     /**
-     * Sets the discount amount.
+     * Sets the loyalty discount amount in VND (BR13, BR15).
      *
-     * @param discountAmount The discount amount to set
+     * @param discount the non-negative discount amount
+     * @throws IllegalArgumentException if discount is negative
      */
-    public void setDiscountAmount(double discountAmount) {
-        this.discountAmount = discountAmount;
+    public final void setDiscount(double discount) {
+        if (Double.isNaN(discount) || Double.isInfinite(discount) || discount < 0.0) {
+            throw new IllegalArgumentException("Order discount cannot be negative.");
+        }
+        this.discount = discount;
     }
 
     /**
-     * Retrieves the final payable amount after discount.
+     * Returns the final net payable amount after discount in VND (BR13).
      *
-     * @return The final amount
+     * @return the net payable amount
      */
     public double getFinalAmount() {
         return finalAmount;
     }
 
     /**
-     * Sets the final payable amount.
+     * Sets the final net payable amount in VND (BR13).
      *
-     * @param finalAmount The final amount to set
+     * @param finalAmount the non-negative final payable amount
+     * @throws IllegalArgumentException if finalAmount is negative
      */
-    public void setFinalAmount(double finalAmount) {
-        this.finalAmount = finalAmount;
-    }
-
-    /**
-     * Checks if the order has been completed and confirmed.
-     *
-     * @return True if completed, false otherwise
-     */
-    public boolean isCompleted() {
-        return isCompleted;
-    }
-
-    /**
-     * Sets the completion status of the order.
-     *
-     * BR12: An order must contain at least one product item to be completed.
-     *
-     * @param completed True if completed, false otherwise
-     * @throws IllegalStateException If attempting to complete an order without line items
-     */
-    public void setCompleted(boolean completed) {
-        if (completed && items.isEmpty()) {
-            throw new IllegalStateException("An order must contain at least one product item to be completed (BR12)");
+    public final void setFinalAmount(double finalAmount) {
+        if (Double.isNaN(finalAmount) || Double.isInfinite(finalAmount) || finalAmount < 0.0) {
+            throw new IllegalArgumentException("Order final amount cannot be negative.");
         }
-        this.isCompleted = completed;
-    }
-
-    @Override
-    public String toString() {
-        return "Order{" +
-                "orderId='" + orderId + '\'' +
-                ", customerId='" + customerId + '\'' +
-                ", orderDate=" + orderDate +
-                ", itemsCount=" + items.size() +
-                ", subtotal=" + subtotal +
-                ", discountAmount=" + discountAmount +
-                ", finalAmount=" + finalAmount +
-                ", isCompleted=" + isCompleted +
-                '}';
+        this.finalAmount = finalAmount;
     }
 }

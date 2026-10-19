@@ -113,7 +113,7 @@ public final class InputValidator {
     }
 
     /**
-     * Normalizes a user-entered Product ID (accepting shorthand like "1" or "P1" -> "P00001") (BR1).
+     * Normalizes a user-entered Product ID (accepting shorthand like "1" or "P1" to "P00001") (BR1).
      *
      * @param raw the raw product ID input
      * @return the canonical 6-character product ID
@@ -135,7 +135,7 @@ public final class InputValidator {
     }
 
     /**
-     * Normalizes a user-entered Batch ID (accepting shorthand like "1" or "B1" -> "B00001") (BR6).
+     * Normalizes a user-entered Batch ID (accepting shorthand like "1" or "B1" to "B00001") (BR6).
      *
      * @param raw the raw batch ID input
      * @return the canonical 6-character batch ID
@@ -157,7 +157,7 @@ public final class InputValidator {
     }
 
     /**
-     * Normalizes a user-entered Customer ID (accepting shorthand like "1" or "C1" -> "C00001") (BR2).
+     * Normalizes a user-entered Customer ID (accepting shorthand like "1" or "C1" to "C00001") (BR2).
      *
      * @param raw the raw customer ID input
      * @return the canonical 6-character customer ID
@@ -179,7 +179,7 @@ public final class InputValidator {
     }
 
     /**
-     * Normalizes a user-entered Order ID (accepting shorthand like "1" or "O1" -> "O00001") (BR8).
+     * Normalizes a user-entered Order ID (accepting shorthand like "1" or "O1" to "O00001") (BR8).
      *
      * @param raw the raw order ID input
      * @return the canonical 6-character order ID
