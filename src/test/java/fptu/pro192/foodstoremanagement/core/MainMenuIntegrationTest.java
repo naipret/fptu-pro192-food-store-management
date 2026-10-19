@@ -18,8 +18,8 @@ import java.nio.file.Path;
 
 /**
  * End-to-end integration test suite verifying navigation and state sharing
- * across MainMenu and all five console submenus: ProductMenu, CustomerMenu,
- * SalesMenu, InventoryMenu, and ReportMenu.
+ * across MainMenu, all five console submenus, and the retail demo seed datasets
+ * in data/.
  */
 public class MainMenuIntegrationTest {
 
@@ -27,15 +27,34 @@ public class MainMenuIntegrationTest {
     }
 
     /**
-     * Executes the end-to-end MainMenu integration test.
+     * Executes the end-to-end MainMenu integration and seed dataset verification tests.
      *
      * @param args command-line arguments (unused)
      * @throws Exception if an unexpected error occurs
      */
     public static void main(String[] args) throws Exception {
         System.out.println("Running MainMenuIntegrationTest...");
+        testSeedDataCsvLoadingVerification();
         testEndToEndMainMenuNavigationAndSharedState();
         System.out.println("MainMenuIntegrationTest PASSED (All assertions succeeded).");
+    }
+
+    private static void testSeedDataCsvLoadingVerification() {
+        ProductController productController = new ProductController();
+        CustomerController customerController = new CustomerController();
+        OrderController orderController = new OrderController(
+                productController, customerController);
+        ReportController reportController = new ReportController(
+                orderController, productController, customerController);
+
+        assertEquals(12, productController.getAllProducts().size(),
+                "12 active retail products loaded from data/products.csv");
+        assertEquals(6, customerController.getAllCustomers().size(),
+                "6 active customers loaded from data/customers.csv");
+        assertEquals(6, orderController.getAllOrders().size(),
+                "6 completed historical orders loaded from data/orders.csv");
+        assertEquals(12, reportController.getTopSellingProducts(0).size(),
+                "12 distinct sold products ranked by ReportController");
     }
 
     private static void testEndToEndMainMenuNavigationAndSharedState() throws Exception {
