@@ -99,7 +99,8 @@ public class ProductModuleTest {
 
         List<Batch> fefoOrder = milk.getActiveBatches(refDate);
         assertEquals(2, fefoOrder.size(), "Only 2 non-expired batches returned by getActiveBatches");
-        assertEquals("B00003", fefoOrder.get(0).getBatchId(), "Earlier expiring batch B00003 placed first via FEFO (BR24)");
+        assertEquals("B00003", fefoOrder.get(0).getBatchId(),
+                "Earlier expiring batch B00003 placed first via FEFO (BR24)");
         assertEquals("B00002", fefoOrder.get(1).getBatchId(), "Later expiring batch B00002 placed second via FEFO");
     }
 

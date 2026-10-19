@@ -17,9 +17,9 @@ public class OrderDetail {
     /**
      * Constructs a validated OrderDetail line item (BR8, BR9, BR12, BR18, BR26).
      *
-     * @param orderId the 6-character order identifier (O00001-O99999)
+     * @param orderId   the 6-character order identifier (O00001-O99999)
      * @param productId the 6-character product identifier (P00001-P99999)
-     * @param quantity the positive integer quantity purchased
+     * @param quantity  the positive integer quantity purchased
      * @param unitPrice the positive snapshot unit selling price in VND
      * @throws IllegalArgumentException if any parameter violates domain invariants
      */
@@ -34,10 +34,11 @@ public class OrderDetail {
      * Constructs an OrderDetail by capturing the id and current selling price
      * of an active Product instance (BR8, BR9, BR12, BR26, BR27).
      *
-     * @param orderId the 6-character order identifier (O00001-O99999)
-     * @param product the active Product being purchased
+     * @param orderId  the 6-character order identifier (O00001-O99999)
+     * @param product  the active Product being purchased
      * @param quantity the positive integer quantity purchased
-     * @throws IllegalArgumentException if product is null, soft-deleted, or quantity is invalid
+     * @throws IllegalArgumentException if product is null, soft-deleted, or
+     *                                  quantity is invalid
      */
     public OrderDetail(String orderId, Product product, int quantity) {
         if (product == null) {

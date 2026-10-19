@@ -16,17 +16,15 @@ import java.util.List;
 public class CustomerMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
-        "Register New Customer",
-        "Update Customer Information",
-        "Delete Customer (Soft Delete)",
-        "View All Active Customers",
-        "Search Customers (by Name, Phone, or ID)"
+            "Register New Customer",
+            "Update Customer Information",
+            "Delete Customer (Soft Delete)",
+            "View All Active Customers",
+            "Search Customers (by Name, Phone, or ID)"
     };
 
-    private static final String CUSTOMER_TABLE_BORDER =
-            "+--------+----------------------+------------+------------------------+-------+";
-    private static final String CUSTOMER_TABLE_HEADER =
-            "| ID     | Full Name            | Phone      | Address                | Tier  |";
+    private static final String CUSTOMER_TABLE_BORDER = "+--------+----------------------+------------+------------------------+-------+";
+    private static final String CUSTOMER_TABLE_HEADER = "| ID     | Full Name            | Phone      | Address                | Tier  |";
 
     private final CustomerController customerController;
 

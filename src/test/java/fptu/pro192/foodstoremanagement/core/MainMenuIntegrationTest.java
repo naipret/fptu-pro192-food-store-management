@@ -27,7 +27,8 @@ public class MainMenuIntegrationTest {
     }
 
     /**
-     * Executes the end-to-end MainMenu integration and seed dataset verification tests.
+     * Executes the end-to-end MainMenu integration and seed dataset verification
+     * tests.
      *
      * @param args command-line arguments (unused)
      * @throws Exception if an unexpected error occurs
@@ -77,11 +78,9 @@ public class MainMenuIntegrationTest {
                 new CustomerMenu(customerController),
                 new SalesMenu(orderController, productController, customerController),
                 new InventoryMenu(productController),
-                new ReportMenu(reportController)
-        );
+                new ReportMenu(reportController));
 
-        String endToEndInput =
-                "1\n1\n\nST25 Fragrant Rice 5kg\n1\n5\n160000\nN\n\n0\n"
+        String endToEndInput = "1\n1\n\nST25 Fragrant Rice 5kg\n1\n5\n160000\nN\n\n0\n"
                 + "4\n1\nP00001\n\n20\n01/10/2026\n31/12/2026\n\n0\n"
                 + "2\n1\n\nNguyễn Văn An\n0901234567\n12 Lê Lợi, District 1\n2\n\n0\n"
                 + "3\n1\nC00001\n1\nP00001\n2\n3\nY\n\n0\n"
@@ -93,7 +92,8 @@ public class MainMenuIntegrationTest {
         mainMenu.display();
         ScannerManager.getInstance().resetToStandardInput();
 
-        assertEquals(1, productController.getAllProducts().size(), "1 product created via MainMenu -> ProductMenu");
+        assertEquals(1, productController.getAllProducts().size(),
+                "1 product created via MainMenu -> ProductMenu");
         assertEquals(18, productController.findById("P00001").getTotalStock(),
                 "20 imported via InventoryMenu minus 2 sold via SalesMenu = 18");
         assertEquals(1, customerController.getAllCustomers().size(), "1 VIP customer created via CustomerMenu");

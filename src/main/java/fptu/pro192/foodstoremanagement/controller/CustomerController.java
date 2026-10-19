@@ -23,7 +23,7 @@ public class CustomerController {
     public static final String DEFAULT_CUSTOMERS_CSV = "data/customers.csv";
 
     private static final String[] CSV_HEADERS = {
-        "type", "id", "fullName", "phone", "address", "isDeleted"
+            "type", "id", "fullName", "phone", "address", "isDeleted"
     };
 
     private final Path csvPath;
@@ -44,7 +44,8 @@ public class CustomerController {
      */
     public CustomerController(String csvPath) {
         this((csvPath == null || csvPath.trim().isEmpty())
-                ? null : Paths.get(csvPath.trim()));
+                ? null
+                : Paths.get(csvPath.trim()));
     }
 
     /**
@@ -110,13 +111,13 @@ public class CustomerController {
         rows.add(CSV_HEADERS);
 
         for (Customer customer : this.customers) {
-            rows.add(new String[]{
-                customer.getCustomerType(),
-                customer.getId(),
-                customer.getFullName(),
-                customer.getPhone(),
-                customer.getAddress(),
-                String.valueOf(customer.isDeleted())
+            rows.add(new String[] {
+                    customer.getCustomerType(),
+                    customer.getId(),
+                    customer.getFullName(),
+                    customer.getPhone(),
+                    customer.getAddress(),
+                    String.valueOf(customer.isDeleted())
             });
         }
         CsvUtil.writeAtomic(this.csvPath, rows);
@@ -165,13 +166,14 @@ public class CustomerController {
      * and phone uniqueness across active customers, then persists to CSV
      * (BR2, BR3, BR15, BR25, BR27).
      *
-     * @param id the 6-character customer ID (C00001-C99999)
+     * @param id       the 6-character customer ID (C00001-C99999)
      * @param fullName the customer's full name
-     * @param phone the customer's Vietnamese mobile phone number
-     * @param address the customer's residential address
-     * @param type the loyalty tier ("Regular" or "VIP")
+     * @param phone    the customer's Vietnamese mobile phone number
+     * @param address  the customer's residential address
+     * @param type     the loyalty tier ("Regular" or "VIP")
      * @return the newly created and persisted Customer instance
-     * @throws IllegalArgumentException if any field is invalid or ID/phone is duplicate
+     * @throws IllegalArgumentException if any field is invalid or ID/phone is
+     *                                  duplicate
      */
     public Customer registerCustomer(String id, String fullName, String phone,
             String address, String type) {
@@ -185,7 +187,7 @@ public class CustomerController {
         if (existingByPhone != null) {
             throw new IllegalArgumentException(
                     "Phone number '" + normalizedPhone + "' is already registered to customer "
-                    + existingByPhone.getId() + ".");
+                            + existingByPhone.getId() + ".");
         }
 
         Customer created = Customer.create(type, validatedId, fullName,
@@ -196,13 +198,14 @@ public class CustomerController {
     }
 
     /**
-     * Alias for registerCustomer maintained for caller compatibility (BR2, BR3, BR15, BR25).
+     * Alias for registerCustomer maintained for caller compatibility (BR2, BR3,
+     * BR15, BR25).
      *
-     * @param id the 6-character customer ID (C00001-C99999)
+     * @param id       the 6-character customer ID (C00001-C99999)
      * @param fullName the customer's full name
-     * @param phone the customer's phone number
-     * @param address the customer's address
-     * @param type the customer loyalty tier ("Regular" or "VIP")
+     * @param phone    the customer's phone number
+     * @param address  the customer's address
+     * @param type     the customer loyalty tier ("Regular" or "VIP")
      * @return the newly created Customer
      */
     public Customer addCustomer(String id, String fullName, String phone,
@@ -215,13 +218,15 @@ public class CustomerController {
      * (BR3, BR15, BR25). Passing null or blank for any parameter retains the
      * customer's existing value for that attribute.
      *
-     * @param id the customer ID to update
-     * @param newName the new full name, or null/blank to keep existing
-     * @param newPhone the new phone number, or null/blank to keep existing
+     * @param id         the customer ID to update
+     * @param newName    the new full name, or null/blank to keep existing
+     * @param newPhone   the new phone number, or null/blank to keep existing
      * @param newAddress the new address, or null/blank to keep existing
-     * @param newType the new loyalty tier ("Regular" or "VIP"), or null/blank to keep existing
+     * @param newType    the new loyalty tier ("Regular" or "VIP"), or null/blank to
+     *                   keep existing
      * @return the updated Customer instance
-     * @throws IllegalArgumentException if the customer is not found or any updated field is invalid/duplicate
+     * @throws IllegalArgumentException if the customer is not found or any updated
+     *                                  field is invalid/duplicate
      */
     public Customer updateCustomer(String id, String newName, String newPhone,
             String newAddress, String newType) {
@@ -252,7 +257,7 @@ public class CustomerController {
             if (owner != null && !owner.getId().equalsIgnoreCase(existing.getId())) {
                 throw new IllegalArgumentException(
                         "Phone number '" + updatedPhone + "' is already used by customer "
-                        + owner.getId() + ".");
+                                + owner.getId() + ".");
             }
         }
 
@@ -261,7 +266,8 @@ public class CustomerController {
                 : existing.getAddress();
 
         String updatedType = (newType != null && !newType.trim().isEmpty())
-                ? newType.trim() : existing.getCustomerType();
+                ? newType.trim()
+                : existing.getCustomerType();
 
         Customer replacement = Customer.create(updatedType, existing.getId(),
                 updatedName, updatedPhone, updatedAddress, false);
@@ -274,8 +280,8 @@ public class CustomerController {
      * Convenience overload that updates phone and address while preserving the
      * customer's existing full name and loyalty tier (BR3, BR25).
      *
-     * @param id the customer ID to update
-     * @param newPhone the new phone number, or null/blank to keep existing
+     * @param id         the customer ID to update
+     * @param newPhone   the new phone number, or null/blank to keep existing
      * @param newAddress the new address, or null/blank to keep existing
      * @return the updated Customer instance
      */
@@ -339,10 +345,12 @@ public class CustomerController {
     }
 
     /**
-     * Finds an active Customer by phone number, normalizing the query first (BR25, BR27).
+     * Finds an active Customer by phone number, normalizing the query first (BR25,
+     * BR27).
      *
      * @param rawPhone the raw phone string to look up
-     * @return the matching active Customer, or null if not found or invalid phone format
+     * @return the matching active Customer, or null if not found or invalid phone
+     *         format
      */
     public Customer findByPhone(String rawPhone) {
         if (rawPhone == null || rawPhone.trim().isEmpty()) {

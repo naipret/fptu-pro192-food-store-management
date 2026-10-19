@@ -20,13 +20,15 @@ public class Batch {
     /**
      * Constructs a validated Batch instance (BR6, BR7, BR18, BR26).
      *
-     * @param batchId the unique 6-character batch identifier (B00001-B99999)
-     * @param productId the 6-character identifier of the parent product (P00001-P99999)
-     * @param importDate the date the batch was received into inventory
+     * @param batchId        the unique 6-character batch identifier (B00001-B99999)
+     * @param productId      the 6-character identifier of the parent product
+     *                       (P00001-P99999)
+     * @param importDate     the date the batch was received into inventory
      * @param productionDate the manufacturing or packing date of the batch
      * @param expirationDate the expiration date of the batch
-     * @param quantity the non-negative integer stock quantity
-     * @throws IllegalArgumentException if any identifier, date, or quantity is invalid
+     * @param quantity       the non-negative integer stock quantity
+     * @throws IllegalArgumentException if any identifier, date, or quantity is
+     *                                  invalid
      */
     public Batch(String batchId, String productId, LocalDate importDate,
             LocalDate productionDate, LocalDate expirationDate, int quantity) {
@@ -38,7 +40,8 @@ public class Batch {
     }
 
     /**
-     * Checks whether this batch has expired relative to the current system date (BR11).
+     * Checks whether this batch has expired relative to the current system date
+     * (BR11).
      *
      * @return true if today is strictly after expirationDate, false otherwise
      */
@@ -47,8 +50,10 @@ public class Batch {
     }
 
     /**
-     * Checks whether this batch has expired relative to a given reference date (BR11).
-     * A batch expiring on the reference date remains valid through the end of that day.
+     * Checks whether this batch has expired relative to a given reference date
+     * (BR11).
+     * A batch expiring on the reference date remains valid through the end of that
+     * day.
      *
      * @param referenceDate the date to evaluate against
      * @return true if referenceDate is strictly after expirationDate
@@ -78,8 +83,10 @@ public class Batch {
      *
      * @param referenceDate the reference date to evaluate from
      * @param daysThreshold the non-negative warning window in days
-     * @return true if the batch is active and expires on or before referenceDate plus daysThreshold
-     * @throws IllegalArgumentException if referenceDate is null or daysThreshold is negative
+     * @return true if the batch is active and expires on or before referenceDate
+     *         plus daysThreshold
+     * @throws IllegalArgumentException if referenceDate is null or daysThreshold is
+     *                                  negative
      */
     public boolean isNearExpiry(LocalDate referenceDate, int daysThreshold) {
         if (referenceDate == null) {
@@ -96,17 +103,19 @@ public class Batch {
     }
 
     /**
-     * Deducts a positive integer amount from this batch's remaining stock (BR6, BR14, BR24, BR26).
+     * Deducts a positive integer amount from this batch's remaining stock (BR6,
+     * BR14, BR24, BR26).
      *
      * @param amount the positive integer quantity to deduct
-     * @throws IllegalArgumentException if amount is not positive or exceeds remaining quantity
+     * @throws IllegalArgumentException if amount is not positive or exceeds
+     *                                  remaining quantity
      */
     public void deduct(int amount) {
         InputValidator.validatePositiveQuantity(amount, "Deduction amount");
         if (amount > this.quantity) {
             throw new IllegalArgumentException(
                     "Cannot deduct " + amount + " units from batch " + this.batchId
-                    + " (only " + this.quantity + " available).");
+                            + " (only " + this.quantity + " available).");
         }
         this.quantity -= amount;
     }
@@ -181,10 +190,12 @@ public class Batch {
     }
 
     /**
-     * Sets the production date after verifying it is not after the current expiration date (BR7).
+     * Sets the production date after verifying it is not after the current
+     * expiration date (BR7).
      *
      * @param productionDate the non-null production LocalDate
-     * @throws IllegalArgumentException if productionDate is null or after expirationDate
+     * @throws IllegalArgumentException if productionDate is null or after
+     *                                  expirationDate
      */
     public void setProductionDate(LocalDate productionDate) {
         if (productionDate == null) {
@@ -206,10 +217,12 @@ public class Batch {
     }
 
     /**
-     * Sets the expiration date after verifying it is not before the current production date (BR7).
+     * Sets the expiration date after verifying it is not before the current
+     * production date (BR7).
      *
      * @param expirationDate the non-null expiration LocalDate
-     * @throws IllegalArgumentException if expirationDate is null or before productionDate
+     * @throws IllegalArgumentException if expirationDate is null or before
+     *                                  productionDate
      */
     public void setExpirationDate(LocalDate expirationDate) {
         if (expirationDate == null) {
@@ -222,11 +235,13 @@ public class Batch {
     }
 
     /**
-     * Atomically validates and updates both productionDate and expirationDate (BR7).
+     * Atomically validates and updates both productionDate and expirationDate
+     * (BR7).
      *
      * @param productionDate the batch production date
      * @param expirationDate the batch expiration date
-     * @throws IllegalArgumentException if either date is null or productionDate is after expirationDate
+     * @throws IllegalArgumentException if either date is null or productionDate is
+     *                                  after expirationDate
      */
     public final void setDates(LocalDate productionDate, LocalDate expirationDate) {
         InputValidator.validateDateOrder(productionDate, expirationDate);

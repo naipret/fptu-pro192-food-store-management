@@ -38,11 +38,11 @@ public class OrderController {
     public static final String DEFAULT_ORDER_DETAILS_CSV = "data/order_details.csv";
 
     private static final String[] ORDER_CSV_HEADERS = {
-        "orderId", "customerId", "orderDate", "totalAmount", "discount", "finalAmount"
+            "orderId", "customerId", "orderDate", "totalAmount", "discount", "finalAmount"
     };
 
     private static final String[] DETAIL_CSV_HEADERS = {
-        "orderId", "productId", "quantity", "unitPrice"
+            "orderId", "productId", "quantity", "unitPrice"
     };
 
     private final Path ordersCsvPath;
@@ -55,7 +55,7 @@ public class OrderController {
      * Constructs an OrderController bound to the default CSV paths in data/
      * with explicitly injected ProductController and CustomerController instances.
      *
-     * @param productController the shared ProductController instance
+     * @param productController  the shared ProductController instance
      * @param customerController the shared CustomerController instance
      * @throws IllegalArgumentException if either collaborator is null
      */
@@ -69,21 +69,22 @@ public class OrderController {
      * Constructs an OrderController bound to the specified CSV path strings
      * and shared controller collaborators.
      *
-     * @param ordersCsvPath the file path string for orders.csv
-     * @param detailsCsvPath the file path string for order_details.csv
-     * @param productController the shared ProductController instance
+     * @param ordersCsvPath      the file path string for orders.csv
+     * @param detailsCsvPath     the file path string for order_details.csv
+     * @param productController  the shared ProductController instance
      * @param customerController the shared CustomerController instance
      */
     public OrderController(String ordersCsvPath, String detailsCsvPath,
             ProductController productController, CustomerController customerController) {
         this(
                 (ordersCsvPath == null || ordersCsvPath.trim().isEmpty())
-                        ? null : Paths.get(ordersCsvPath.trim()),
+                        ? null
+                        : Paths.get(ordersCsvPath.trim()),
                 (detailsCsvPath == null || detailsCsvPath.trim().isEmpty())
-                        ? null : Paths.get(detailsCsvPath.trim()),
+                        ? null
+                        : Paths.get(detailsCsvPath.trim()),
                 productController,
-                customerController
-        );
+                customerController);
     }
 
     /**
@@ -91,9 +92,9 @@ public class OrderController {
      * controller collaborators, immediately loading completed historical
      * orders from disk.
      *
-     * @param ordersCsvPath the Path for orders.csv
-     * @param detailsCsvPath the Path for order_details.csv
-     * @param productController the shared ProductController instance
+     * @param ordersCsvPath      the Path for orders.csv
+     * @param detailsCsvPath     the Path for order_details.csv
+     * @param productController  the shared ProductController instance
      * @param customerController the shared CustomerController instance
      * @throws IllegalArgumentException if any argument is null
      */
@@ -122,7 +123,8 @@ public class OrderController {
     /**
      * Loads all completed historical orders and their line items from
      * orders.csv and order_details.csv, skipping header rows at line 0 and
-     * joining line items to parent orders via a Map (BR8, BR12, BR13, BR16, BR17, BR18).
+     * joining line items to parent orders via a Map (BR8, BR12, BR13, BR16, BR17,
+     * BR18).
      */
     public final void loadFromCsv() {
         this.orders.clear();
@@ -179,7 +181,8 @@ public class OrderController {
                 String rawCustomerId = row[1].trim();
                 String customerId = (rawCustomerId.isEmpty()
                         || Order.GUEST_CUSTOMER_ID.equalsIgnoreCase(rawCustomerId))
-                        ? null : InputValidator.validateCustomerId(rawCustomerId);
+                                ? null
+                                : InputValidator.validateCustomerId(rawCustomerId);
                 LocalDateTime orderDate = parseOrderDateTime(row[2].trim());
                 double totalAmount = Double.parseDouble(row[3].trim());
                 double discount = Double.parseDouble(row[4].trim());
@@ -217,21 +220,22 @@ public class OrderController {
 
         for (Order order : this.orders) {
             String serializedCustomerId = (order.getCustomerId() == null)
-                    ? Order.GUEST_CUSTOMER_ID : order.getCustomerId();
-            orderRows.add(new String[]{
-                order.getOrderId(),
-                serializedCustomerId,
-                order.getOrderDate().toString(),
-                String.valueOf(order.getTotalAmount()),
-                String.valueOf(order.getDiscount()),
-                String.valueOf(order.getFinalAmount())
+                    ? Order.GUEST_CUSTOMER_ID
+                    : order.getCustomerId();
+            orderRows.add(new String[] {
+                    order.getOrderId(),
+                    serializedCustomerId,
+                    order.getOrderDate().toString(),
+                    String.valueOf(order.getTotalAmount()),
+                    String.valueOf(order.getDiscount()),
+                    String.valueOf(order.getFinalAmount())
             });
             for (OrderDetail item : order.getItems()) {
-                detailRows.add(new String[]{
-                    order.getOrderId(),
-                    item.getProductId(),
-                    String.valueOf(item.getQuantity()),
-                    String.valueOf(item.getUnitPrice())
+                detailRows.add(new String[] {
+                        order.getOrderId(),
+                        item.getProductId(),
+                        String.valueOf(item.getQuantity()),
+                        String.valueOf(item.getUnitPrice())
                 });
             }
         }
@@ -282,7 +286,8 @@ public class OrderController {
      *
      * @param customerId the active customer ID, or null/GUEST for guest checkout
      * @return a new empty draft Order
-     * @throws IllegalArgumentException if a non-guest customerId does not exist or is soft-deleted
+     * @throws IllegalArgumentException if a non-guest customerId does not exist or
+     *                                  is soft-deleted
      */
     public Order createDraftOrder(String customerId) {
         return createDraftOrder(generateNextOrderId(), customerId, LocalDateTime.now());
@@ -292,9 +297,9 @@ public class OrderController {
      * Creates a new in-memory draft Order with an explicit Order ID and date
      * (BR8, BR14, BR16, BR18).
      *
-     * @param orderId the 6-character order ID (O00001-O99999)
+     * @param orderId    the 6-character order ID (O00001-O99999)
      * @param customerId the active customer ID, or null/GUEST for guest checkout
-     * @param orderDate the calendar date of the order
+     * @param orderDate  the calendar date of the order
      * @return a new empty draft Order
      */
     public Order createDraftOrder(String orderId, String customerId, LocalDate orderDate) {
@@ -306,11 +311,12 @@ public class OrderController {
      * Creates a new in-memory draft Order with an explicit Order ID and timestamp
      * (BR8, BR14, BR16, BR18).
      *
-     * @param orderId the 6-character order ID (O00001-O99999)
+     * @param orderId    the 6-character order ID (O00001-O99999)
      * @param customerId the active customer ID, or null/GUEST for guest checkout
-     * @param orderDate the timestamp of the order
+     * @param orderDate  the timestamp of the order
      * @return a new empty draft Order
-     * @throws IllegalArgumentException if orderId is invalid/duplicate or customerId is not found
+     * @throws IllegalArgumentException if orderId is invalid/duplicate or
+     *                                  customerId is not found
      */
     public Order createDraftOrder(String orderId, String customerId, LocalDateTime orderDate) {
         String normalizedOrderId = InputValidator.validateOrderId(orderId);
@@ -332,11 +338,13 @@ public class OrderController {
 
     /**
      * Returns the remaining non-expired sellable stock of a product after
-     * subtracting any quantity already placed in the current draft cart (BR10, BR11).
+     * subtracting any quantity already placed in the current draft cart (BR10,
+     * BR11).
      *
-     * @param draft the current draft Order, may be null
+     * @param draft     the current draft Order, may be null
      * @param productId the product ID to inspect
-     * @return the remaining available stock that can still be added to the draft cart
+     * @return the remaining available stock that can still be added to the draft
+     *         cart
      */
     public int getRemainingAvailableStock(Order draft, String productId) {
         return getRemainingAvailableStock(draft, productId, LocalDate.now());
@@ -347,10 +355,11 @@ public class OrderController {
      * to referenceDate after subtracting any quantity already placed in the
      * current draft cart (BR10, BR11).
      *
-     * @param draft the current draft Order, may be null
-     * @param productId the product ID to inspect
+     * @param draft         the current draft Order, may be null
+     * @param productId     the product ID to inspect
      * @param referenceDate the date used to evaluate batch expiration
-     * @return the remaining available stock that can still be added to the draft cart
+     * @return the remaining available stock that can still be added to the draft
+     *         cart
      */
     public int getRemainingAvailableStock(Order draft, String productId, LocalDate referenceDate) {
         Product product = this.productController.findById(productId);
@@ -368,11 +377,13 @@ public class OrderController {
      * recalculates order totals and VIP discounts (BR9, BR10, BR11, BR12,
      * BR13, BR14, BR15, BR16, BR26).
      *
-     * @param draft the draft Order being assembled
+     * @param draft     the draft Order being assembled
      * @param productId the product ID to add
-     * @param quantity the positive integer quantity to add
-     * @throws IllegalArgumentException if draft/product is invalid, quantity is not positive, or all stock is expired
-     * @throws InsufficientStockException if cumulative cart quantity exceeds available non-expired stock
+     * @param quantity  the positive integer quantity to add
+     * @throws IllegalArgumentException   if draft/product is invalid, quantity is
+     *                                    not positive, or all stock is expired
+     * @throws InsufficientStockException if cumulative cart quantity exceeds
+     *                                    available non-expired stock
      */
     public void addItemToDraft(Order draft, String productId, int quantity)
             throws InsufficientStockException {
@@ -385,12 +396,14 @@ public class OrderController {
      * recalculates order totals and VIP discounts (BR9, BR10, BR11, BR12,
      * BR13, BR14, BR15, BR16, BR26).
      *
-     * @param draft the draft Order being assembled
-     * @param productId the product ID to add
-     * @param quantity the positive integer quantity to add
+     * @param draft         the draft Order being assembled
+     * @param productId     the product ID to add
+     * @param quantity      the positive integer quantity to add
      * @param referenceDate the reference date used to evaluate batch expiration
-     * @throws IllegalArgumentException if draft/product is invalid, quantity is not positive, or all stock is expired
-     * @throws InsufficientStockException if cumulative cart quantity exceeds available non-expired stock
+     * @throws IllegalArgumentException   if draft/product is invalid, quantity is
+     *                                    not positive, or all stock is expired
+     * @throws InsufficientStockException if cumulative cart quantity exceeds
+     *                                    available non-expired stock
      */
     public void addItemToDraft(Order draft, String productId, int quantity, LocalDate referenceDate)
             throws InsufficientStockException {
@@ -420,13 +433,14 @@ public class OrderController {
         if (newCumulativeQuantity > availableStock) {
             throw new InsufficientStockException(
                     "Insufficient stock for '" + product.getName() + "'. Available: "
-                    + availableStock + ", already in cart: " + existingInCart
-                    + ", requested to add: " + quantity + ".");
+                            + availableStock + ", already in cart: " + existingInCart
+                            + ", requested to add: " + quantity + ".");
         }
 
         draft.addItem(new OrderDetail(draft.getOrderId(), product, quantity));
         Customer customer = (draft.getCustomerId() == null)
-                ? null : this.customerController.findByIdIncludeDeleted(draft.getCustomerId());
+                ? null
+                : this.customerController.findByIdIncludeDeleted(draft.getCustomerId());
         draft.calculateTotals(customer);
     }
 
@@ -450,8 +464,10 @@ public class OrderController {
      *
      * @param draft the non-empty draft Order to finalize
      * @return the finalized and persisted Order
-     * @throws IllegalArgumentException if draft is null, empty, or has a duplicate orderId
-     * @throws InsufficientStockException if any line item exceeds available non-expired stock
+     * @throws IllegalArgumentException   if draft is null, empty, or has a
+     *                                    duplicate orderId
+     * @throws InsufficientStockException if any line item exceeds available
+     *                                    non-expired stock
      */
     public Order finalizeOrder(Order draft) throws InsufficientStockException {
         return finalizeOrder(draft, LocalDate.now());
@@ -463,11 +479,14 @@ public class OrderController {
      * persisting both updated inventory and the completed order to CSV (BR8,
      * BR10, BR11, BR13, BR14, BR15, BR16, BR17, BR24).
      *
-     * @param draft the non-empty draft Order to finalize
-     * @param referenceDate the date used to evaluate batch expiration during FEFO deduction
+     * @param draft         the non-empty draft Order to finalize
+     * @param referenceDate the date used to evaluate batch expiration during FEFO
+     *                      deduction
      * @return the finalized and persisted Order
-     * @throws IllegalArgumentException if draft is null, empty, or has a duplicate orderId
-     * @throws InsufficientStockException if any line item exceeds available non-expired stock
+     * @throws IllegalArgumentException   if draft is null, empty, or has a
+     *                                    duplicate orderId
+     * @throws InsufficientStockException if any line item exceeds available
+     *                                    non-expired stock
      */
     public Order finalizeOrder(Order draft, LocalDate referenceDate)
             throws InsufficientStockException {
@@ -495,12 +514,13 @@ public class OrderController {
             if (available < item.getQuantity()) {
                 throw new InsufficientStockException(
                         "Insufficient stock for '" + product.getName() + "'. Requested: "
-                        + item.getQuantity() + ", Available: " + available + ".");
+                                + item.getQuantity() + ", Available: " + available + ".");
             }
         }
 
         Customer customer = (draft.getCustomerId() == null)
-                ? null : this.customerController.findByIdIncludeDeleted(draft.getCustomerId());
+                ? null
+                : this.customerController.findByIdIncludeDeleted(draft.getCustomerId());
         draft.calculateTotals(customer);
 
         for (OrderDetail item : draft.getItems()) {
@@ -517,7 +537,8 @@ public class OrderController {
      * persists to CSV (used when seeding or testing persistence) (BR8, BR17).
      *
      * @param completedOrder the completed Order to persist
-     * @throws IllegalArgumentException if completedOrder is null, empty, or has a duplicate orderId
+     * @throws IllegalArgumentException if completedOrder is null, empty, or has a
+     *                                  duplicate orderId
      */
     public void saveOrder(Order completedOrder) {
         if (completedOrder == null) {

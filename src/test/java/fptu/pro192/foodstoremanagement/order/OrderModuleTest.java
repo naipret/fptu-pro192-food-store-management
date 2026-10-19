@@ -129,7 +129,8 @@ public class OrderModuleTest {
         final LocalDate today = LocalDate.now();
         productController.addProduct(
                 new Product("P00001", "Expired Yogurt Pack", "Dairy", "Pack", 28000.0),
-                new Batch("B00001", "P00001", today.minusDays(20), today.minusDays(25), today.minusDays(1), 12));
+                new Batch("B00001", "P00001", today.minusDays(20), today.minusDays(25),
+                        today.minusDays(1), 12));
         productController.addProduct(
                 new Product("P00002", "Canned Tuna 150g", "Canned", "Can", 32000.0),
                 new Batch("B00002", "P00002", today, today.minusDays(10), today.plusDays(90), 5));
@@ -150,7 +151,8 @@ public class OrderModuleTest {
         } catch (InsufficientStockException e) {
             caughtInsufficient = true;
         }
-        assertTrue(caughtInsufficient, "Adding quantity exceeding available stock must throw InsufficientStockException (BR10)");
+        assertTrue(caughtInsufficient,
+                "Adding quantity exceeding available stock must throw InsufficientStockException (BR10)");
 
         Files.deleteIfExists(productsCsv);
         Files.deleteIfExists(batchesCsv);

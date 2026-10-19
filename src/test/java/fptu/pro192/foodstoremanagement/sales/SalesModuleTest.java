@@ -59,8 +59,7 @@ public class SalesModuleTest {
 
         SalesMenu salesMenu = new SalesMenu(orderController, productController, customerController);
 
-        String simulatedInput =
-                "1\nC00001\n1\nP00001\n2\n2\n3\nY\n\n"
+        String simulatedInput = "1\nC00001\n1\nP00001\n2\n2\n3\nY\n\n"
                 + "1\nGUEST\n1\nP00001\n5\n0\n\n"
                 + "2\n\n"
                 + "3\nO00001\n\n"

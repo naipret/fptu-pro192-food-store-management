@@ -80,8 +80,9 @@ public final class CsvUtil {
      * Atomically writes a header row and data rows to the specified file path.
      *
      * @param filePath the target CSV file path string
-     * @param headers the column header names written at line 0, may be null or empty
-     * @param rows the data rows to write after the header row
+     * @param headers  the column header names written at line 0, may be null or
+     *                 empty
+     * @param rows     the data rows to write after the header row
      */
     public static void writeAtomic(String filePath, List<String> headers, List<String[]> rows) {
         if (filePath == null || filePath.trim().isEmpty()) {
@@ -103,7 +104,7 @@ public final class CsvUtil {
      * place using ATOMIC_MOVE and REPLACE_EXISTING.
      *
      * @param targetPath the destination CSV file Path
-     * @param rows the complete list of rows to write
+     * @param rows       the complete list of rows to write
      */
     public static void writeAtomic(Path targetPath, List<String[]> rows) {
         if (targetPath == null) {

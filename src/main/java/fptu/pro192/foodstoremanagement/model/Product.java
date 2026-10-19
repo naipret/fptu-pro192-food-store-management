@@ -35,11 +35,11 @@ public class Product {
     /**
      * Constructs an active Product with an empty batch list (BR1, BR3, BR4, BR5).
      *
-     * @param id the unique 6-character product identifier (P00001-P99999)
-     * @param name the non-empty product display name
+     * @param id       the unique 6-character product identifier (P00001-P99999)
+     * @param name     the non-empty product display name
      * @param category the single-word retail category name
-     * @param unit the single-word measurement unit
-     * @param price the positive unit selling price in VND
+     * @param unit     the single-word measurement unit
+     * @param price    the positive unit selling price in VND
      * @throws IllegalArgumentException if any parameter violates domain invariants
      */
     public Product(String id, String name, String category, String unit, double price) {
@@ -47,13 +47,14 @@ public class Product {
     }
 
     /**
-     * Constructs a Product with an explicit soft-delete state (BR1, BR3, BR4, BR5, BR27).
+     * Constructs a Product with an explicit soft-delete state (BR1, BR3, BR4, BR5,
+     * BR27).
      *
-     * @param id the unique 6-character product identifier (P00001-P99999)
-     * @param name the non-empty product display name
-     * @param category the single-word retail category name
-     * @param unit the single-word measurement unit
-     * @param price the positive unit selling price in VND
+     * @param id        the unique 6-character product identifier (P00001-P99999)
+     * @param name      the non-empty product display name
+     * @param category  the single-word retail category name
+     * @param unit      the single-word measurement unit
+     * @param price     the positive unit selling price in VND
      * @param isDeleted true if the product is soft-deleted, false if active
      * @throws IllegalArgumentException if any parameter violates domain invariants
      */
@@ -72,7 +73,8 @@ public class Product {
      * integrity and batch ID uniqueness within the product (BR6, BR18).
      *
      * @param batch the Batch instance to attach
-     * @throws IllegalArgumentException if batch is null, belongs to another product, or has a duplicate batchId
+     * @throws IllegalArgumentException if batch is null, belongs to another
+     *                                  product, or has a duplicate batchId
      */
     public void addBatch(Batch batch) {
         if (batch == null) {
@@ -81,7 +83,7 @@ public class Product {
         if (!this.id.equalsIgnoreCase(batch.getProductId())) {
             throw new IllegalArgumentException(
                     "Batch product ID (" + batch.getProductId()
-                    + ") does not match product ID (" + this.id + ").");
+                            + ") does not match product ID (" + this.id + ").");
         }
         for (Batch existing : this.batches) {
             if (existing.getBatchId().equalsIgnoreCase(batch.getBatchId())) {
@@ -208,9 +210,10 @@ public class Product {
      * the specified threshold relative to referenceDate (BR19).
      *
      * @param referenceDate the date used to evaluate batch expiration
-     * @param threshold the non-negative low-stock threshold
+     * @param threshold     the non-negative low-stock threshold
      * @return true if available stock is less than or equal to threshold
-     * @throws IllegalArgumentException if referenceDate is null or threshold is negative
+     * @throws IllegalArgumentException if referenceDate is null or threshold is
+     *                                  negative
      */
     public boolean isLowStock(LocalDate referenceDate, int threshold) {
         if (threshold < 0) {
@@ -270,7 +273,8 @@ public class Product {
      * Sets and validates the single-word retail category (BR5).
      *
      * @param category the category token
-     * @throws IllegalArgumentException if category is blank or contains invalid characters
+     * @throws IllegalArgumentException if category is blank or contains invalid
+     *                                  characters
      */
     public final void setCategory(String category) {
         this.category = InputValidator.normalizeSingleWordToken(category, "Category");
@@ -289,7 +293,8 @@ public class Product {
      * Sets and validates the single-word measurement unit (BR5).
      *
      * @param unit the measurement unit token
-     * @throws IllegalArgumentException if unit is blank or contains invalid characters
+     * @throws IllegalArgumentException if unit is blank or contains invalid
+     *                                  characters
      */
     public final void setUnit(String unit) {
         this.unit = InputValidator.normalizeSingleWordToken(unit, "Unit");

@@ -27,11 +27,13 @@ public class Order {
     private double finalAmount;
 
     /**
-     * Constructs a new empty draft Order at the specified date and time (BR8, BR16).
+     * Constructs a new empty draft Order at the specified date and time (BR8,
+     * BR16).
      *
-     * @param orderId the 6-character order identifier (O00001-O99999)
-     * @param customerId the 6-character customer ID (C00001-C99999), or null/GUEST for walk-in guests
-     * @param orderDate the timestamp when the order was created
+     * @param orderId    the 6-character order identifier (O00001-O99999)
+     * @param customerId the 6-character customer ID (C00001-C99999), or null/GUEST
+     *                   for walk-in guests
+     * @param orderDate  the timestamp when the order was created
      * @throws IllegalArgumentException if orderId or orderDate is invalid
      */
     public Order(String orderId, String customerId, LocalDateTime orderDate) {
@@ -39,11 +41,13 @@ public class Order {
     }
 
     /**
-     * Constructs a new empty draft Order at the start of the specified calendar date (BR8, BR16).
+     * Constructs a new empty draft Order at the start of the specified calendar
+     * date (BR8, BR16).
      *
-     * @param orderId the 6-character order identifier (O00001-O99999)
-     * @param customerId the 6-character customer ID, or null/GUEST for walk-in guests
-     * @param orderDate the calendar date of the order
+     * @param orderId    the 6-character order identifier (O00001-O99999)
+     * @param customerId the 6-character customer ID, or null/GUEST for walk-in
+     *                   guests
+     * @param orderDate  the calendar date of the order
      * @throws IllegalArgumentException if orderId or orderDate is invalid
      */
     public Order(String orderId, String customerId, LocalDate orderDate) {
@@ -51,17 +55,21 @@ public class Order {
     }
 
     /**
-     * Reconstructs a persisted Order with pre-loaded line items and financial totals
+     * Reconstructs a persisted Order with pre-loaded line items and financial
+     * totals
      * (BR8, BR13, BR16, BR17).
      *
-     * @param orderId the 6-character order identifier (O00001-O99999)
-     * @param customerId the 6-character customer ID, or null/GUEST for walk-in guests
-     * @param orderDate the timestamp of the order
-     * @param items the list of OrderDetail line items, may be null or empty for drafts
+     * @param orderId     the 6-character order identifier (O00001-O99999)
+     * @param customerId  the 6-character customer ID, or null/GUEST for walk-in
+     *                    guests
+     * @param orderDate   the timestamp of the order
+     * @param items       the list of OrderDetail line items, may be null or empty
+     *                    for drafts
      * @param totalAmount the gross pre-discount total in VND
-     * @param discount the loyalty discount amount in VND
+     * @param discount    the loyalty discount amount in VND
      * @param finalAmount the net payable amount in VND
-     * @throws IllegalArgumentException if any identifier, date, or monetary amount is invalid
+     * @throws IllegalArgumentException if any identifier, date, or monetary amount
+     *                                  is invalid
      */
     public Order(String orderId, String customerId, LocalDateTime orderDate,
             List<OrderDetail> items, double totalAmount, double discount, double finalAmount) {
@@ -108,7 +116,7 @@ public class Order {
      * Convenience helper that snapshots a Product's current price and adds the
      * requested quantity to this order (BR8, BR9, BR12).
      *
-     * @param product the active Product to add
+     * @param product  the active Product to add
      * @param quantity the positive integer quantity
      */
     public void addItem(Product product, int quantity) {
@@ -116,7 +124,8 @@ public class Order {
     }
 
     /**
-     * Clears all line items and resets financial totals to zero when cancelling a draft.
+     * Clears all line items and resets financial totals to zero when cancelling a
+     * draft.
      */
     public void clearItems() {
         this.items.clear();
@@ -159,7 +168,8 @@ public class Order {
     }
 
     /**
-     * Returns the total integer quantity of a specific product currently in this order.
+     * Returns the total integer quantity of a specific product currently in this
+     * order.
      *
      * @param productId the product ID to inspect
      * @return the quantity already in the order, or 0 if not present

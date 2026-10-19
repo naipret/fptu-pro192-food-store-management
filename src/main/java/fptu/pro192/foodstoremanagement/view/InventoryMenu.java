@@ -18,24 +18,20 @@ import java.util.List;
 public class InventoryMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
-        "Import New Batch for Product",
-        "Replenish Existing Batch Quantity (+Stock)",
-        "Adjust Existing Batch Quantity (Set Exact Stock)",
-        "View All Batches of a Product",
-        "View Low-Stock Products Alert",
-        "View Near-Expiry Batches Alert",
-        "View Expired Batches Report"
+            "Import New Batch for Product",
+            "Replenish Existing Batch Quantity (+Stock)",
+            "Adjust Existing Batch Quantity (Set Exact Stock)",
+            "View All Batches of a Product",
+            "View Low-Stock Products Alert",
+            "View Near-Expiry Batches Alert",
+            "View Expired Batches Report"
     };
 
-    private static final String BATCH_TABLE_BORDER =
-            "+--------+--------+------------------+------------+------------+-------+--------+";
-    private static final String BATCH_TABLE_HEADER =
-            "| Batch  | ProdID | Product Name     | Prod Date  | Exp Date   |   Qty | Status |";
+    private static final String BATCH_TABLE_BORDER = "+--------+--------+------------------+------------+------------+-------+--------+";
+    private static final String BATCH_TABLE_HEADER = "| Batch  | ProdID | Product Name     | Prod Date  | Exp Date   |   Qty | Status |";
 
-    private static final String LOW_STOCK_BORDER =
-            "+--------+--------------------------+--------------+--------+--------+----------+";
-    private static final String LOW_STOCK_HEADER =
-            "| ID     | Product Name             | Category     | Unit   |  Avail |    Total |";
+    private static final String LOW_STOCK_BORDER = "+--------+--------------------------+--------------+--------+--------+----------+";
+    private static final String LOW_STOCK_HEADER = "| ID     | Product Name             | Category     | Unit   |  Avail |    Total |";
 
     private final ProductController productController;
 
@@ -223,7 +219,7 @@ public class InventoryMenu extends Menu {
         printSectionHeader("LOW-STOCK PRODUCTS ALERT (BR19)");
         String rawThreshold = ConsoleUtil.readOptionalString(
                 "Enter stock threshold [Press Enter for default "
-                + Product.DEFAULT_LOW_STOCK_THRESHOLD + "]: ");
+                        + Product.DEFAULT_LOW_STOCK_THRESHOLD + "]: ");
         int threshold = Product.DEFAULT_LOW_STOCK_THRESHOLD;
         if (!rawThreshold.isEmpty()) {
             try {
@@ -260,7 +256,7 @@ public class InventoryMenu extends Menu {
         printSectionHeader("NEAR-EXPIRY BATCHES ALERT (BR20)");
         String rawDays = ConsoleUtil.readOptionalString(
                 "Enter warning window in days [Press Enter for default "
-                + Product.DEFAULT_NEAR_EXPIRY_DAYS + "]: ");
+                        + Product.DEFAULT_NEAR_EXPIRY_DAYS + "]: ");
         int days = Product.DEFAULT_NEAR_EXPIRY_DAYS;
         if (!rawDays.isEmpty()) {
             try {

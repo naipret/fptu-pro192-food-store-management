@@ -24,16 +24,14 @@ import java.util.Locale;
 public class SalesMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
-        "Create New Sales Order (Checkout)",
-        "View All Sales Orders",
-        "View Order Details / Invoice by ID",
-        "Search Orders by Customer ID"
+            "Create New Sales Order (Checkout)",
+            "View All Sales Orders",
+            "View Order Details / Invoice by ID",
+            "Search Orders by Customer ID"
     };
 
-    private static final String INVOICE_BORDER =
-            "+-----+--------+------------------------+-------+-------------+--------------+";
-    private static final String ORDERS_BORDER =
-            "+--------+--------+------------+------------+------------+--------------+";
+    private static final String INVOICE_BORDER = "+-----+--------+------------------------+-------+-------------+--------------+";
+    private static final String ORDERS_BORDER = "+--------+--------+------------+------------+------------+--------------+";
 
     private final OrderController orderController;
     private final ProductController productController;
@@ -43,8 +41,8 @@ public class SalesMenu extends Menu {
      * Constructs a SalesMenu bound to the shared OrderController,
      * ProductController, and CustomerController instances.
      *
-     * @param orderController the shared OrderController
-     * @param productController the shared ProductController
+     * @param orderController    the shared OrderController
+     * @param productController  the shared ProductController
      * @param customerController the shared CustomerController
      * @throws IllegalArgumentException if any controller is null
      */
@@ -95,7 +93,8 @@ public class SalesMenu extends Menu {
     /**
      * Interactive workflow for assembling a draft shopping cart, adding items
      * with real-time stock and expiration checks, and completing or cancelling
-     * the transaction (BR8, BR9, BR10, BR11, BR12, BR13, BR14, BR15, BR16, BR24, BR26).
+     * the transaction (BR8, BR9, BR10, BR11, BR12, BR13, BR14, BR15, BR16, BR24,
+     * BR26).
      */
     public void handleCreateOrderFlow() {
         printSectionHeader("CREATE NEW SALES ORDER (CHECKOUT)");
@@ -113,11 +112,12 @@ public class SalesMenu extends Menu {
 
         Order draft = this.orderController.createDraftOrder(resolvedCustomerId);
         Customer customer = (draft.getCustomerId() == null)
-                ? null : this.customerController.findById(draft.getCustomerId());
+                ? null
+                : this.customerController.findById(draft.getCustomerId());
         String customerDisplay = (customer == null)
                 ? "Walk-in Guest (Regular - 0% discount)"
                 : customer.getId() + " - " + customer.getFullName()
-                + " (" + customer.getCustomerType() + ")";
+                        + " (" + customer.getCustomerType() + ")";
 
         System.out.println("  [INFO] Draft Order ID: " + draft.getOrderId()
                 + " | Customer: " + customerDisplay);
@@ -286,11 +286,12 @@ public class SalesMenu extends Menu {
             return;
         }
         Customer customer = (order.getCustomerId() == null)
-                ? null : this.customerController.findByIdIncludeDeleted(order.getCustomerId());
+                ? null
+                : this.customerController.findByIdIncludeDeleted(order.getCustomerId());
         String customerText = (customer == null)
                 ? Order.GUEST_CUSTOMER_ID
                 : customer.getId() + " - " + customer.getFullName()
-                + " (" + customer.getCustomerType() + ")";
+                        + " (" + customer.getCustomerType() + ")";
 
         System.out.println(INVOICE_BORDER);
         System.out.printf("  Order ID   : %-22s Date : %s%n",
@@ -357,7 +358,8 @@ public class SalesMenu extends Menu {
         System.out.println(ORDERS_BORDER);
         for (Order order : orders) {
             String custId = (order.getCustomerId() == null)
-                    ? Order.GUEST_CUSTOMER_ID : order.getCustomerId();
+                    ? Order.GUEST_CUSTOMER_ID
+                    : order.getCustomerId();
             String dateStr = InputValidator.formatDisplayDate(order.getOrderDate().toLocalDate());
             String grossStr = String.format(Locale.US, "%,.0f", order.getTotalAmount());
             String discStr = String.format(Locale.US, "%,.0f", order.getDiscount());
