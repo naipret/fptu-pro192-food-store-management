@@ -96,6 +96,16 @@ public class MainMenu extends Menu {
     }
 
     /**
+     * Suppresses automatic breadcrumb banners at the top-level main menu.
+     *
+     * @return false so that submenus render their own contextual breadcrumbs
+     */
+    @Override
+    protected boolean shouldShowBreadcrumb() {
+        return false;
+    }
+
+    /**
      * Returns the exit label for option [0] on the root menu.
      *
      * @return "Exit Application"

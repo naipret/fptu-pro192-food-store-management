@@ -23,8 +23,8 @@ public class CustomerMenu extends Menu {
             "Remove Customer"
     };
 
-    private static final String CUSTOMER_TABLE_BORDER = "+--------+----------------------+------------+------------------------+-------+";
-    private static final String CUSTOMER_TABLE_HEADER = "| ID     | Full Name            | Phone      | Address                | Tier  |";
+    private static final String CUSTOMER_TABLE_BORDER = "+--------+---------------------+------------+------------------------+---------+";
+    private static final String CUSTOMER_TABLE_HEADER = "| ID     | Full Name           | Phone      | Address                | Tier    |";
 
     private final CustomerController customerController;
 
@@ -40,6 +40,11 @@ public class CustomerMenu extends Menu {
             throw new IllegalArgumentException("CustomerController cannot be null.");
         }
         this.customerController = customerController;
+    }
+
+    @Override
+    protected String getBreadcrumbPrefix() {
+        return "MAIN MENU > [2] CUSTOMERS";
     }
 
     @Override
@@ -67,20 +72,17 @@ public class CustomerMenu extends Menu {
     }
 
     private void handleViewAllCustomers() {
-        printBreadcrumbHeader("MAIN MENU > [2] CUSTOMERS > [1] View All Customers");
         List<Customer> customers = this.customerController.getAllActive();
         renderCustomerTable(customers);
     }
 
     private void handleSearchCustomers() {
-        printBreadcrumbHeader("MAIN MENU > [2] CUSTOMERS > [2] Search Customers");
         String keyword = ConsoleUtil.readOptionalString("Enter search keyword (ID, Name, Phone, or Address): ");
         List<Customer> matches = this.customerController.search(keyword);
         renderCustomerTable(matches);
     }
 
     private void handleRegisterCustomer() {
-        printBreadcrumbHeader("MAIN MENU > [2] CUSTOMERS > [3] Register New Customer");
         String suggestedId = this.customerController.generateNextCustomerId();
         String customerId = promptCustomerId(suggestedId);
         if (customerId == null) {
@@ -105,7 +107,6 @@ public class CustomerMenu extends Menu {
     }
 
     private void handleUpdateCustomer() {
-        printBreadcrumbHeader("MAIN MENU > [2] CUSTOMERS > [4] Update Customer Information");
         String rawId = ConsoleUtil.readNonEmptyString("Enter Customer ID to update (e.g., C00001, or 0 to cancel): ");
         if ("0".equals(rawId)) {
             System.out.println("  [INFO] Operation cancelled.");
@@ -146,7 +147,6 @@ public class CustomerMenu extends Menu {
     }
 
     private void handleDeleteCustomer() {
-        printBreadcrumbHeader("MAIN MENU > [2] CUSTOMERS > [5] Remove Customer");
         String rawId = ConsoleUtil.readNonEmptyString("Enter Customer ID to remove (e.g., C00001, or 0 to cancel): ");
         if ("0".equals(rawId)) {
             System.out.println("  [INFO] Operation cancelled.");
@@ -189,13 +189,12 @@ public class CustomerMenu extends Menu {
         System.out.println(CUSTOMER_TABLE_HEADER);
         System.out.println(CUSTOMER_TABLE_BORDER);
         for (Customer c : customers) {
-            String tierLabel = "VIP".equalsIgnoreCase(c.getCustomerType()) ? "VIP" : "Reg";
             System.out.printf("| %s | %s | %s | %s | %s |%n",
                     TableFormatter.fit(c.getId(), 6),
-                    TableFormatter.fit(c.getFullName(), 20),
+                    TableFormatter.fit(c.getFullName(), 19),
                     TableFormatter.fit(c.getPhone(), 10),
                     TableFormatter.fit(c.getAddress(), 22),
-                    TableFormatter.fit(tierLabel, 5));
+                    TableFormatter.fit(c.getCustomerType(), 7));
         }
         System.out.println(CUSTOMER_TABLE_BORDER);
         System.out.printf("  Total customers listed: %d%n", customers.size());
