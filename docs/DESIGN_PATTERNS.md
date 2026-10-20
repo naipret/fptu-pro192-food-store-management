@@ -4,7 +4,7 @@ This document describes the five software design patterns implemented in the Foo
 
 ---
 
-## 1. Factory Method Pattern
+## 1. Static Factory (Simple Factory) Pattern
 
 ### 1.1. Context and Problem
 
@@ -111,6 +111,7 @@ The abstract class `Menu` defines the `final` template method `display()`:
 public final void display() {
     boolean running = true;
     while (running) {
+        ConsoleUtil.clearScreen();
         renderMenuFrame();
         int choice = ConsoleUtil.readInt("Enter your choice [0-" + options.length + "]: ", 0, options.length);
         if (choice == 0) {
