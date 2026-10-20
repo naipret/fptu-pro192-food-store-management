@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Food Store Management System - Web Terminal</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
+
+    <!-- xterm.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0d1117;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        #terminal-container {
+            width: 100vw;
+            height: 100vh;
+            padding: 8px 12px;
+            background-color: #0d1117;
+        }
+
+        .xterm {
+            height: 100%;
+        }
+
+        /* Floating control bar at the top-right corner */
+        #floating-toolbar {
+            position: fixed;
+            top: 12px;
+            right: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+            background: rgba(22, 27, 34, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(48, 54, 61, 0.7);
+            border-radius: 8px;
+            padding: 6px 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            opacity: 0.45;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        #floating-toolbar:hover {
+            opacity: 1;
+            transform: translateY(-1px);
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #8b949e;
+            user-select: none;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #d29922;
+            box-shadow: 0 0 6px rgba(210, 153, 34, 0.6);
+            transition: background-color 0.3s ease;
+        }
+
+        .status-dot.ready {
+            background-color: #2ea043;
+            box-shadow: 0 0 6px rgba(46, 160, 67, 0.8);
+        }
+
+        .status-dot.error {
+            background-color: #f85149;
+            box-shadow: 0 0 6px rgba(248, 81, 73, 0.8);
+        }
+
+        .btn-action {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-action:hover {
+            background: #30363d;
+            color: #f0f6fc;
+            border-color: #8b949e;
+        }
+
+        .btn-action:active {
+            transform: scale(0.96);
+        }
+
+        /* Loading splash overlay */
+        #splash-screen {
+            position: fixed;
+            inset: 0;
+            background: #0d1117;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            color: #c9d1d9;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        #splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid rgba(56, 139, 253, 0.2);
+            border-top-color: #58a6ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .splash-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #f0f6fc;
+        }
+
+        .splash-desc {
+            font-size: 13px;
+            color: #8b949e;
+        }
+    </style>
+
+    <!-- xterm.js & addons -->
+    <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-web-links@0.9.0/lib/addon-web-links.js"></script>
+
+    <!-- CheerpJ 3.0 WebAssembly Loader -->
+    <script src="https://cjrtnc.leaningtech.com/3.0/cj3loader.js"></script>
+</head>
+
+<body>
+    <!-- Splash Loading Overlay -->
+    <div id="splash-screen">
+        <div class="spinner"></div>
+        <div class="splash-title">Food Store Management System</div>
+        <div class="splash-desc" id="splash-status">Initializing Java WebAssembly runtime (CheerpJ)...</div>
+    </div>
+
+    <!-- Floating Control Bar -->
+    <div id="floating-toolbar">
+        <div class="badge-status">
+            <span class="status-dot" id="status-indicator"></span>
+            <span id="status-text">Loading...</span>
+        </div>
+        <button class="btn-action" id="btn-restart" title="Restart application">Restart App</button>
+        <button class="btn-action" id="btn-reset-data"
+            title="Discard modifications and restore original sample dataset">Reset Data</button>
+    </div>
+
+    <!-- Terminal Container -->
+    <div id="terminal-container"></div>
+
+    <script>
+        // Initialize xterm.js
+        const term = new Terminal({
+            cursorBlink: true,
+            cursorStyle: 'block',
+            fontFamily: 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+            fontSize: 14,
+            lineHeight: 1.25,
+            theme: {
+                background: '#0d1117',
+                foreground: '#e6edf3',
+                cursor: '#58a6ff',
+                cursorAccent: '#0d1117',
+                selectionBackground: 'rgba(56, 139, 253, 0.4)',
+                black: '#484f58',
+                red: '#ff7b72',
+                green: '#3fb950',
+                yellow: '#d29922',
+                blue: '#58a6ff',
+                magenta: '#bc8cff',
+                cyan: '#39c5cf',
+                white: '#b1bac4',
+                brightBlack: '#6e7681',
+                brightRed: '#ffa198',
+                brightGreen: '#56d364',
+                brightYellow: '#e3b341',
+                brightBlue: '#79c0ff',
+                brightMagenta: '#d2a8ff',
+                brightCyan: '#56d4dd',
+                brightWhite: '#f0f6fc'
+            }
+        });
+
+        const fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+        term.loadAddon(new WebLinksAddon.WebLinksAddon());
+
+        const terminalContainer = document.getElementById('terminal-container');
+        term.open(terminalContainer);
+        fitAddon.fit();
+
+        window.addEventListener('resize', () => {
+            try {
+                fitAddon.fit();
+            } catch (e) { }
+        });
+
+        // Input state management
+        let inputResolver = null;
+        let inputBuffer = '';
+
+        term.onData(data => {
+            if (!inputResolver) {
+                return;
+            }
+
+            // Handle Enter (CR: \r or LF: \n)
+            if (data === '\r' || data === '\n') {
+                term.write('\r\n');
+                const submitted = inputBuffer;
+                inputBuffer = '';
+                const resolve = inputResolver;
+                inputResolver = null;
+                resolve(submitted);
+                return;
+            }
+
+            // Handle Backspace (DEL: \x7f or BS: \x08)
+            if (data === '\x7f' || data === '\b') {
+                if (inputBuffer.length > 0) {
+                    inputBuffer = inputBuffer.slice(0, -1);
+                    term.write('\b \b');
+                }
+                return;
+            }
+
+            // Handle Ctrl+C (\x03)
+            if (data === '\x03') {
+                term.write('^C\r\n');
+                inputBuffer = '';
+                const resolve = inputResolver;
+                inputResolver = null;
+                resolve('');
+                return;
+            }
+
+            // Printable character entry
+            if (data >= ' ' || data.length > 1) {
+                inputBuffer += data;
+                term.write(data);
+            }
+        });
+
+        const splashScreen = document.getElementById('splash-screen');
+        const splashStatus = document.getElementById('splash-status');
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+
+        function updateStatus(state, message) {
+            if (state === 'ready') {
+                statusIndicator.className = 'status-dot ready';
+                statusText.textContent = 'Online';
+            } else if (state === 'error') {
+                statusIndicator.className = 'status-dot error';
+                statusText.textContent = 'Failed';
+            } else {
+                statusIndicator.className = 'status-dot';
+                statusText.textContent = message || 'Loading...';
+            }
+            if (splashStatus) {
+                splashStatus.textContent = message || '';
+            }
+        }
+
+        async function runApplication() {
+            try {
+                updateStatus('loading', 'Loading Java WebAssembly runtime...');
+
+                await cheerpjInit({
+                    version: 8,
+                    status: 'none',
+                    natives: {
+                        async Java_web_WebTerminalManager_readLine(lib) {
+                            return new Promise(resolve => {
+                                inputResolver = resolve;
+                            });
+                        },
+                        async Java_web_WebTerminalManager_print(lib, nullSelf, text) {
+                            if (text) {
+                                term.write(text.replace(/\r?\n/g, '\r\n'));
+                            }
+                        }
+                    }
+                });
+
+                updateStatus('loading', 'Loading application bytecode...');
+
+                splashScreen.classList.add('hidden');
+                updateStatus('ready');
+                term.focus();
+
+                // Run web.WebMain with both web-runner.jar and the core application JAR on classpath
+                await cheerpjRunMain(
+                    'web.WebMain',
+                    '/app/web-runner.jar:/app/fptu-pro192-food-store-management.jar'
+                );
+            } catch (err) {
+                console.error('CheerpJ execution error:', err);
+                updateStatus('error', err.message);
+                splashScreen.classList.add('hidden');
+            }
+        }
+
+        // Restart app handler
+        document.getElementById('btn-restart').addEventListener('click', () => {
+            window.location.reload();
+        });
+
+        // Reset data handler (clears IndexedDB storage created by CheerpJ)
+        document.getElementById('btn-reset-data').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to discard local changes and restore the original sample dataset?')) {
+                try {
+                    if (window.indexedDB && window.indexedDB.databases) {
+                        const dbs = await window.indexedDB.databases();
+                        for (const db of dbs) {
+                            if (db.name) {
+                                window.indexedDB.deleteDatabase(db.name);
+                            }
+                        }
+                    }
+                    alert('Local session data has been reset. Reloading application...');
+                    window.location.reload();
+                } catch (e) {
+                    alert('Please clear your browser site data (F12) or open an Incognito window to reset data.');
+                    window.location.reload();
+                }
+            }
+        });
+
+        // Boot up
+        window.addEventListener('load', () => {
+            runApplication();
+        });
+    </script>
+</body>
+
+</html>

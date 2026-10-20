@@ -74,6 +74,14 @@ ant clean compile test jar
 java -jar dist/fptu-pro192-food-store-management.jar
 ```
 
+### Option C: Live Interactive Web Terminal (GitHub Pages)
+
+Test and interact with the application directly inside your web browser without installing Java or NetBeans locally:
+
+- **Live Web Terminal**: [https://naipret.github.io/fptu-pro192-food-store-management/](https://naipret.github.io/fptu-pro192-food-store-management/)
+- Built with **CheerpJ 3.0** WebAssembly runtime and **xterm.js** terminal emulator.
+- Automated continuous delivery via GitHub Actions on every push to `main`.
+
 ---
 
 ## 4. Documentation Index
