@@ -63,7 +63,7 @@ public class CustomerModuleTest {
         controller.registerCustomer("C00002", "Võ Thị Mai", "0913334444", "88 Đồng Khởi, District 1", "VIP");
 
         List<String> lines = Files.readAllLines(customersCsv);
-        assertEquals("type,id,fullName,phone,address,isDeleted",
+        assertEquals("id,fullName,phone,address,customerType,isDeleted",
                 lines.get(0), "customers.csv header at line 0");
 
         CustomerController reloaded = new CustomerController(customersCsv);
