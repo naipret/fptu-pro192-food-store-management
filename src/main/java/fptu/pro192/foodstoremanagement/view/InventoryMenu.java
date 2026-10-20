@@ -30,8 +30,8 @@ public class InventoryMenu extends Menu {
     private static final String BATCH_TABLE_BORDER = "+--------+--------+------------------+------------+------------+-------+--------+";
     private static final String BATCH_TABLE_HEADER = "| Batch  | ProdID | Product Name     | Prod Date  | Exp Date   |   Qty | Status |";
 
-    private static final String LOW_STOCK_BORDER = "+--------+--------------------------+--------------+--------+--------+----------+";
-    private static final String LOW_STOCK_HEADER = "| ID     | Product Name             | Category     | Unit   |  Avail |    Total |";
+    private static final String LOW_STOCK_BORDER = "+--------+-------------------------+--------------+--------+--------+----------+";
+    private static final String LOW_STOCK_HEADER = "| ID     | Product Name            | Category     | Unit   |  Avail |    Total |";
 
     private final ProductController productController;
 
@@ -50,34 +50,32 @@ public class InventoryMenu extends Menu {
     }
 
     @Override
+    protected String getBreadcrumbPrefix() {
+        return "MAIN MENU > [4] INVENTORY";
+    }
+
+    @Override
     protected void handleChoice(int choice) {
         switch (choice) {
             case 1:
-                printBreadcrumbHeader("MAIN MENU > [4] INVENTORY > [1] Import New Batch");
                 handleImportNewBatch();
                 break;
             case 2:
-                printBreadcrumbHeader("MAIN MENU > [4] INVENTORY > [2] Replenish Existing Batch Stock");
                 handleReplenishBatch();
                 break;
             case 3:
-                printBreadcrumbHeader("MAIN MENU > [4] INVENTORY > [3] Adjust Batch Quantity");
                 handleAdjustBatchQuantity();
                 break;
             case 4:
-                printBreadcrumbHeader("MAIN MENU > [4] INVENTORY > [4] View Product Batches");
                 handleViewProductBatches();
                 break;
             case 5:
-                printBreadcrumbHeader("MAIN MENU > [4] INVENTORY > [5] View Low-Stock Products Alert");
                 handleViewLowStockProducts();
                 break;
             case 6:
-                printBreadcrumbHeader("MAIN MENU > [4] INVENTORY > [6] View Near-Expiry Batches Alert");
                 handleViewNearExpiryBatches();
                 break;
             case 7:
-                printBreadcrumbHeader("MAIN MENU > [4] INVENTORY > [7] View Expired Batches Report");
                 handleViewExpiredBatches();
                 break;
             default:
@@ -87,8 +85,7 @@ public class InventoryMenu extends Menu {
     }
 
     private void handleImportNewBatch() {
-        printSectionHeader("IMPORT NEW INVENTORY BATCH (Enter 0 to Cancel)");
-        String rawProdId = ConsoleUtil.readNonEmptyString("Enter Product ID (e.g., P00001): ");
+        String rawProdId = ConsoleUtil.readNonEmptyString("Enter Product ID (e.g., P00001, or 0 to cancel): ");
         if ("0".equals(rawProdId)) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
@@ -147,8 +144,7 @@ public class InventoryMenu extends Menu {
     }
 
     private void handleReplenishBatch() {
-        printSectionHeader("REPLENISH EXISTING BATCH STOCK (Enter 0 to Cancel)");
-        String rawProdId = ConsoleUtil.readNonEmptyString("Enter Product ID (e.g., P00001): ");
+        String rawProdId = ConsoleUtil.readNonEmptyString("Enter Product ID (e.g., P00001, or 0 to cancel): ");
         if ("0".equals(rawProdId)) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
@@ -178,8 +174,7 @@ public class InventoryMenu extends Menu {
     }
 
     private void handleAdjustBatchQuantity() {
-        printSectionHeader("ADJUST BATCH QUANTITY (Enter 0 to Cancel)");
-        String rawProdId = ConsoleUtil.readNonEmptyString("Enter Product ID (e.g., P00001): ");
+        String rawProdId = ConsoleUtil.readNonEmptyString("Enter Product ID (e.g., P00001, or 0 to cancel): ");
         if ("0".equals(rawProdId)) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
@@ -208,7 +203,6 @@ public class InventoryMenu extends Menu {
     }
 
     private void handleViewProductBatches() {
-        printSectionHeader("VIEW PRODUCT BATCHES");
         String rawProdId = ConsoleUtil.readNonEmptyString("Enter Product ID (e.g., P00001): ");
         Product product = this.productController.findById(rawProdId);
         if (product == null) {
@@ -223,7 +217,6 @@ public class InventoryMenu extends Menu {
     }
 
     private void handleViewLowStockProducts() {
-        printSectionHeader("LOW-STOCK PRODUCTS ALERT (BR19)");
         String rawThreshold = ConsoleUtil.readOptionalString(
                 "Enter stock threshold [Press Enter for default "
                         + Product.DEFAULT_LOW_STOCK_THRESHOLD + "]: ");
@@ -249,7 +242,7 @@ public class InventoryMenu extends Menu {
         for (Product p : lowStock) {
             System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
                     TableFormatter.fit(p.getId(), 6),
-                    TableFormatter.fit(p.getName(), 24),
+                    TableFormatter.fit(p.getName(), 23),
                     TableFormatter.fit(p.getCategory(), 12),
                     TableFormatter.fit(p.getUnit(), 6),
                     TableFormatter.fitRight(String.valueOf(p.getAvailableStock()), 6),
@@ -260,7 +253,6 @@ public class InventoryMenu extends Menu {
     }
 
     private void handleViewNearExpiryBatches() {
-        printSectionHeader("NEAR-EXPIRY BATCHES ALERT (BR20)");
         String rawDays = ConsoleUtil.readOptionalString(
                 "Enter warning window in days [Press Enter for default "
                         + Product.DEFAULT_NEAR_EXPIRY_DAYS + "]: ");
@@ -280,7 +272,6 @@ public class InventoryMenu extends Menu {
     }
 
     private void handleViewExpiredBatches() {
-        printSectionHeader("EXPIRED BATCHES REPORT (BR11)");
         List<Batch> expiredBatches = this.productController.getExpiredBatches();
         renderBatchTable(expiredBatches);
     }

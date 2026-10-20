@@ -33,61 +33,61 @@ public class ProductModuleTest {
     }
 
     private static void testBatchExpirationAndNearExpiryRules() {
-        LocalDate refDate = LocalDate.of(2026, 10, 19);
+        LocalDate now = LocalDate.now();
         Batch activeBatch = new Batch("B00001", "P00001",
-                LocalDate.of(2026, 10, 1),
-                LocalDate.of(2026, 9, 15),
-                LocalDate.of(2026, 12, 31),
+                now,
+                now.minusDays(15),
+                now.plusDays(60),
                 20);
-        assertTrue(!activeBatch.isExpired(refDate), "Batch expiring in Dec 2026 is not expired");
-        assertTrue(!activeBatch.isNearExpiry(refDate, 7), "Batch expiring in Dec 2026 is not near expiry");
+        assertTrue(!activeBatch.isExpired(), "Batch expiring in 60 days is not expired");
+        assertTrue(!activeBatch.isNearExpiry(7), "Batch expiring in 60 days is not near expiry");
 
         Batch nearBatch = new Batch("B00002", "P00001",
-                LocalDate.of(2026, 10, 1),
-                LocalDate.of(2026, 9, 20),
-                LocalDate.of(2026, 10, 24),
+                now,
+                now.minusDays(10),
+                now.plusDays(3),
                 10);
-        assertTrue(!nearBatch.isExpired(refDate), "Batch expiring in 5 days is not expired");
-        assertTrue(nearBatch.isNearExpiry(refDate, 7), "Batch expiring in 5 days is near expiry (BR20)");
+        assertTrue(!nearBatch.isExpired(), "Batch expiring in 3 days is not expired");
+        assertTrue(nearBatch.isNearExpiry(7), "Batch expiring in 3 days is near expiry (BR20)");
 
         Batch expiredBatch = new Batch("B00003", "P00001",
-                LocalDate.of(2026, 9, 1),
-                LocalDate.of(2026, 8, 1),
-                LocalDate.of(2026, 10, 18),
+                now.minusDays(20),
+                now.minusDays(30),
+                now.minusDays(1),
                 15);
-        assertTrue(expiredBatch.isExpired(refDate), "Batch expiring yesterday is expired (BR11)");
-        assertTrue(!expiredBatch.isNearExpiry(refDate, 7), "Expired batch is not near-expiry");
+        assertTrue(expiredBatch.isExpired(), "Batch expiring yesterday is expired (BR11)");
+        assertTrue(!expiredBatch.isNearExpiry(7), "Expired batch is not near-expiry");
 
         assertThrows(new Runnable() {
             @Override
             public void run() {
                 new Batch("B00004", "P00001",
-                        LocalDate.of(2026, 10, 1),
-                        LocalDate.of(2026, 10, 25),
-                        LocalDate.of(2026, 10, 20),
+                        now,
+                        now.plusDays(10),
+                        now.plusDays(5),
                         5);
             }
         }, "Production date after expiration date must be rejected (BR7)");
     }
 
     private static void testProductFefoAndAvailableStockCalculation() {
-        LocalDate refDate = LocalDate.of(2026, 10, 19);
+        LocalDate now = LocalDate.now();
         Product milk = new Product("P00001", "Vinamilk Fresh Milk 1L", "Dairy", "Carton", 36000.0);
 
         Batch expiredBatch = new Batch("B00001", "P00001",
-                LocalDate.of(2026, 9, 1),
-                LocalDate.of(2026, 8, 25),
-                LocalDate.of(2026, 10, 10),
+                now.minusDays(20),
+                now.minusDays(25),
+                now.minusDays(5),
                 10);
         Batch laterBatch = new Batch("B00002", "P00001",
-                LocalDate.of(2026, 10, 5),
-                LocalDate.of(2026, 10, 1),
-                LocalDate.of(2026, 11, 20),
+                now,
+                now.minusDays(5),
+                now.plusDays(30),
                 15);
         Batch earlierBatch = new Batch("B00003", "P00001",
-                LocalDate.of(2026, 10, 2),
-                LocalDate.of(2026, 9, 28),
-                LocalDate.of(2026, 10, 25),
+                now,
+                now.minusDays(2),
+                now.plusDays(10),
                 8);
 
         milk.addBatch(expiredBatch);
@@ -95,9 +95,9 @@ public class ProductModuleTest {
         milk.addBatch(earlierBatch);
 
         assertEquals(33, milk.getTotalStock(), "Total physical stock includes expired batch");
-        assertEquals(23, milk.getAvailableStock(refDate), "Available stock excludes expired batch (BR11)");
+        assertEquals(23, milk.getAvailableStock(), "Available stock excludes expired batch (BR11)");
 
-        List<Batch> fefoOrder = milk.getActiveBatches(refDate);
+        List<Batch> fefoOrder = milk.getActiveBatches();
         assertEquals(2, fefoOrder.size(), "Only 2 non-expired batches returned by getActiveBatches");
         assertEquals("B00003", fefoOrder.get(0).getBatchId(),
                 "Earlier expiring batch B00003 placed first via FEFO (BR24)");
@@ -123,7 +123,8 @@ public class ProductModuleTest {
                 LocalDate.now().minusDays(10),
                 LocalDate.now().plusDays(120),
                 30);
-        controller.addProduct(rice, batch1);
+        controller.addProduct(rice);
+        controller.addBatchToProduct("P00001", batch1);
 
         List<String> productLines = Files.readAllLines(productsCsv);
         List<String> batchLines = Files.readAllLines(batchesCsv);

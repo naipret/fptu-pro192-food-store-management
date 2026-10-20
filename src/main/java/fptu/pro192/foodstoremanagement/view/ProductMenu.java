@@ -26,8 +26,8 @@ public class ProductMenu extends Menu {
             "Remove Product"
     };
 
-    private static final String PRODUCT_TABLE_BORDER = "+--------+------------------------+--------------+--------+------------+------+";
-    private static final String PRODUCT_TABLE_HEADER = "| ID     | Product Name           | Category     | Unit   | Price(VND) |Stock |";
+    private static final String PRODUCT_TABLE_BORDER = "+--------+------------------------+--------------+--------+------------+-------+";
+    private static final String PRODUCT_TABLE_HEADER = "| ID     | Product Name           | Category     | Unit   | Price(VND) | Stock |";
 
     private final ProductController productController;
 
@@ -43,6 +43,11 @@ public class ProductMenu extends Menu {
             throw new IllegalArgumentException("ProductController cannot be null.");
         }
         this.productController = productController;
+    }
+
+    @Override
+    protected String getBreadcrumbPrefix() {
+        return "MAIN MENU > [1] PRODUCTS";
     }
 
     @Override
@@ -70,20 +75,17 @@ public class ProductMenu extends Menu {
     }
 
     private void handleViewAllProducts() {
-        printBreadcrumbHeader("MAIN MENU > [1] PRODUCTS > [1] View All Products");
         List<Product> products = this.productController.getAllProducts();
         renderProductTable(products);
     }
 
     private void handleSearchProducts() {
-        printBreadcrumbHeader("MAIN MENU > [1] PRODUCTS > [2] Search Products");
         String keyword = ConsoleUtil.readOptionalString("Enter search keyword (ID, Name, Category, or Unit): ");
         List<Product> matches = this.productController.search(keyword);
         renderProductTable(matches);
     }
 
     private void handleAddProduct() {
-        printBreadcrumbHeader("MAIN MENU > [1] PRODUCTS > [3] Add New Product");
         String suggestedId = this.productController.generateNextProductId();
         String productId = promptProductId(suggestedId);
         if (productId == null) {
@@ -108,7 +110,6 @@ public class ProductMenu extends Menu {
     }
 
     private void handleUpdateProduct() {
-        printBreadcrumbHeader("MAIN MENU > [1] PRODUCTS > [4] Update Product Information");
         String rawId = ConsoleUtil.readNonEmptyString("Enter Product ID to update (e.g., P00001, or 0 to cancel): ");
         if ("0".equals(rawId)) {
             System.out.println("  [INFO] Operation cancelled.");
@@ -156,7 +157,6 @@ public class ProductMenu extends Menu {
     }
 
     private void handleDeleteProduct() {
-        printBreadcrumbHeader("MAIN MENU > [1] PRODUCTS > [5] Remove Product");
         String rawId = ConsoleUtil.readNonEmptyString("Enter Product ID to remove (e.g., P00001, or 0 to cancel): ");
         if ("0".equals(rawId)) {
             System.out.println("  [INFO] Operation cancelled.");
@@ -206,7 +206,7 @@ public class ProductMenu extends Menu {
             String priceCell = TableFormatter.fitRight(
                     InputValidator.formatCurrency(product.getPrice()), 10);
             String stockCell = TableFormatter.fitRight(
-                    String.valueOf(product.getAvailableStock()), 4);
+                    String.valueOf(product.getAvailableStock()), 5);
             System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
                     idCell, nameCell, catCell, unitCell, priceCell, stockCell);
         }
@@ -307,18 +307,6 @@ public class ProductMenu extends Menu {
         }
     }
 
-    private String promptCategoryFilter() {
-        List<String> list = new ArrayList<>(this.productController.getCategories());
-        for (int i = 0; i < list.size(); i++) {
-            System.out.printf("    [%2d] %-14s", i + 1, list.get(i));
-            if ((i + 1) % 3 == 0 || i == list.size() - 1) {
-                System.out.println();
-            }
-        }
-        int selected = ConsoleUtil.readInt("Select category [1-" + list.size() + "]: ", 1, list.size());
-        return list.get(selected - 1);
-    }
-
     private String promptUnitSelection() {
         List<String> list = new ArrayList<>(this.productController.getUnits());
         System.out.println("  Available Measurement Units:");
@@ -340,43 +328,6 @@ public class ProductMenu extends Menu {
                     "Enter new single-word unit name (letters only, no spaces/slashes): ");
             try {
                 return this.productController.registerUnit(custom);
-            } catch (IllegalArgumentException e) {
-                System.out.println("  [ERROR] " + e.getMessage());
-            }
-        }
-    }
-
-    private Batch promptNewBatchForProduct(String productId) {
-        String suggestedBatchId = this.productController.generateNextBatchId();
-        String batchId;
-        while (true) {
-            String raw = ConsoleUtil.readOptionalString(
-                    "Enter Batch ID [Press Enter for " + suggestedBatchId + "]: ");
-            if (raw.isEmpty()) {
-                batchId = suggestedBatchId;
-                break;
-            }
-            try {
-                String normalized = InputValidator.normalizeBatchId(raw);
-                if (this.productController.existsBatchId(normalized)) {
-                    System.out.println("  [ERROR] Batch ID '" + normalized + "' already exists.");
-                    continue;
-                }
-                batchId = normalized;
-                break;
-            } catch (IllegalArgumentException e) {
-                System.out.println("  [ERROR] " + e.getMessage());
-            }
-        }
-
-        int quantity = ConsoleUtil.readPositiveInt("Enter initial batch quantity (> 0): ", false);
-        while (true) {
-            LocalDate productionDate = ConsoleUtil.readDate("Enter production date (dd/MM/yyyy): ");
-            LocalDate expirationDate = ConsoleUtil.readDate("Enter expiration date (dd/MM/yyyy): ");
-            try {
-                InputValidator.validateDateOrder(productionDate, expirationDate);
-                return new Batch(batchId, productId, LocalDate.now(),
-                        productionDate, expirationDate, quantity);
             } catch (IllegalArgumentException e) {
                 System.out.println("  [ERROR] " + e.getMessage());
             }

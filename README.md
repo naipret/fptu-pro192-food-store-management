@@ -27,7 +27,10 @@ fptu-pro192-foodstore-management/
 ├── CONTRIBUTING.md                            # Git branching, commit, issue, and PR workflow
 ├── README.md                                  # Project overview and quick start guide
 ├── nbproject/                                 # NetBeans 13 project metadata
-├── data/                                      # Runtime CSV storage files
+├── scripts/                                   # Standalone dataset generation scripts
+│   ├── seed.ps1                               # PowerShell script generating dynamic relative-date demo CSVs
+│   └── seed.sh                                # Bash script generating dynamic relative-date demo CSVs
+├── data/                                      # Runtime CSV storage files (auto-initialized with headers)
 │   ├── products.csv                           # Retail product catalog records
 │   ├── batches.csv                            # Inventory batch records linked to products
 │   ├── customers.csv                          # Registered Regular and VIP customer records
@@ -41,6 +44,9 @@ fptu-pro192-foodstore-management/
 │   ├── UI_SPECIFICATION.md                    # 80-column ASCII terminal standards and table layouts
 │   ├── NAMING_CONVENTIONS.md                  # Identifier and architectural naming rules
 │   └── CLEAN_CODE.md                          # Defensive coding, exception handling, and Javadoc rules
+├── .github/
+│   ├── workflows/                             # GitHub Actions CI/CD workflows
+│   └── pages/                                 # Web Terminal assets for GitHub Pages deployment
 ├── src/main/java/fptu/pro192/foodstoremanagement/
 │   ├── Main.java                              # Application entry point and dependency wiring
 │   ├── model/                                 # Domain entities (Product, Batch, Customer, Order, OrderDetail)
@@ -74,7 +80,19 @@ ant clean compile test jar
 java -jar dist/fptu-pro192-food-store-management.jar
 ```
 
-### Option C: Live Interactive Web Terminal (GitHub Pages)
+### Option C: Generating Realistic Demo Data (Optional)
+
+The application starts up cleanly with empty header-only CSVs automatically. To populate realistic demo datasets with dynamic dates relative to today (active stock, near-expiry alerts, expired batches, and sample invoices):
+
+```powershell
+# PowerShell (Windows)
+powershell -ExecutionPolicy Bypass -File scripts/seed.ps1
+
+# Bash (Linux / macOS / WSL)
+./scripts/seed.sh
+```
+
+### Option D: Live Interactive Web Terminal (GitHub Pages)
 
 Test and interact with the application directly inside your web browser without installing Java or NetBeans locally:
 

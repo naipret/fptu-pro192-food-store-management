@@ -49,16 +49,6 @@ public final class ConsoleUtil {
     }
 
     /**
-     * Alias for readNonEmptyString for backward compatibility across menu prompts.
-     *
-     * @param prompt the prompt message displayed to the user
-     * @return a non-empty trimmed string entered by the user
-     */
-    public static String readString(String prompt) {
-        return readNonEmptyString(prompt);
-    }
-
-    /**
      * Repeatedly prompts the user until an integer within the inclusive range
      * from min to max is entered (BR26).
      *
@@ -191,18 +181,21 @@ public final class ConsoleUtil {
     }
 
     /**
-     * Clears or flushes the terminal screen using ANSI escape sequences
-     * with fallback line feeds for IDE console views.
+     * Clears the terminal screen using native Windows command when running in a
+     * Windows console, falling back to ANSI escape sequences for modern terminals
+     * and the CheerpJ WebAssembly browser environment.
      */
     public static void clearScreen() {
         try {
-            System.out.print("\033[H\033[2J");
-            System.out.flush();
+            if (System.getProperty("os.name", "").toLowerCase().contains("win")
+                    && System.console() != null) {
+                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+                return;
+            }
         } catch (Exception ignored) {
         }
-        for (int i = 0; i < 25; i++) {
-            System.out.println();
-        }
+        System.out.print("\033[H\033[2J\033[3J");
+        System.out.flush();
     }
 
     /**

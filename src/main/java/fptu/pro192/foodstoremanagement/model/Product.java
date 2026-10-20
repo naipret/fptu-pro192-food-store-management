@@ -105,30 +105,15 @@ public class Product {
 
     /**
      * Returns all non-expired batches with positive stock relative to today,
-     * sorted in FEFO order (earliest expirationDate first) (BR11, BR24).
+     * sorted in FEFO order (ascending expirationDate, then importDate, then
+     * batchId) (BR11, BR24).
      *
      * @return an unmodifiable list of active, sellable batches sorted by FEFO
      */
     public List<Batch> getActiveBatches() {
-        return getActiveBatches(LocalDate.now());
-    }
-
-    /**
-     * Returns all non-expired batches with positive stock relative to the given
-     * reference date, sorted in FEFO order (ascending expirationDate, then
-     * importDate, then batchId) (BR11, BR24).
-     *
-     * @param referenceDate the date used to evaluate batch expiration
-     * @return an unmodifiable list of active, sellable batches sorted by FEFO
-     * @throws IllegalArgumentException if referenceDate is null
-     */
-    public List<Batch> getActiveBatches(LocalDate referenceDate) {
-        if (referenceDate == null) {
-            throw new IllegalArgumentException("Reference date cannot be null.");
-        }
         List<Batch> active = new ArrayList<>();
         for (Batch batch : this.batches) {
-            if (batch.getQuantity() > 0 && !batch.isExpired(referenceDate)) {
+            if (batch.getQuantity() > 0 && !batch.isExpired()) {
                 active.add(batch);
             }
         }
@@ -170,24 +155,9 @@ public class Product {
      * @return the available non-expired stock quantity
      */
     public int getAvailableStock() {
-        return getAvailableStock(LocalDate.now());
-    }
-
-    /**
-     * Returns the sellable stock quantity across all non-expired batches
-     * relative to the specified reference date (BR10, BR11, BR26).
-     *
-     * @param referenceDate the date used to evaluate batch expiration
-     * @return the available non-expired stock quantity
-     * @throws IllegalArgumentException if referenceDate is null
-     */
-    public int getAvailableStock(LocalDate referenceDate) {
-        if (referenceDate == null) {
-            throw new IllegalArgumentException("Reference date cannot be null.");
-        }
         int available = 0;
         for (Batch batch : this.batches) {
-            if (batch.getQuantity() > 0 && !batch.isExpired(referenceDate)) {
+            if (batch.getQuantity() > 0 && !batch.isExpired()) {
                 available += batch.getQuantity();
             }
         }
@@ -200,26 +170,13 @@ public class Product {
      *
      * @param threshold the non-negative low-stock threshold
      * @return true if available stock is less than or equal to threshold
+     * @throws IllegalArgumentException if threshold is negative
      */
     public boolean isLowStock(int threshold) {
-        return isLowStock(LocalDate.now(), threshold);
-    }
-
-    /**
-     * Checks whether this product's available non-expired stock is at or below
-     * the specified threshold relative to referenceDate (BR19).
-     *
-     * @param referenceDate the date used to evaluate batch expiration
-     * @param threshold     the non-negative low-stock threshold
-     * @return true if available stock is less than or equal to threshold
-     * @throws IllegalArgumentException if referenceDate is null or threshold is
-     *                                  negative
-     */
-    public boolean isLowStock(LocalDate referenceDate, int threshold) {
         if (threshold < 0) {
             throw new IllegalArgumentException("Low-stock threshold cannot be negative.");
         }
-        return getAvailableStock(referenceDate) <= threshold;
+        return getAvailableStock() <= threshold;
     }
 
     /**

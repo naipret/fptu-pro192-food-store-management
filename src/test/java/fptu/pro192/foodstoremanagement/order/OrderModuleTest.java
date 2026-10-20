@@ -69,7 +69,8 @@ public class OrderModuleTest {
 
         LocalDate today = LocalDate.now();
         productController.addProduct(
-                new Product("P00001", "Vinamilk Fresh Milk 1L", "Dairy", "Carton", 40000.0),
+                new Product("P00001", "Vinamilk Fresh Milk 1L", "Dairy", "Carton", 40000.0));
+        productController.addBatchToProduct("P00001",
                 new Batch("B00001", "P00001", today, today.minusDays(5), today.plusDays(30), 10));
         productController.addBatchToProduct("P00001",
                 new Batch("B00002", "P00001", today, today.minusDays(10), today.plusDays(5), 4));
@@ -78,17 +79,17 @@ public class OrderModuleTest {
                 "C00001", "Trần Thị Bình", "0912345678", "45 Nguyễn Huệ, District 1", "VIP");
 
         Order draft = orderController.createDraftOrder("C00001");
-        orderController.addItemToDraft(draft, "P00001", 6, today);
+        orderController.addItemToDraft(draft, "P00001", 6);
 
-        assertEquals(14, productController.findById("P00001").getAvailableStock(today),
+        assertEquals(14, productController.findById("P00001").getAvailableStock(),
                 "Stock not deducted while order is still a draft (BR14)");
         assertEquals(240000.0, draft.getTotalAmount(), "Gross total 6 * 40,000 (BR13)");
         assertEquals(24000.0, draft.getDiscount(), "VIP 10% discount (BR15)");
         assertEquals(216000.0, draft.getFinalAmount(), "Final amount after discount (BR16)");
 
-        Order finalized = orderController.finalizeOrder(draft, today);
+        Order finalized = orderController.finalizeOrder(draft);
         assertEquals("O00001", finalized.getOrderId(), "Finalized order ID");
-        assertEquals(8, productController.findById("P00001").getAvailableStock(today),
+        assertEquals(8, productController.findById("P00001").getAvailableStock(),
                 "Stock deducted from 14 to 8 on checkout completion (BR14)");
 
         List<String> orderLines = Files.readAllLines(ordersCsv);
@@ -128,18 +129,21 @@ public class OrderModuleTest {
 
         final LocalDate today = LocalDate.now();
         productController.addProduct(
-                new Product("P00001", "Expired Yogurt Pack", "Dairy", "Pack", 28000.0),
+                new Product("P00001", "Expired Yogurt Pack", "Dairy", "Pack", 28000.0));
+        productController.addBatchToProduct("P00001",
                 new Batch("B00001", "P00001", today.minusDays(20), today.minusDays(25),
                         today.minusDays(1), 12));
+
         productController.addProduct(
-                new Product("P00002", "Canned Tuna 150g", "Canned", "Can", 32000.0),
+                new Product("P00002", "Canned Tuna 150g", "Canned", "Can", 32000.0));
+        productController.addBatchToProduct("P00002",
                 new Batch("B00002", "P00002", today, today.minusDays(10), today.plusDays(90), 5));
 
         final Order draft = orderController.createDraftOrder(null);
 
         boolean caughtExpired = false;
         try {
-            orderController.addItemToDraft(draft, "P00001", 1, today);
+            orderController.addItemToDraft(draft, "P00001", 1);
         } catch (IllegalArgumentException e) {
             caughtExpired = true;
         }
@@ -147,7 +151,7 @@ public class OrderModuleTest {
 
         boolean caughtInsufficient = false;
         try {
-            orderController.addItemToDraft(draft, "P00002", 6, today);
+            orderController.addItemToDraft(draft, "P00002", 6);
         } catch (InsufficientStockException e) {
             caughtInsufficient = true;
         }

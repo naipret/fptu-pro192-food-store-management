@@ -45,10 +45,10 @@ jobs:
       - name: Compile Web Bridge and Prepare Deployment Payload
         run: |
           mkdir -p _site/web-classes
-          javac -cp dist/fptu-pro192-food-store-management.jar -d _site/web-classes web/bridge/*.java
+          javac -cp dist/fptu-pro192-food-store-management.jar -d _site/web-classes .github/pages/bridge/*.java
           jar -cf _site/web-runner.jar -C _site/web-classes . -C . data
           rm -rf _site/web-classes
-          cp web/index.html _site/index.html
+          cp .github/pages/index.html _site/index.html
           cp dist/fptu-pro192-food-store-management.jar _site/fptu-pro192-food-store-management.jar
           cp -r data _site/data
 

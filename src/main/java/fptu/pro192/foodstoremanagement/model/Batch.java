@@ -42,28 +42,12 @@ public class Batch {
     /**
      * Checks whether this batch has expired relative to the current system date
      * (BR11).
+     * A batch expiring on today remains valid through the end of today.
      *
      * @return true if today is strictly after expirationDate, false otherwise
      */
     public boolean isExpired() {
-        return isExpired(LocalDate.now());
-    }
-
-    /**
-     * Checks whether this batch has expired relative to a given reference date
-     * (BR11).
-     * A batch expiring on the reference date remains valid through the end of that
-     * day.
-     *
-     * @param referenceDate the date to evaluate against
-     * @return true if referenceDate is strictly after expirationDate
-     * @throws IllegalArgumentException if referenceDate is null
-     */
-    public boolean isExpired(LocalDate referenceDate) {
-        if (referenceDate == null) {
-            throw new IllegalArgumentException("Reference date cannot be null.");
-        }
-        return referenceDate.isAfter(this.expirationDate);
+        return LocalDate.now().isAfter(this.expirationDate);
     }
 
     /**
@@ -72,33 +56,16 @@ public class Batch {
      *
      * @param daysThreshold the non-negative warning window in days
      * @return true if the batch expires within daysThreshold days from today
+     * @throws IllegalArgumentException if daysThreshold is negative
      */
     public boolean isNearExpiry(int daysThreshold) {
-        return isNearExpiry(LocalDate.now(), daysThreshold);
-    }
-
-    /**
-     * Checks whether this batch has positive stock, is not yet expired relative
-     * to referenceDate, and expires within daysThreshold days (BR20).
-     *
-     * @param referenceDate the reference date to evaluate from
-     * @param daysThreshold the non-negative warning window in days
-     * @return true if the batch is active and expires on or before referenceDate
-     *         plus daysThreshold
-     * @throws IllegalArgumentException if referenceDate is null or daysThreshold is
-     *                                  negative
-     */
-    public boolean isNearExpiry(LocalDate referenceDate, int daysThreshold) {
-        if (referenceDate == null) {
-            throw new IllegalArgumentException("Reference date cannot be null.");
-        }
         if (daysThreshold < 0) {
             throw new IllegalArgumentException("Days threshold cannot be negative.");
         }
-        if (this.quantity <= 0 || isExpired(referenceDate)) {
+        if (this.quantity <= 0 || isExpired()) {
             return false;
         }
-        LocalDate warningLimit = referenceDate.plusDays(daysThreshold);
+        LocalDate warningLimit = LocalDate.now().plusDays(daysThreshold);
         return !this.expirationDate.isAfter(warningLimit);
     }
 

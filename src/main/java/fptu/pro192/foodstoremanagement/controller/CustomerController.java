@@ -60,6 +60,10 @@ public class CustomerController {
     public final void loadFromCsv() {
         this.customers.clear();
         List<String[]> rows = CsvUtil.readCsv(this.csvPath);
+        if (rows.isEmpty()) {
+            saveToCsv();
+            return;
+        }
 
         for (int i = 0; i < rows.size(); i++) {
             String[] row = rows.get(i);
@@ -186,22 +190,6 @@ public class CustomerController {
     }
 
     /**
-     * Alias for registerCustomer maintained for caller compatibility (BR2, BR3,
-     * BR15, BR25).
-     *
-     * @param id       the 6-character customer ID (C00001-C99999)
-     * @param fullName the customer's full name
-     * @param phone    the customer's phone number
-     * @param address  the customer's address
-     * @param type     the customer loyalty tier ("Regular" or "VIP")
-     * @return the newly created Customer
-     */
-    public Customer addCustomer(String id, String fullName, String phone,
-            String address, String type) {
-        return registerCustomer(id, fullName, phone, address, type);
-    }
-
-    /**
      * Updates an active customer's attributes selectively and persists to CSV
      * (BR3, BR15, BR25). Passing null or blank for any parameter retains the
      * customer's existing value for that attribute.
@@ -262,19 +250,6 @@ public class CustomerController {
         this.customers.set(targetIndex, replacement);
         saveToCsv();
         return replacement;
-    }
-
-    /**
-     * Convenience overload that updates phone and address while preserving the
-     * customer's existing full name and loyalty tier (BR3, BR25).
-     *
-     * @param id         the customer ID to update
-     * @param newPhone   the new phone number, or null/blank to keep existing
-     * @param newAddress the new address, or null/blank to keep existing
-     * @return the updated Customer instance
-     */
-    public Customer updateCustomer(String id, String newPhone, String newAddress) {
-        return updateCustomer(id, null, newPhone, newAddress, null);
     }
 
     /**
@@ -374,15 +349,6 @@ public class CustomerController {
     }
 
     /**
-     * Alias for getAllActive for caller compatibility (BR27).
-     *
-     * @return an unmodifiable list of active Customer objects
-     */
-    public List<Customer> getAllCustomers() {
-        return getAllActive();
-    }
-
-    /**
      * Searches active customers by matching the keyword against customer ID,
      * full name, or phone number (case-insensitive). Returns all active
      * customers if keyword is null or blank.
@@ -408,28 +374,6 @@ public class CustomerController {
                     || (!digitsOnly.isEmpty() && customer.getPhone().contains(digitsOnly));
             boolean matchAddress = customer.getAddress().toLowerCase(Locale.ROOT).contains(lower);
             if (matchId || matchName || matchPhone || matchAddress) {
-                matches.add(customer);
-            }
-        }
-        return Collections.unmodifiableList(matches);
-    }
-
-    /**
-     * Searches active customers whose full name contains the given keyword
-     * (case-insensitive). Returns all active customers if keyword is null or blank.
-     *
-     * @param keyword the name substring to search for
-     * @return an unmodifiable list of matching active customers
-     */
-    public List<Customer> searchByName(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return getAllActive();
-        }
-        String lower = keyword.trim().toLowerCase(Locale.ROOT);
-        List<Customer> matches = new ArrayList<>();
-        for (Customer customer : this.customers) {
-            if (!customer.isDeleted()
-                    && customer.getFullName().toLowerCase(Locale.ROOT).contains(lower)) {
                 matches.add(customer);
             }
         }

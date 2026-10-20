@@ -108,15 +108,19 @@ Every interactive console screen (`MainMenu`, `ProductMenu`, `InventoryMenu`, `C
 The abstract class `Menu` defines the `final` template method `display()`:
 
 ```java
-public final void display() {
+public void display() {
     boolean running = true;
     while (running) {
-        ConsoleUtil.clearScreen();
         renderMenuFrame();
-        int choice = ConsoleUtil.readInt("Enter your choice [0-" + options.length + "]: ", 0, options.length);
+        int choice = ConsoleUtil.readInt("Enter your choice [0-" + this.options.length + "]: ", 0, this.options.length);
         if (choice == 0) {
+            onExit();
             running = false;
         } else {
+            ConsoleUtil.clearScreen();
+            if (shouldShowBreadcrumb()) {
+                printBreadcrumbHeader(getBreadcrumbPrefix() + " > [" + choice + "] " + this.options[choice - 1]);
+            }
             handleChoice(choice);
             if (shouldPauseAfterAction()) {
                 ConsoleUtil.pressEnterToContinue();
@@ -126,4 +130,7 @@ public final void display() {
 }
 ```
 
-Subclasses implement the abstract primitive operation `protected abstract void handleChoice(int choice)` and may override the hook method `protected boolean shouldPauseAfterAction()` (which defaults to `true` in `Menu` for leaf action screens and returns `false` in `MainMenu` so returning from a submenu does not trigger a redundant `Press Enter` prompt).
+Subclasses implement the abstract primitive operation `protected abstract void handleChoice(int choice)` and may override the hook methods:
+- `protected boolean shouldPauseAfterAction()`: defaults to `true` in `Menu` for leaf action screens and returns `false` in `MainMenu` so returning from a submenu does not trigger a redundant `Press Enter` prompt.
+- `protected boolean shouldShowBreadcrumb()`: defaults to `true` to automatically render the centered 80-column breadcrumb banner before executing the selected action handler; overridden in `MainMenu` to return `false`.
+- `protected String getBreadcrumbPrefix()`: provides the menu's breadcrumb prefix trail (e.g. `MAIN MENU > [1] PRODUCTS`).

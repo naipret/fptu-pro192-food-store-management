@@ -59,6 +59,9 @@ public abstract class Menu {
                 running = false;
             } else {
                 ConsoleUtil.clearScreen();
+                if (shouldShowBreadcrumb()) {
+                    printBreadcrumbHeader(getBreadcrumbPrefix() + " > [" + choice + "] " + this.options[choice - 1]);
+                }
                 handleChoice(choice);
                 if (shouldPauseAfterAction()) {
                     ConsoleUtil.pressEnterToContinue();
@@ -99,6 +102,27 @@ public abstract class Menu {
      */
     protected boolean shouldPauseAfterAction() {
         return true;
+    }
+
+    /**
+     * Hook method controlling whether an automatic breadcrumb banner is rendered
+     * before executing a chosen menu action. Defaults to true. MainMenu overrides
+     * this to return false so that top-level dispatching does not print a breadcrumb.
+     *
+     * @return true to show automatic breadcrumb header, false otherwise
+     */
+    protected boolean shouldShowBreadcrumb() {
+        return true;
+    }
+
+    /**
+     * Returns the breadcrumb prefix for this menu, e.g. "MAIN MENU > PRODUCTS".
+     * Defaults to "MAIN MENU > " + this.title.
+     *
+     * @return the breadcrumb prefix
+     */
+    protected String getBreadcrumbPrefix() {
+        return "MAIN MENU > " + this.title;
     }
 
     /**
