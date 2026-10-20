@@ -118,6 +118,19 @@ public abstract class Menu {
     }
 
     /**
+     * Prints a formatted 80-column section header banner for a sub-operation
+     * featuring a centered breadcrumb navigation indicator.
+     *
+     * @param breadcrumb the hierarchical navigation trail (e.g. "MAIN MENU > [1]
+     *                   PRODUCTS > [3] Add product")
+     */
+    protected void printBreadcrumbHeader(String breadcrumb) {
+        System.out.println(DOUBLE_BORDER);
+        System.out.println(TableFormatter.center(breadcrumb, TableFormatter.SCREEN_WIDTH));
+        System.out.println(DOUBLE_BORDER);
+    }
+
+    /**
      * Prints a formatted 80-column section header banner for a sub-operation.
      *
      * @param heading the section title to display

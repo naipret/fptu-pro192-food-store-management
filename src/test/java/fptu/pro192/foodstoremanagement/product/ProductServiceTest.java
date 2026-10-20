@@ -117,7 +117,7 @@ public class ProductServiceTest {
         ProductMenu productMenu = new ProductMenu(controller);
         InventoryMenu inventoryMenu = new InventoryMenu(controller);
 
-        String productMenuInput = "1\n\nTH True Milk 1L\n6\n10\n38000\nN\n4\n\n0\n";
+        String productMenuInput = "3\n\nTH True Milk 1L\n6\n10\n38000\n1\n\n0\n";
         ScannerManager.getInstance().setInputStream(
                 new ByteArrayInputStream(productMenuInput.getBytes(StandardCharsets.UTF_8)));
         productMenu.display();

@@ -45,7 +45,7 @@ public class ReportMenu extends Menu {
      * @throws IllegalArgumentException if reportController is null
      */
     public ReportMenu(ReportController reportController) {
-        super("ANALYTICAL & REVENUE REPORTS", MENU_OPTIONS);
+        super("REPORTS", MENU_OPTIONS);
         if (reportController == null) {
             throw new IllegalArgumentException("ReportController cannot be null.");
         }

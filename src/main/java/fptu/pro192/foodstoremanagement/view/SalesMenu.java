@@ -24,10 +24,10 @@ import java.util.Locale;
 public class SalesMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
-            "Create New Sales Order (Checkout)",
+            "New Sale (Checkout)",
             "View All Sales Orders",
-            "View Order Details / Invoice by ID",
-            "Search Orders by Customer ID"
+            "Search Sales Orders",
+            "View Order Invoice by ID"
     };
 
     private static final String INVOICE_BORDER = "+-----+--------+------------------------+-------+-------------+--------------+";
@@ -49,7 +49,7 @@ public class SalesMenu extends Menu {
     public SalesMenu(OrderController orderController,
             ProductController productController,
             CustomerController customerController) {
-        super("SALES & CHECKOUT MANAGEMENT", MENU_OPTIONS);
+        super("SALES", MENU_OPTIONS);
         if (orderController == null) {
             throw new IllegalArgumentException("OrderController cannot be null.");
         }
@@ -79,10 +79,10 @@ public class SalesMenu extends Menu {
                 handleViewAllOrders();
                 break;
             case 3:
-                handleViewOrderById();
+                handleSearchOrders();
                 break;
             case 4:
-                handleSearchOrdersByCustomer();
+                handleViewOrderById();
                 break;
             default:
                 System.out.println("  [ERROR] Unsupported menu choice: " + choice);
@@ -97,7 +97,7 @@ public class SalesMenu extends Menu {
      * BR26).
      */
     public void handleCreateOrderFlow() {
-        printSectionHeader("CREATE NEW SALES ORDER (CHECKOUT)");
+        printBreadcrumbHeader("MAIN MENU > [3] SALES > [1] New Sale (Checkout)");
         List<Product> activeProducts = this.productController.getAllProducts();
         if (activeProducts.isEmpty()) {
             System.out.println("  [WARN] No active products in catalog. Cannot create an order.");
@@ -186,15 +186,36 @@ public class SalesMenu extends Menu {
 
     private void promptAddItemToCart(Order draft) {
         LocalDate today = LocalDate.now();
-        String rawProductId = ConsoleUtil.readNonEmptyString(
-                "Enter Product ID to add (e.g., P00001) or 0 to return to cart: ");
-        if ("0".equals(rawProductId)) {
+        String rawInput = ConsoleUtil.readNonEmptyString(
+                "Enter Product ID or search keyword (or 0 to return): ");
+        if ("0".equals(rawInput)) {
             return;
         }
-        Product product = this.productController.findById(rawProductId);
+
+        Product product = this.productController.findById(rawInput);
         if (product == null) {
-            System.out.println("  [ERROR] Active product not found with ID: " + rawProductId);
-            return;
+            List<Product> matches = this.productController.search(rawInput);
+            if (matches.isEmpty()) {
+                System.out.println("  [ERROR] No active products match keyword: " + rawInput);
+                return;
+            }
+            System.out.println("  Matching products found:");
+            for (Product p : matches) {
+                System.out.printf("    - %s | %s | %s | Available Stock: %d%n",
+                        p.getId(), p.getName(),
+                        InputValidator.formatCurrencyWithUnit(p.getPrice()),
+                        p.getAvailableStock(today));
+            }
+            String confirmedId = ConsoleUtil.readNonEmptyString(
+                    "Enter exact Product ID from list above to add (or 0 to cancel): ");
+            if ("0".equals(confirmedId)) {
+                return;
+            }
+            product = this.productController.findById(confirmedId);
+            if (product == null) {
+                System.out.println("  [ERROR] Active product not found with ID: " + confirmedId);
+                return;
+            }
         }
 
         int remainingStock = this.orderController.getRemainingAvailableStock(
@@ -211,7 +232,7 @@ public class SalesMenu extends Menu {
         }
 
         System.out.println("  Selected: " + product.getId() + " - " + product.getName()
-                + " | Price: " + InputValidator.formatCurrency(product.getPrice()) + " VND"
+                + " | Price: " + InputValidator.formatCurrencyWithUnit(product.getPrice())
                 + " | Available to add: " + remainingStock + " " + product.getUnit());
 
         int qty = ConsoleUtil.readPositiveInt("Enter quantity to add (1-" + remainingStock + "): ", false);
@@ -219,7 +240,7 @@ public class SalesMenu extends Menu {
             this.orderController.addItemToDraft(draft, product.getId(), qty, today);
             System.out.println("  [OK] Added " + qty + " x " + product.getName()
                     + " to cart. Current total: "
-                    + InputValidator.formatCurrency(draft.getFinalAmount()) + " VND");
+                    + InputValidator.formatCurrencyWithUnit(draft.getFinalAmount()));
         } catch (InsufficientStockException | IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
         }
@@ -229,16 +250,27 @@ public class SalesMenu extends Menu {
      * Displays a summary table of all completed historical sales orders (BR17).
      */
     public void handleViewAllOrders() {
-        printSectionHeader("ALL COMPLETED SALES ORDERS");
+        printBreadcrumbHeader("MAIN MENU > [3] SALES > [2] View All Sales Orders");
         List<Order> orders = this.orderController.getAllOrders();
         renderOrdersSummaryTable(orders);
+    }
+
+    /**
+     * Prompts for search criteria and displays matching sales orders.
+     */
+    public void handleSearchOrders() {
+        printBreadcrumbHeader("MAIN MENU > [3] SALES > [3] Search Sales Orders");
+        String keyword = ConsoleUtil
+                .readOptionalString("Enter search keyword (Order ID, Customer ID, or Date e.g. 2026, 10/2026): ");
+        List<Order> matching = this.orderController.searchOrders(keyword);
+        renderOrdersSummaryTable(matching);
     }
 
     /**
      * Prompts for an Order ID and renders its detailed invoice table (BR8, BR17).
      */
     public void handleViewOrderById() {
-        printSectionHeader("VIEW ORDER INVOICE BY ID");
+        printBreadcrumbHeader("MAIN MENU > [3] SALES > [4] View Order Invoice by ID");
         String rawOrderId = ConsoleUtil.readNonEmptyString(
                 "Enter Order ID (e.g., O00001) or 0 to cancel: ");
         if ("0".equals(rawOrderId)) {

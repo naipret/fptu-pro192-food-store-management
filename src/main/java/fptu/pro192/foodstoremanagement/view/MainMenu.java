@@ -14,11 +14,11 @@ import fptu.pro192.foodstoremanagement.controller.ReportController;
 public class MainMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
-            "Product Catalog Management",
-            "Customer Management",
-            "Sales & Checkout Management",
-            "Inventory & Batch Management",
-            "Analytical & Revenue Reports"
+            "Products",
+            "Customers",
+            "Sales",
+            "Inventory",
+            "Reports"
     };
 
     private final ProductMenu productMenu;

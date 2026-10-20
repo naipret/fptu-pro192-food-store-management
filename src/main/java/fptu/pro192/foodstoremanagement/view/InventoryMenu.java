@@ -42,7 +42,7 @@ public class InventoryMenu extends Menu {
      * @throws IllegalArgumentException if productController is null
      */
     public InventoryMenu(ProductController productController) {
-        super("INVENTORY & BATCH MANAGEMENT", MENU_OPTIONS);
+        super("INVENTORY", MENU_OPTIONS);
         if (productController == null) {
             throw new IllegalArgumentException("ProductController cannot be null.");
         }

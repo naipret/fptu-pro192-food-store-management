@@ -72,7 +72,7 @@ public class CustomerServiceTest {
         CustomerController controller = new CustomerController(customersCsv);
         CustomerMenu customerMenu = new CustomerMenu(controller);
 
-        String simulatedInput = "1\n\nLê Minh Khoa\n0987654321\n50 Điện Biên Phủ, District 3\n2\n\n4\n\n0\n";
+        String simulatedInput = "3\n\nLê Minh Khoa\n0987654321\n50 Điện Biên Phủ, District 3\n2\n\n1\n\n0\n";
         ScannerManager.getInstance().setInputStream(
                 new ByteArrayInputStream(simulatedInput.getBytes(StandardCharsets.UTF_8)));
         customerMenu.display();
