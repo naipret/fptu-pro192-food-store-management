@@ -92,8 +92,16 @@ public class ProductController {
         this.units.clear();
         this.units.addAll(InputValidator.DEFAULT_UNITS);
 
-        Map<String, Product> productMap = new LinkedHashMap<>();
         List<String[]> productRows = CsvUtil.readCsv(this.productCsvPath);
+        List<String[]> batchRows = CsvUtil.readCsv(this.batchCsvPath);
+        if (productRows.isEmpty()) {
+            CsvUtil.writeAtomic(this.productCsvPath, Collections.singletonList(PRODUCT_CSV_HEADERS));
+        }
+        if (batchRows.isEmpty()) {
+            CsvUtil.writeAtomic(this.batchCsvPath, Collections.singletonList(BATCH_CSV_HEADERS));
+        }
+
+        Map<String, Product> productMap = new LinkedHashMap<>();
 
         for (int i = 0; i < productRows.size(); i++) {
             String[] row = productRows.get(i);
@@ -124,7 +132,7 @@ public class ProductController {
             }
         }
 
-        List<String[]> batchRows = CsvUtil.readCsv(this.batchCsvPath);
+        batchRows = CsvUtil.readCsv(this.batchCsvPath);
         for (int i = 0; i < batchRows.size(); i++) {
             String[] row = batchRows.get(i);
             if (row.length == 0 || (row.length == 1 && row[0].trim().isEmpty())) {
@@ -404,35 +412,14 @@ public class ProductController {
     }
 
     /**
-     * Returns an unmodifiable list of all products, including soft-deleted ones.
-     *
-     * @return an unmodifiable list of all Product objects
-     */
-    public List<Product> getAllProductsIncludeDeleted() {
-        return Collections.unmodifiableList(this.products);
-    }
-
-    /**
      * Adds a new Product without an initial batch and persists to CSV (BR1, BR3,
      * BR4, BR5, BR27).
      *
      * @param product the new Product to register
-     * @throws IllegalArgumentException if product is null or its ID already exists
+     * @throws IllegalArgumentException if product is null, its ID already exists,
+     *                                  or any attached batch ID already exists
      */
     public void addProduct(Product product) {
-        addProduct(product, null);
-    }
-
-    /**
-     * Adds a new Product with an optional initial inventory Batch and persists
-     * to CSV (BR1, BR3, BR4, BR5, BR6, BR7, BR18, BR26, BR27).
-     *
-     * @param product      the new Product to register
-     * @param initialBatch the optional initial Batch, may be null
-     * @throws IllegalArgumentException if product is null, ID is duplicate, or
-     *                                  batch is invalid
-     */
-    public void addProduct(Product product, Batch initialBatch) {
         if (product == null) {
             throw new IllegalArgumentException("Product cannot be null.");
         }
@@ -440,19 +427,10 @@ public class ProductController {
             throw new IllegalArgumentException(
                     "Product ID '" + product.getId() + "' already exists in the system.");
         }
-        if (initialBatch != null) {
-            InputValidator.validatePositiveQuantity(initialBatch.getQuantity(), "Initial batch quantity");
-            if (existsBatchId(initialBatch.getBatchId())) {
+        for (Batch attached : product.getBatches()) {
+            if (existsBatchId(attached.getBatchId())) {
                 throw new IllegalArgumentException(
-                        "Batch ID '" + initialBatch.getBatchId() + "' already exists in the system.");
-            }
-            product.addBatch(initialBatch);
-        } else {
-            for (Batch attached : product.getBatches()) {
-                if (existsBatchId(attached.getBatchId())) {
-                    throw new IllegalArgumentException(
-                            "Batch ID '" + attached.getBatchId() + "' already exists in the system.");
-                }
+                        "Batch ID '" + attached.getBatchId() + "' already exists in the system.");
             }
         }
         product.setCategory(registerCategory(product.getCategory()));
@@ -617,35 +595,13 @@ public class ProductController {
      */
     public void deductStockFEFO(String productId, int requestedQuantity)
             throws InsufficientStockException {
-        deductStockFEFO(productId, requestedQuantity, LocalDate.now());
-    }
-
-    /**
-     * Deducts the requested quantity from a product's non-expired batches
-     * relative to referenceDate using the First-Expired-First-Out algorithm and
-     * persists the updated batch quantities atomically (BR10, BR11, BR14, BR24,
-     * BR26).
-     *
-     * @param productId         the product ID to deduct from
-     * @param requestedQuantity the positive integer quantity to deduct
-     * @param referenceDate     the date used to evaluate batch expiration
-     * @throws IllegalArgumentException   if product is not found, referenceDate is
-     *                                    null, or requestedQuantity is not positive
-     * @throws InsufficientStockException if available non-expired stock is less
-     *                                    than requestedQuantity
-     */
-    public void deductStockFEFO(String productId, int requestedQuantity, LocalDate referenceDate)
-            throws InsufficientStockException {
         InputValidator.validatePositiveQuantity(requestedQuantity, "Requested deduction quantity");
-        if (referenceDate == null) {
-            throw new IllegalArgumentException("Reference date cannot be null.");
-        }
         Product product = findById(productId);
         if (product == null) {
             throw new IllegalArgumentException("Active product not found with ID: " + productId);
         }
 
-        int availableStock = product.getAvailableStock(referenceDate);
+        int availableStock = product.getAvailableStock();
         if (availableStock < requestedQuantity) {
             throw new InsufficientStockException(
                     "Insufficient stock for product '" + product.getName() + "' ("
@@ -653,7 +609,7 @@ public class ProductController {
                             + ", Available non-expired stock: " + availableStock + ".");
         }
 
-        List<Batch> activeBatches = product.getActiveBatches(referenceDate);
+        List<Batch> activeBatches = product.getActiveBatches();
         int remaining = requestedQuantity;
         for (Batch batch : activeBatches) {
             if (remaining == 0) {
@@ -673,23 +629,9 @@ public class ProductController {
      * @return an unmodifiable list of available in-stock products
      */
     public List<Product> getAvailableProducts() {
-        return getAvailableProducts(LocalDate.now());
-    }
-
-    /**
-     * Returns all active products that have positive non-expired sellable stock
-     * relative to referenceDate (BR10, BR11).
-     *
-     * @param referenceDate the date used to evaluate batch expiration
-     * @return an unmodifiable list of available in-stock products
-     */
-    public List<Product> getAvailableProducts(LocalDate referenceDate) {
-        if (referenceDate == null) {
-            throw new IllegalArgumentException("Reference date cannot be null.");
-        }
         List<Product> result = new ArrayList<>();
         for (Product product : this.products) {
-            if (!product.isDeleted() && product.getAvailableStock(referenceDate) > 0) {
+            if (!product.isDeleted() && product.getAvailableStock() > 0) {
                 result.add(product);
             }
         }
@@ -727,84 +669,13 @@ public class ProductController {
     }
 
     /**
-     * Searches active products whose name contains the specified keyword
-     * (case-insensitive). Returns all active products if keyword is null or blank.
-     *
-     * @param keyword the product name substring
-     * @return an unmodifiable list of matching active products
-     */
-    public List<Product> searchByName(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return getAllProducts();
-        }
-        String lower = keyword.trim().toLowerCase(Locale.ROOT);
-        List<Product> matches = new ArrayList<>();
-        for (Product product : this.products) {
-            if (!product.isDeleted()
-                    && product.getName().toLowerCase(Locale.ROOT).contains(lower)) {
-                matches.add(product);
-            }
-        }
-        return Collections.unmodifiableList(matches);
-    }
-
-    /**
-     * Searches active products belonging to the specified category
-     * (case-insensitive).
-     *
-     * @param category the category name to filter by
-     * @return an unmodifiable list of matching active products
-     */
-    public List<Product> searchByCategory(String category) {
-        if (category == null || category.trim().isEmpty()) {
-            return Collections.emptyList();
-        }
-        String target = category.trim().toLowerCase(Locale.ROOT);
-        List<Product> matches = new ArrayList<>();
-        for (Product product : this.products) {
-            if (!product.isDeleted()
-                    && product.getCategory().toLowerCase(Locale.ROOT).contains(target)) {
-                matches.add(product);
-            }
-        }
-        return Collections.unmodifiableList(matches);
-    }
-
-    /**
-     * Searches active products that have at least one batch with positive stock
-     * expiring on or before the specified target expiration date (BR7, BR11, BR20).
-     *
-     * @param targetDate the upper-bound expiration date to filter by
-     * @return an unmodifiable list of matching active products
-     * @throws IllegalArgumentException if targetDate is null
-     */
-    public List<Product> searchByExpirationDate(LocalDate targetDate) {
-        if (targetDate == null) {
-            throw new IllegalArgumentException("Target expiration date cannot be null.");
-        }
-        List<Product> matches = new ArrayList<>();
-        for (Product product : this.products) {
-            if (product.isDeleted()) {
-                continue;
-            }
-            for (Batch batch : product.getBatches()) {
-                if (batch.getQuantity() > 0 && !batch.getExpirationDate().isAfter(targetDate)) {
-                    matches.add(product);
-                    break;
-                }
-            }
-        }
-        return Collections.unmodifiableList(matches);
-    }
-
-    /**
      * Returns all active products whose available non-expired stock is at or
      * below the default threshold of 5 units relative to today (BR19).
      *
      * @return an unmodifiable list of low-stock active products
      */
     public List<Product> getLowStockProducts() {
-        return getLowStockProducts(LocalDate.now(), Product.DEFAULT_LOW_STOCK_THRESHOLD);
+        return getLowStockProducts(Product.DEFAULT_LOW_STOCK_THRESHOLD);
     }
 
     /**
@@ -813,31 +684,15 @@ public class ProductController {
      *
      * @param threshold the non-negative stock threshold
      * @return an unmodifiable list of low-stock active products
+     * @throws IllegalArgumentException if threshold is negative
      */
     public List<Product> getLowStockProducts(int threshold) {
-        return getLowStockProducts(LocalDate.now(), threshold);
-    }
-
-    /**
-     * Returns all active products whose available non-expired stock is at or
-     * below the specified threshold relative to referenceDate (BR19).
-     *
-     * @param referenceDate the date used to evaluate batch expiration
-     * @param threshold     the non-negative stock threshold
-     * @return an unmodifiable list of low-stock active products
-     * @throws IllegalArgumentException if referenceDate is null or threshold is
-     *                                  negative
-     */
-    public List<Product> getLowStockProducts(LocalDate referenceDate, int threshold) {
-        if (referenceDate == null) {
-            throw new IllegalArgumentException("Reference date cannot be null.");
-        }
         if (threshold < 0) {
             throw new IllegalArgumentException("Low-stock threshold cannot be negative.");
         }
         List<Product> result = new ArrayList<>();
         for (Product product : this.products) {
-            if (!product.isDeleted() && product.isLowStock(referenceDate, threshold)) {
+            if (!product.isDeleted() && product.isLowStock(threshold)) {
                 result.add(product);
             }
         }
@@ -851,28 +706,13 @@ public class ProductController {
      * @return an unmodifiable list of expired batches
      */
     public List<Batch> getExpiredBatches() {
-        return getExpiredBatches(LocalDate.now());
-    }
-
-    /**
-     * Returns all batches with positive stock across active products that have
-     * expired relative to referenceDate, sorted by expiration date ascending
-     * (BR11).
-     *
-     * @param referenceDate the reference date to evaluate against
-     * @return an unmodifiable list of expired batches
-     */
-    public List<Batch> getExpiredBatches(LocalDate referenceDate) {
-        if (referenceDate == null) {
-            throw new IllegalArgumentException("Reference date cannot be null.");
-        }
         List<Batch> expired = new ArrayList<>();
         for (Product product : this.products) {
             if (product.isDeleted()) {
                 continue;
             }
             for (Batch batch : product.getBatches()) {
-                if (batch.getQuantity() > 0 && batch.isExpired(referenceDate)) {
+                if (batch.getQuantity() > 0 && batch.isExpired()) {
                     expired.add(batch);
                 }
             }
@@ -888,7 +728,7 @@ public class ProductController {
      * @return an unmodifiable list of near-expiry batches
      */
     public List<Batch> getNearExpiryBatches() {
-        return getNearExpiryBatches(LocalDate.now(), Product.DEFAULT_NEAR_EXPIRY_DAYS);
+        return getNearExpiryBatches(Product.DEFAULT_NEAR_EXPIRY_DAYS);
     }
 
     /**
@@ -897,23 +737,9 @@ public class ProductController {
      *
      * @param daysThreshold the non-negative warning window in days
      * @return an unmodifiable list of near-expiry batches
+     * @throws IllegalArgumentException if daysThreshold is negative
      */
     public List<Batch> getNearExpiryBatches(int daysThreshold) {
-        return getNearExpiryBatches(LocalDate.now(), daysThreshold);
-    }
-
-    /**
-     * Returns all non-expired batches with positive stock across active products
-     * that expire within daysThreshold days from referenceDate (BR20).
-     *
-     * @param referenceDate the reference date to evaluate from
-     * @param daysThreshold the non-negative warning window in days
-     * @return an unmodifiable list of near-expiry batches
-     */
-    public List<Batch> getNearExpiryBatches(LocalDate referenceDate, int daysThreshold) {
-        if (referenceDate == null) {
-            throw new IllegalArgumentException("Reference date cannot be null.");
-        }
         if (daysThreshold < 0) {
             throw new IllegalArgumentException("Days threshold cannot be negative.");
         }
@@ -923,7 +749,7 @@ public class ProductController {
                 continue;
             }
             for (Batch batch : product.getBatches()) {
-                if (batch.isNearExpiry(referenceDate, daysThreshold)) {
+                if (batch.isNearExpiry(daysThreshold)) {
                     nearExpiry.add(batch);
                 }
             }

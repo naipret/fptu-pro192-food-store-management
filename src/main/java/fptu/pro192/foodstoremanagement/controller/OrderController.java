@@ -108,6 +108,12 @@ public class OrderController {
         this.orders.clear();
         List<String[]> orderRows = CsvUtil.readCsv(this.ordersCsvPath);
         List<String[]> detailRows = CsvUtil.readCsv(this.detailsCsvPath);
+        if (orderRows.isEmpty()) {
+            CsvUtil.writeAtomic(this.ordersCsvPath, Collections.singletonList(ORDER_CSV_HEADERS));
+        }
+        if (detailRows.isEmpty()) {
+            CsvUtil.writeAtomic(this.detailsCsvPath, Collections.singletonList(DETAIL_CSV_HEADERS));
+        }
 
         Map<String, List<OrderDetail>> detailsByOrder = new LinkedHashMap<>();
         for (int i = 0; i < detailRows.size(); i++) {
@@ -268,40 +274,7 @@ public class OrderController {
      *                                  is soft-deleted
      */
     public Order createDraftOrder(String customerId) {
-        return createDraftOrder(generateNextOrderId(), customerId, LocalDateTime.now());
-    }
-
-    /**
-     * Creates a new in-memory draft Order with an explicit Order ID and date
-     * (BR8, BR14, BR16, BR18).
-     *
-     * @param orderId    the 6-character order ID (O00001-O99999)
-     * @param customerId the active customer ID, or null/GUEST for guest checkout
-     * @param orderDate  the calendar date of the order
-     * @return a new empty draft Order
-     */
-    public Order createDraftOrder(String orderId, String customerId, LocalDate orderDate) {
-        LocalDateTime dateTime = (orderDate == null) ? LocalDateTime.now() : orderDate.atStartOfDay();
-        return createDraftOrder(orderId, customerId, dateTime);
-    }
-
-    /**
-     * Creates a new in-memory draft Order with an explicit Order ID and timestamp
-     * (BR8, BR14, BR16, BR18).
-     *
-     * @param orderId    the 6-character order ID (O00001-O99999)
-     * @param customerId the active customer ID, or null/GUEST for guest checkout
-     * @param orderDate  the timestamp of the order
-     * @return a new empty draft Order
-     * @throws IllegalArgumentException if orderId is invalid/duplicate or
-     *                                  customerId is not found
-     */
-    public Order createDraftOrder(String orderId, String customerId, LocalDateTime orderDate) {
-        String normalizedOrderId = InputValidator.validateOrderId(orderId);
-        if (existsById(normalizedOrderId)) {
-            throw new IllegalArgumentException(
-                    "Order ID '" + normalizedOrderId + "' already exists in the system.");
-        }
+        String normalizedOrderId = generateNextOrderId();
         String normalizedCustomerId = null;
         if (customerId != null && !customerId.trim().isEmpty()
                 && !Order.GUEST_CUSTOMER_ID.equalsIgnoreCase(customerId.trim())) {
@@ -311,7 +284,7 @@ public class OrderController {
             }
             normalizedCustomerId = customer.getId();
         }
-        return new Order(normalizedOrderId, normalizedCustomerId, orderDate);
+        return new Order(normalizedOrderId, normalizedCustomerId, LocalDateTime.now());
     }
 
     /**
@@ -325,26 +298,11 @@ public class OrderController {
      *         cart
      */
     public int getRemainingAvailableStock(Order draft, String productId) {
-        return getRemainingAvailableStock(draft, productId, LocalDate.now());
-    }
-
-    /**
-     * Returns the remaining non-expired sellable stock of a product relative
-     * to referenceDate after subtracting any quantity already placed in the
-     * current draft cart (BR10, BR11).
-     *
-     * @param draft         the current draft Order, may be null
-     * @param productId     the product ID to inspect
-     * @param referenceDate the date used to evaluate batch expiration
-     * @return the remaining available stock that can still be added to the draft
-     *         cart
-     */
-    public int getRemainingAvailableStock(Order draft, String productId, LocalDate referenceDate) {
         Product product = this.productController.findById(productId);
         if (product == null) {
             return 0;
         }
-        int available = product.getAvailableStock(referenceDate);
+        int available = product.getAvailableStock();
         int inCart = (draft == null) ? 0 : draft.getQuantityForProduct(product.getId());
         return Math.max(0, available - inCart);
     }
@@ -365,31 +323,8 @@ public class OrderController {
      */
     public void addItemToDraft(Order draft, String productId, int quantity)
             throws InsufficientStockException {
-        addItemToDraft(draft, productId, quantity, LocalDate.now());
-    }
-
-    /**
-     * Validates and adds a product quantity to an in-memory draft Order
-     * relative to referenceDate without deducting inventory batches yet, then
-     * recalculates order totals and VIP discounts (BR9, BR10, BR11, BR12,
-     * BR13, BR14, BR15, BR16, BR26).
-     *
-     * @param draft         the draft Order being assembled
-     * @param productId     the product ID to add
-     * @param quantity      the positive integer quantity to add
-     * @param referenceDate the reference date used to evaluate batch expiration
-     * @throws IllegalArgumentException   if draft/product is invalid, quantity is
-     *                                    not positive, or all stock is expired
-     * @throws InsufficientStockException if cumulative cart quantity exceeds
-     *                                    available non-expired stock
-     */
-    public void addItemToDraft(Order draft, String productId, int quantity, LocalDate referenceDate)
-            throws InsufficientStockException {
         if (draft == null) {
             throw new IllegalArgumentException("Draft order cannot be null.");
-        }
-        if (referenceDate == null) {
-            throw new IllegalArgumentException("Reference date cannot be null.");
         }
         InputValidator.validatePositiveQuantity(quantity, "Order item quantity");
 
@@ -400,7 +335,7 @@ public class OrderController {
         }
 
         int totalPhysicalStock = product.getTotalStock();
-        int availableStock = product.getAvailableStock(referenceDate);
+        int availableStock = product.getAvailableStock();
         if (availableStock == 0 && totalPhysicalStock > 0) {
             throw new IllegalArgumentException(
                     "Cannot add product '" + product.getName() + "': all batches in stock have expired.");
@@ -448,31 +383,8 @@ public class OrderController {
      *                                    non-expired stock
      */
     public Order finalizeOrder(Order draft) throws InsufficientStockException {
-        return finalizeOrder(draft, LocalDate.now());
-    }
-
-    /**
-     * Finalizes a draft Order relative to referenceDate by verifying stock
-     * sufficiency across all items, deducting batch quantities via FEFO, and
-     * persisting both updated inventory and the completed order to CSV (BR8,
-     * BR10, BR11, BR13, BR14, BR15, BR16, BR17, BR24).
-     *
-     * @param draft         the non-empty draft Order to finalize
-     * @param referenceDate the date used to evaluate batch expiration during FEFO
-     *                      deduction
-     * @return the finalized and persisted Order
-     * @throws IllegalArgumentException   if draft is null, empty, or has a
-     *                                    duplicate orderId
-     * @throws InsufficientStockException if any line item exceeds available
-     *                                    non-expired stock
-     */
-    public Order finalizeOrder(Order draft, LocalDate referenceDate)
-            throws InsufficientStockException {
         if (draft == null) {
             throw new IllegalArgumentException("Draft order cannot be null.");
-        }
-        if (referenceDate == null) {
-            throw new IllegalArgumentException("Reference date cannot be null.");
         }
         if (draft.getItems().isEmpty()) {
             throw new IllegalArgumentException("Order must contain at least one item before checkout.");
@@ -488,7 +400,7 @@ public class OrderController {
                 throw new IllegalArgumentException(
                         "Product '" + item.getProductId() + "' is no longer active.");
             }
-            int available = product.getAvailableStock(referenceDate);
+            int available = product.getAvailableStock();
             if (available < item.getQuantity()) {
                 throw new InsufficientStockException(
                         "Insufficient stock for '" + product.getName() + "'. Requested: "
@@ -502,35 +414,12 @@ public class OrderController {
         draft.calculateTotals(customer);
 
         for (OrderDetail item : draft.getItems()) {
-            this.productController.deductStockFEFO(item.getProductId(), item.getQuantity(), referenceDate);
+            this.productController.deductStockFEFO(item.getProductId(), item.getQuantity());
         }
 
         this.orders.add(draft);
         saveToCsv();
         return draft;
-    }
-
-    /**
-     * Directly registers a pre-populated completed Order into history and
-     * persists to CSV (used when seeding or testing persistence) (BR8, BR17).
-     *
-     * @param completedOrder the completed Order to persist
-     * @throws IllegalArgumentException if completedOrder is null, empty, or has a
-     *                                  duplicate orderId
-     */
-    public void saveOrder(Order completedOrder) {
-        if (completedOrder == null) {
-            throw new IllegalArgumentException("Order cannot be null.");
-        }
-        if (completedOrder.getItems().isEmpty()) {
-            throw new IllegalArgumentException("Completed order must contain at least one item.");
-        }
-        if (existsById(completedOrder.getOrderId())) {
-            throw new IllegalArgumentException(
-                    "Order ID '" + completedOrder.getOrderId() + "' already exists.");
-        }
-        this.orders.add(completedOrder);
-        saveToCsv();
     }
 
     /**
@@ -556,32 +445,6 @@ public class OrderController {
             }
         }
         return null;
-    }
-
-    /**
-     * Returns all completed orders associated with a specific customer ID (BR18).
-     *
-     * @param customerId the customer ID to filter by
-     * @return an unmodifiable list of matching orders
-     */
-    public List<Order> findByCustomerId(String customerId) {
-        if (customerId == null || customerId.trim().isEmpty()) {
-            return Collections.emptyList();
-        }
-        String lookupId;
-        try {
-            lookupId = InputValidator.normalizeCustomerId(customerId);
-        } catch (IllegalArgumentException e) {
-            lookupId = customerId.trim();
-        }
-        List<Order> result = new ArrayList<>();
-        for (Order order : this.orders) {
-            if (order.getCustomerId() != null
-                    && order.getCustomerId().equalsIgnoreCase(lookupId)) {
-                result.add(order);
-            }
-        }
-        return Collections.unmodifiableList(result);
     }
 
     /**
