@@ -119,7 +119,7 @@ public void display() {
         } else {
             ConsoleUtil.clearScreen();
             if (shouldShowBreadcrumb()) {
-                printBreadcrumbHeader(getBreadcrumbPrefix() + " > [" + choice + "] " + this.options[choice - 1]);
+                printBreadcrumbHeader(this.title + " > [" + choice + "] " + this.options[choice - 1]);
             }
             handleChoice(choice);
             if (shouldPauseAfterAction()) {
@@ -133,4 +133,4 @@ public void display() {
 Subclasses implement the abstract primitive operation `protected abstract void handleChoice(int choice)` and may override the hook methods:
 - `protected boolean shouldPauseAfterAction()`: defaults to `true` in `Menu` for leaf action screens and returns `false` in `MainMenu` so returning from a submenu does not trigger a redundant `Press Enter` prompt.
 - `protected boolean shouldShowBreadcrumb()`: defaults to `true` to automatically render the centered 80-column breadcrumb banner before executing the selected action handler; overridden in `MainMenu` to return `false`.
-- `protected String getBreadcrumbPrefix()`: provides the menu's breadcrumb prefix trail (e.g. `MAIN MENU > [1] PRODUCTS`).
+- Each submenu passes its full hierarchical title directly into `super(...)` (e.g., `super("MAIN MENU > [1] PRODUCTS", MENU_OPTIONS)`), so the menu frame header and action breadcrumbs share a single unified source of truth.

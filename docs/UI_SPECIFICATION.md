@@ -63,8 +63,9 @@ To prevent long product names, customer names, or addresses from wrapping past c
 
 Every ASCII table is constructed so the sum of its column content widths plus border separators (`|` and `|`) never exceeds `80` columns.
 
-### 4.1. Standard Menu Frame (`80` Columns)
+### 4.1. Standard Menu Frames (`80` Columns)
 
+#### Root Main Menu
 ```text
 ================================================================================
                           FOOD STORE MANAGEMENT SYSTEM                          
@@ -75,6 +76,21 @@ Every ASCII table is constructed so the sum of its column content widths plus bo
   [4] Inventory
   [5] Reports
   [0] Exit Application
+--------------------------------------------------------------------------------
+Enter your choice [0-5]: 
+```
+
+#### Level-2 Submenu (Hierarchical Breadcrumb Header)
+```text
+================================================================================
+                            MAIN MENU > [1] PRODUCTS                            
+================================================================================
+  [1] View All Products
+  [2] Search Products
+  [3] Add New Product
+  [4] Update Product Information
+  [5] Remove Product
+  [0] Back to Main Menu
 --------------------------------------------------------------------------------
 Enter your choice [0-5]: 
 ```
