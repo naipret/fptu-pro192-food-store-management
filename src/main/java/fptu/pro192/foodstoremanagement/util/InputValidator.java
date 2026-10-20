@@ -317,17 +317,6 @@ public final class InputValidator {
     }
 
     /**
-     * Alias for normalizePhone maintained for caller compatibility (BR25).
-     *
-     * @param raw the raw phone number string
-     * @return the normalized 10-digit phone number
-     * @throws IllegalArgumentException if the phone number is empty or invalid
-     */
-    public static String normalPhoneNumbers(String raw) {
-        return normalizePhone(raw);
-    }
-
-    /**
      * Validates that a selling price is finite and strictly greater than zero
      * (BR4).
      *

@@ -56,11 +56,4 @@ public final class ScannerManager {
     public void reset() {
         this.scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
     }
-
-    /**
-     * Restores the underlying Scanner to System.in after automated tests.
-     */
-    public void resetToStandardInput() {
-        reset();
-    }
 }
