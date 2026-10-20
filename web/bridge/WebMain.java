@@ -3,6 +3,8 @@ package web;
 import fptu.pro192.foodstoremanagement.Main;
 import fptu.pro192.foodstoremanagement.util.ScannerManager;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,9 +14,10 @@ import java.nio.charset.StandardCharsets;
 /**
  * Web bootstrap entry point designed for the CheerpJ WebAssembly browser
  * environment.
- * Redirects standard input and output streams to WebTerminalManager and
- * delegates
- * application startup to the core Main entry point.
+ * Redirects standard input and output streams to WebTerminalManager, seeds
+ * initial
+ * CSV files into the virtual storage, and delegates application startup to
+ * Main.
  */
 public final class WebMain {
 
@@ -22,8 +25,8 @@ public final class WebMain {
     }
 
     /**
-     * Initializes the web terminal stream bridges and launches the main application
-     * loop.
+     * Initializes the web terminal stream bridges, seeds initial data, and launches
+     * the main application loop.
      *
      * @param args command-line arguments forwarded to Main
      */
@@ -31,6 +34,7 @@ public final class WebMain {
         try {
             configureStandardOutput();
             configureStandardInput();
+            initializeSeedData();
             Main.main(args);
         } catch (Exception e) {
             WebTerminalManager.print("[ERROR] Web bootstrap initialization error: " + e.getMessage() + "\n");
@@ -104,5 +108,38 @@ public final class WebMain {
         };
 
         ScannerManager.getInstance().setInputStream(webIn);
+    }
+
+    private static void initializeSeedData() {
+        File dataDir = new File("data");
+        if (!dataDir.exists()) {
+            dataDir.mkdirs();
+        }
+        String[] csvFiles = {
+                "products.csv", "batches.csv", "customers.csv", "orders.csv", "order_details.csv"
+        };
+        for (int i = 0; i < csvFiles.length; i++) {
+            String filename = csvFiles[i];
+            File targetFile = new File(dataDir, filename);
+            if (!targetFile.exists() || targetFile.length() == 0) {
+                copyResourceToFile("/data/" + filename, targetFile);
+            }
+        }
+    }
+
+    private static void copyResourceToFile(String resourcePath, File targetFile) {
+        try (InputStream in = WebMain.class.getResourceAsStream(resourcePath)) {
+            if (in == null) {
+                return;
+            }
+            try (OutputStream out = new FileOutputStream(targetFile)) {
+                byte[] byteBuffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = in.read(byteBuffer)) != -1) {
+                    out.write(byteBuffer, 0, bytesRead);
+                }
+            }
+        } catch (Exception ignored) {
+        }
     }
 }
