@@ -23,7 +23,7 @@ public class CustomerController {
     public static final String DEFAULT_CUSTOMERS_CSV = "data/customers.csv";
 
     private static final String[] CSV_HEADERS = {
-            "type", "id", "fullName", "phone", "address", "isDeleted"
+            "id", "fullName", "phone", "address", "customerType", "isDeleted"
     };
 
     private final Path csvPath;
@@ -78,7 +78,7 @@ public class CustomerController {
             if (row.length == 0 || (row.length == 1 && row[0].trim().isEmpty())) {
                 continue;
             }
-            if (i == 0 && "type".equalsIgnoreCase(row[0].trim())) {
+            if (i == 0 && ("id".equalsIgnoreCase(row[0].trim()) || "type".equalsIgnoreCase(row[0].trim()))) {
                 continue;
             }
             if (row.length < 6) {
@@ -86,11 +86,11 @@ public class CustomerController {
                         "Corrupted customer CSV row at index " + i + ": expected 6 columns.");
             }
             try {
-                String type = row[0].trim();
-                String id = InputValidator.validateCustomerId(row[1]);
-                String fullName = InputValidator.normalizeText(row[2], "Customer full name");
-                String phone = InputValidator.normalizePhone(row[3]);
-                String address = InputValidator.normalizeText(row[4], "Customer address");
+                String id = InputValidator.validateCustomerId(row[0]);
+                String fullName = InputValidator.normalizeText(row[1], "Customer full name");
+                String phone = InputValidator.normalizePhone(row[2]);
+                String address = InputValidator.normalizeText(row[3], "Customer address");
+                String type = row[4].trim();
                 boolean isDeleted = Boolean.parseBoolean(row[5].trim());
 
                 Customer customer = Customer.create(type, id, fullName, phone, address, isDeleted);
@@ -112,11 +112,11 @@ public class CustomerController {
 
         for (Customer customer : this.customers) {
             rows.add(new String[] {
-                    customer.getCustomerType(),
                     customer.getId(),
                     customer.getFullName(),
                     customer.getPhone(),
                     customer.getAddress(),
+                    customer.getCustomerType(),
                     String.valueOf(customer.isDeleted())
             });
         }

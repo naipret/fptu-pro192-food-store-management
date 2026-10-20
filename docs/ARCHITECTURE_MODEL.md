@@ -288,15 +288,15 @@ Header row: `batchId,productId,importDate,productionDate,expirationDate,quantity
 
 ### 4.3. `data/customers.csv`
 
-Header row: `type,id,fullName,phone,address,isDeleted`
+Header row: `id,fullName,phone,address,customerType,isDeleted`
 
 | Column Index | Field Name | Data Type | Format and Constraints |
 | :--- | :--- | :--- | :--- |
-| `0` | `type` | `String` | Subclass discriminator (`Regular` or `VIP`, `BR15`) |
-| `1` | `id` | `String` | Primary key (`C00001` through `C99999`, `BR2`) |
-| `2` | `fullName` | `String` | Non-empty customer full name (`BR3`) |
-| `3` | `phone` | `String` | Normalized 10-digit Vietnamese phone number (`0[35789]xxxxxxxx`, `BR25`) |
-| `4` | `address` | `String` | Non-empty residential or delivery address (`BR3`) |
+| `0` | `id` | `String` | Primary key (`C00001` through `C99999`, `BR2`) |
+| `1` | `fullName` | `String` | Non-empty customer full name (`BR3`) |
+| `2` | `phone` | `String` | Normalized 10-digit Vietnamese phone number (`0[35789]xxxxxxxx`, `BR25`) |
+| `3` | `address` | `String` | Non-empty residential or delivery address (`BR3`) |
+| `4` | `customerType` | `String` | Subclass discriminator (`Regular` or `VIP`, `BR15`) |
 | `5` | `isDeleted` | `boolean` | `true` if soft-deleted, `false` if active (`BR27`) |
 
 ### 4.4. `data/orders.csv`
