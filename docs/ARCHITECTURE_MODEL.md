@@ -168,10 +168,7 @@ classDiagram
         +deductStockFEFO(String productId, int requestedQuantity) void
         +findById(String id) Product
         +findByIdIncludeDeleted(String id) Product
-        +searchProducts(String keyword) List~Product~
-        +searchByName(String keyword) List~Product~
-        +searchByCategory(String category) List~Product~
-        +searchByExpirationDate(LocalDate targetDate) List~Product~
+        +search(String keyword) List~Product~
         +getAvailableProducts() List~Product~
         +getLowStockProducts(int threshold) List~Product~
         +getExpiredBatches() List~Batch~
@@ -189,8 +186,7 @@ classDiagram
         +findById(String id) Customer
         +findByIdIncludeDeleted(String id) Customer
         +findByPhone(String rawPhone) Customer
-        +searchCustomers(String keyword) List~Customer~
-        +searchByName(String keyword) List~Customer~
+        +search(String keyword) List~Customer~
     }
 
     class OrderController {
@@ -218,12 +214,8 @@ classDiagram
         +getMonthlyRevenue(YearMonth month) double
         +getTopSellingProducts(int limit) List~ProductSalesSummary~
         +getTopSellingProducts(LocalDate fromDate, LocalDate toDate, int limit) List~ProductSalesSummary~
-        +getCustomerSpendingSummary() List~CustomerSpendingSummary~
-        +getCustomerSpendingSummary(LocalDate fromDate, LocalDate toDate) List~CustomerSpendingSummary~
+        +getHighestSpendingCustomers(int limit) List~CustomerSpendingSummary~
         +getHighestSpendingCustomers(LocalDate fromDate, LocalDate toDate, int limit) List~CustomerSpendingSummary~
-        +getLowStockProducts(int threshold) List~Product~
-        +getExpiredBatches() List~Batch~
-        +getNearExpiryBatches(int daysThreshold) List~Batch~
     }
 
     class Menu {
@@ -233,6 +225,8 @@ classDiagram
         +display() void
         #handleChoice(int choice)* void
         #shouldPauseAfterAction() boolean
+        #shouldShowBreadcrumb() boolean
+        #getBreadcrumbPrefix() String
         +printBreadcrumbHeader(String breadcrumb) void
     }
 

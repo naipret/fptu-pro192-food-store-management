@@ -79,9 +79,9 @@ Every ASCII table is constructed so the sum of its column content widths plus bo
 Enter your choice [0-5]: 
 ```
 
-### 4.2. Product Catalog Table (`79` Columns)
+### 4.2. Product Catalog Table (`80` Columns)
 
-Formula: `1 + (8) + 1 + (24) + 1 + (14) + 1 + (8) + 1 + (12) + 1 + (6) + 1 = 79` columns.
+Formula: `1 + (8) + 1 + (24) + 1 + (14) + 1 + (8) + 1 + (12) + 1 + (7) + 1 = 80` columns.
 
 | Column Header | Content Width (`fit`) | Padded Cell Width | Alignment |
 | :--- | :--- | :--- | :--- |
@@ -90,15 +90,15 @@ Formula: `1 + (8) + 1 + (24) + 1 + (14) + 1 + (8) + 1 + (12) + 1 + (6) + 1 = 79`
 | `Category` | `12` | `14` | Left |
 | `Unit` | `6` | `8` | Left |
 | `Price (VND)` | `10` | `12` | Right |
-| `Stock` | `4` | `6` | Right |
+| `Stock` | `5` | `7` | Right |
 
 ```text
-+--------+------------------------+--------------+--------+------------+------+
-| ID     | Product Name           | Category     | Unit   | Price(VND) |Stock |
-+--------+------------------------+--------------+--------+------------+------+
-| P00001 | ST25 Fragrant Rice 5kg | Grains       | Bag    |    165,000 |   45 |
-| P00002 | Vinamilk Fresh Milk 1L | Dairy        | Carton |     36,000 |   12 |
-+--------+------------------------+--------------+--------+------------+------+
++--------+------------------------+--------------+--------+------------+-------+
+| ID     | Product Name           | Category     | Unit   | Price(VND) | Stock |
++--------+------------------------+--------------+--------+------------+-------+
+| P00001 | ST25 Fragrant Rice 5kg | Grains       | Bag    |    165,000 |    45 |
+| P00002 | Vinamilk Fresh Milk 1L | Dairy        | Carton |     36,000 |    12 |
++--------+------------------------+--------------+--------+------------+-------+
 ```
 
 ### 4.3. Batch and Expiry Table (`80` Columns)
@@ -115,30 +115,43 @@ Formula: `1 + (8) + 1 + (8) + 1 + (18) + 1 + (12) + 1 + (12) + 1 + (7) + 1 + (8)
 | `Qty` | `5` | `7` | Remaining batch quantity |
 | `Status` | `6` (`ACTIVE`/`NEAR`/`EXPRD`) | `8` | Shelf-life status |
 
-### 4.4. Customer Directory Table (`79` Columns)
+### 4.4. Customer Directory Table (`80` Columns)
 
-Formula: `1 + (8) + 1 + (22) + 1 + (12) + 1 + (24) + 1 + (7) + 1 = 79` columns.
+Formula: `1 + (8) + 1 + (21) + 1 + (12) + 1 + (24) + 1 + (9) + 1 = 80` columns.
 
 | Column Header | Content Width (`fit`) | Padded Cell Width | Description |
 | :--- | :--- | :--- | :--- |
 | `ID` | `6` (`C00001`) | `8` | Customer identifier |
-| `Full Name` | `20` | `22` | Customer full name |
+| `Full Name` | `19` | `21` | Customer full name |
 | `Phone` | `10` (`0901234567`) | `12` | Normalized 10-digit phone |
 | `Address` | `22` | `24` | Residential address |
-| `Tier` | `5` (`Reg`/`VIP`) | `7` | Loyalty tier |
+| `Tier` | `7` (`Regular`/`VIP`) | `9` | Loyalty tier (untruncated) |
 
-### 4.5. Sales Cart and Invoice Table (`78` Columns)
+### 4.5. Sales Cart and Invoice Table (`80` Columns)
 
-Formula: `1 + (5) + 1 + (8) + 1 + (24) + 1 + (7) + 1 + (13) + 1 + (14) + 1 = 78` columns.
+Formula: `1 + (5) + 1 + (8) + 1 + (25) + 1 + (7) + 1 + (13) + 1 + (15) + 1 = 80` columns.
 
 | Column Header | Content Width (`fit`) | Padded Cell Width | Description |
 | :--- | :--- | :--- | :--- |
 | `No.` | `3` | `5` | Line number (`1..N`) |
 | `ProdID` | `6` (`P00001`) | `8` | Product identifier |
-| `Product Name` | `22` | `24` | Product name |
+| `Product Name` | `23` | `25` | Product name |
 | `Qty` | `5` | `7` | Integer quantity |
 | `Unit Price` | `11` | `13` | Snapshot selling price |
-| `Subtotal` | `12` | `14` | Line-item subtotal (`Qty * Unit Price`) |
+| `Subtotal` | `13` | `15` | Line-item subtotal (`Qty * Unit Price`) |
+
+### 4.6. Sales Summary Table (`80` Columns)
+
+Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 80` columns.
+
+| Column Header | Content Width (`fit`) | Padded Cell Width | Description |
+| :--- | :--- | :--- | :--- |
+| `OrdID` | `8` | `10` | Order identifier |
+| `CustID` | `8` | `10` | Customer identifier |
+| `Date` | `10` | `12` | Order date (`dd/MM/yyyy`) |
+| `Gross(VND)` | `11` | `13` | Gross amount before discount |
+| `Disc(VND)` | `11` | `13` | Loyalty discount amount |
+| `Final(VND)` | `13` | `15` | Net finalized payment |
 
 ---
 
@@ -149,7 +162,7 @@ Formula: `1 + (5) + 1 + (8) + 1 + (24) + 1 + (7) + 1 + (13) + 1 + (14) + 1 = 78`
 1. **Products Menu (`ProductMenu`):**
    - `[1] View All Products` (lists all active food products and their available inventory)
    - `[2] Search Products` (universal multi-field query across ID, Name, Category, and Unit)
-   - `[3] Add New Product` (prompts for name, category, unit, price, and initial batch)
+   - `[3] Add New Product` (prompts for name, category, unit, and price)
    - `[4] Update Product` (allows updating name, category, unit, price with Enter to keep current)
    - `[5] Remove Product` (soft-deletes product after confirmation)
    - `[0] Back to Main Menu`
@@ -157,16 +170,16 @@ Formula: `1 + (5) + 1 + (8) + 1 + (24) + 1 + (7) + 1 + (13) + 1 + (14) + 1 = 78`
 2. **Customers Menu (`CustomerMenu`):**
    - `[1] View All Customers` (lists all registered customers and their tiers)
    - `[2] Search Customers` (universal multi-field query across ID, Full Name, Phone, and Address)
-   - `[3] Add New Customer` (prompts for full name, phone, address, and loyalty tier)
-   - `[4] Update Customer` (allows updating name, phone, address, tier with Enter to keep current)
+   - `[3] Register New Customer` (prompts for full name, phone, address, and loyalty tier)
+   - `[4] Update Customer Information` (allows updating name, phone, address, tier with Enter to keep current)
    - `[5] Remove Customer` (soft-deletes customer after confirmation)
    - `[0] Back to Main Menu`
 
 3. **Sales Menu (`SalesMenu`):**
-   - `[1] Create New Order (Checkout)` (prompts for customer ID or Guest; typing non-ID product keyword shows matching search candidates, but requires explicit Product ID confirmation before adding to cart)
-   - `[2] View All Orders` (lists all completed sales orders)
-   - `[3] Search Orders` (universal query across Order ID, Customer ID, and Date patterns like `2026`, `10/2026`, `19/10/2026`)
-   - `[4] View Order Details` (displays itemized invoice breakdown by Order ID)
+   - `[1] New Sale (Checkout)` (prompts for customer ID or Guest; interactive cart with FEFO stock deduction)
+   - `[2] View All Sales Orders` (lists all completed sales orders in 80-column summary format)
+   - `[3] Search Sales Orders` (universal query across Order ID, Customer ID, and Date patterns)
+   - `[4] View Order Invoice by ID` (displays itemized 80-column invoice breakdown)
    - `[0] Back to Main Menu`
 
 4. **Inventory Menu (`InventoryMenu`):**
@@ -184,7 +197,6 @@ Formula: `1 + (5) + 1 + (8) + 1 + (24) + 1 + (7) + 1 + (13) + 1 + (14) + 1 = 78`
    - `[2] Monthly Sales & Revenue Report (by Month/Year)`
    - `[3] Best-Selling Products Ranking` (supports optional From Date and To Date period filtering per BR21)
    - `[4] Customer Spending Summary Ranking` (supports optional From Date and To Date period filtering per BR22)
-   - `[5] Inventory Health Alerts (Low Stock & Expiry)`
    - `[0] Back to Main Menu`
 
 ### 5.2. Universal Multi-Field Search Specification
