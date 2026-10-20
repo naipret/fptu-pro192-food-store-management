@@ -80,11 +80,21 @@ public class MainMenuIntegrationTest {
                 new InventoryMenu(productController),
                 new ReportMenu(reportController));
 
-        String endToEndInput = "1\n1\n\nST25 Fragrant Rice 5kg\n1\n5\n160000\nN\n\n0\n"
-                + "4\n1\nP00001\n\n20\n01/10/2026\n31/12/2026\n\n0\n"
-                + "2\n1\n\nNguyễn Văn An\n0901234567\n12 Lê Lợi, District 1\n2\n\n0\n"
-                + "3\n1\nC00001\n1\nP00001\n2\n3\nY\n\n0\n"
-                + "5\n4\n\n0\n"
+        String endToEndInput = "1\n"
+                + "3\n\nST25 Fragrant Rice 5kg\n1\n5\n160000\n\n"
+                + "0\n"
+                + "4\n"
+                + "1\nP00001\n\n20\n01/10/2026\n31/12/2026\n\n"
+                + "0\n"
+                + "2\n"
+                + "3\n\nNguyễn Văn An\n0901234567\n12 Lê Lợi, District 1\n2\n\n"
+                + "0\n"
+                + "3\n"
+                + "1\nC00001\n1\nP00001\n2\n3\nY\n\n"
+                + "0\n"
+                + "5\n"
+                + "4\n\n"
+                + "0\n"
                 + "0\n";
 
         ScannerManager.getInstance().setInputStream(

@@ -16,11 +16,11 @@ import java.util.List;
 public class CustomerMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
+            "View All Customers",
+            "Search Customers",
             "Register New Customer",
             "Update Customer Information",
-            "Delete Customer (Soft Delete)",
-            "View All Active Customers",
-            "Search Customers (by Name, Phone, or ID)"
+            "Remove Customer"
     };
 
     private static final String CUSTOMER_TABLE_BORDER = "+--------+----------------------+------------+------------------------+-------+";
@@ -35,7 +35,7 @@ public class CustomerMenu extends Menu {
      * @throws IllegalArgumentException if customerController is null
      */
     public CustomerMenu(CustomerController customerController) {
-        super("CUSTOMER MANAGEMENT", MENU_OPTIONS);
+        super("CUSTOMERS", MENU_OPTIONS);
         if (customerController == null) {
             throw new IllegalArgumentException("CustomerController cannot be null.");
         }
@@ -46,19 +46,19 @@ public class CustomerMenu extends Menu {
     protected void handleChoice(int choice) {
         switch (choice) {
             case 1:
-                handleRegisterCustomer();
-                break;
-            case 2:
-                handleUpdateCustomer();
-                break;
-            case 3:
-                handleDeleteCustomer();
-                break;
-            case 4:
                 handleViewAllCustomers();
                 break;
-            case 5:
+            case 2:
                 handleSearchCustomers();
+                break;
+            case 3:
+                handleRegisterCustomer();
+                break;
+            case 4:
+                handleUpdateCustomer();
+                break;
+            case 5:
+                handleDeleteCustomer();
                 break;
             default:
                 System.out.println("  [ERROR] Unsupported menu option.");
@@ -66,8 +66,21 @@ public class CustomerMenu extends Menu {
         }
     }
 
+    private void handleViewAllCustomers() {
+        printBreadcrumbHeader("MAIN MENU > [2] CUSTOMERS > [1] View All Customers");
+        List<Customer> customers = this.customerController.getAllActive();
+        renderCustomerTable(customers);
+    }
+
+    private void handleSearchCustomers() {
+        printBreadcrumbHeader("MAIN MENU > [2] CUSTOMERS > [2] Search Customers");
+        String keyword = ConsoleUtil.readOptionalString("Enter search keyword (ID, Name, Phone, or Address): ");
+        List<Customer> matches = this.customerController.search(keyword);
+        renderCustomerTable(matches);
+    }
+
     private void handleRegisterCustomer() {
-        printSectionHeader("REGISTER NEW CUSTOMER (Enter 0 as ID to Cancel)");
+        printBreadcrumbHeader("MAIN MENU > [2] CUSTOMERS > [3] Register New Customer");
         String suggestedId = this.customerController.generateNextCustomerId();
         String customerId = promptCustomerId(suggestedId);
         if (customerId == null) {
@@ -92,8 +105,8 @@ public class CustomerMenu extends Menu {
     }
 
     private void handleUpdateCustomer() {
-        printSectionHeader("UPDATE CUSTOMER INFORMATION (Enter 0 to Cancel)");
-        String rawId = ConsoleUtil.readNonEmptyString("Enter Customer ID to update (e.g., C00001): ");
+        printBreadcrumbHeader("MAIN MENU > [2] CUSTOMERS > [4] Update Customer Information");
+        String rawId = ConsoleUtil.readNonEmptyString("Enter Customer ID to update (e.g., C00001, or 0 to cancel): ");
         if ("0".equals(rawId)) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
@@ -133,8 +146,8 @@ public class CustomerMenu extends Menu {
     }
 
     private void handleDeleteCustomer() {
-        printSectionHeader("DELETE CUSTOMER (Enter 0 to Cancel)");
-        String rawId = ConsoleUtil.readNonEmptyString("Enter Customer ID to delete (e.g., C00001): ");
+        printBreadcrumbHeader("MAIN MENU > [2] CUSTOMERS > [5] Remove Customer");
+        String rawId = ConsoleUtil.readNonEmptyString("Enter Customer ID to remove (e.g., C00001, or 0 to cancel): ");
         if ("0".equals(rawId)) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
@@ -149,31 +162,17 @@ public class CustomerMenu extends Menu {
         System.out.printf("  Selected Customer: %s - %s (%s, Phone: %s)%n",
                 existing.getId(), existing.getFullName(),
                 existing.getCustomerType(), existing.getPhone());
-        if (!ConsoleUtil.confirm("Confirm soft-deleting customer " + existing.getId() + "?")) {
+        if (!ConsoleUtil.confirm("Confirm removing customer " + existing.getId() + "?")) {
             System.out.println("  [INFO] Deletion cancelled.");
             return;
         }
 
         try {
             this.customerController.deleteCustomer(existing.getId());
-            System.out.printf("  [OK] Customer %s has been soft-deleted.%n", existing.getId());
+            System.out.printf("  [OK] Customer %s has been removed successfully.%n", existing.getId());
         } catch (IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
         }
-    }
-
-    private void handleViewAllCustomers() {
-        printSectionHeader("ALL ACTIVE CUSTOMERS");
-        List<Customer> customers = this.customerController.getAllActive();
-        renderCustomerTable(customers);
-    }
-
-    private void handleSearchCustomers() {
-        printSectionHeader("SEARCH CUSTOMERS");
-        String keyword = ConsoleUtil.readOptionalString(
-                "Enter customer name, phone number, or ID keyword: ");
-        List<Customer> matches = this.customerController.search(keyword);
-        renderCustomerTable(matches);
     }
 
     /**

@@ -698,8 +698,9 @@ public class ProductController {
 
     /**
      * Searches active products by matching the keyword against product ID,
-     * product name, or category (case-insensitive substring match). Returns all
-     * active products if keyword is null or blank.
+     * product name, category, or measurement unit (case-insensitive substring
+     * match).
+     * Returns all active products if keyword is null or blank.
      *
      * @param keyword the search keyword
      * @return an unmodifiable list of matching active products
@@ -717,7 +718,8 @@ public class ProductController {
             boolean matchId = product.getId().toLowerCase(Locale.ROOT).contains(lower);
             boolean matchName = product.getName().toLowerCase(Locale.ROOT).contains(lower);
             boolean matchCat = product.getCategory().toLowerCase(Locale.ROOT).contains(lower);
-            if (matchId || matchName || matchCat) {
+            boolean matchUnit = product.getUnit().toLowerCase(Locale.ROOT).contains(lower);
+            if (matchId || matchName || matchCat || matchUnit) {
                 matches.add(product);
             }
         }

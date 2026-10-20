@@ -585,6 +585,34 @@ public class OrderController {
     }
 
     /**
+     * Searches completed orders by matching keyword against Order ID, Customer ID,
+     * or order date string (e.g. "2026", "10/2026", "19/10/2026").
+     *
+     * @param keyword the search query
+     * @return an unmodifiable list of matching orders
+     */
+    public List<Order> searchOrders(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllOrders();
+        }
+        String lower = keyword.trim().toLowerCase(Locale.ROOT);
+        List<Order> result = new ArrayList<>();
+        for (Order order : this.orders) {
+            boolean matchOrderId = order.getOrderId().toLowerCase(Locale.ROOT).contains(lower);
+            boolean matchCustomerId = (order.getCustomerId() != null
+                    && order.getCustomerId().toLowerCase(Locale.ROOT).contains(lower))
+                    || (order.getCustomerId() == null && "guest".contains(lower));
+            String dateDisplay = InputValidator.formatDisplayDate(order.getOrderDate().toLocalDate());
+            String dateIso = order.getOrderDate().toLocalDate().toString();
+            boolean matchDate = dateDisplay.contains(lower) || dateIso.contains(lower);
+            if (matchOrderId || matchCustomerId || matchDate) {
+                result.add(order);
+            }
+        }
+        return Collections.unmodifiableList(result);
+    }
+
+    /**
      * Returns an unmodifiable list of all completed orders in the system (BR17).
      *
      * @return an unmodifiable list of Order objects

@@ -170,10 +170,18 @@ public final class ConsoleUtil {
     }
 
     /**
-     * Prints a blank line to separate console sections cleanly.
+     * Clears or flushes the terminal screen using ANSI escape sequences
+     * with fallback line feeds for IDE console views.
      */
     public static void clearScreen() {
-        System.out.println();
+        try {
+            System.out.print("\033[H\033[2J");
+            System.out.flush();
+        } catch (Exception ignored) {
+        }
+        for (int i = 0; i < 25; i++) {
+            System.out.println();
+        }
     }
 
     /**

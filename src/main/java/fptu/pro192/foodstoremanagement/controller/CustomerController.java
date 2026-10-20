@@ -406,7 +406,8 @@ public class CustomerController {
             boolean matchName = customer.getFullName().toLowerCase(Locale.ROOT).contains(lower);
             boolean matchPhone = customer.getPhone().contains(lower)
                     || (!digitsOnly.isEmpty() && customer.getPhone().contains(digitsOnly));
-            if (matchId || matchName || matchPhone) {
+            boolean matchAddress = customer.getAddress().toLowerCase(Locale.ROOT).contains(lower);
+            if (matchId || matchName || matchPhone || matchAddress) {
                 matches.add(customer);
             }
         }

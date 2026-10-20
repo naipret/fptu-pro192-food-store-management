@@ -19,12 +19,11 @@ import java.util.List;
 public class ProductMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
+            "View All Products",
+            "Search Products",
             "Add New Product",
-            "Update Product Catalog Information",
-            "Delete Product (Soft Delete)",
-            "View All Active Products",
-            "View Available In-Stock Products",
-            "Search Products (by Name, Category, or Expiry Date)"
+            "Update Product Information",
+            "Remove Product"
     };
 
     private static final String PRODUCT_TABLE_BORDER = "+--------+------------------------+--------------+--------+------------+------+";
@@ -39,7 +38,7 @@ public class ProductMenu extends Menu {
      * @throws IllegalArgumentException if productController is null
      */
     public ProductMenu(ProductController productController) {
-        super("PRODUCT CATALOG MANAGEMENT", MENU_OPTIONS);
+        super("PRODUCTS", MENU_OPTIONS);
         if (productController == null) {
             throw new IllegalArgumentException("ProductController cannot be null.");
         }
@@ -50,22 +49,19 @@ public class ProductMenu extends Menu {
     protected void handleChoice(int choice) {
         switch (choice) {
             case 1:
-                handleAddProduct();
-                break;
-            case 2:
-                handleUpdateProduct();
-                break;
-            case 3:
-                handleDeleteProduct();
-                break;
-            case 4:
                 handleViewAllProducts();
                 break;
-            case 5:
-                handleViewAvailableProducts();
-                break;
-            case 6:
+            case 2:
                 handleSearchProducts();
+                break;
+            case 3:
+                handleAddProduct();
+                break;
+            case 4:
+                handleUpdateProduct();
+                break;
+            case 5:
+                handleDeleteProduct();
                 break;
             default:
                 System.out.println("  [ERROR] Unsupported menu option.");
@@ -73,8 +69,21 @@ public class ProductMenu extends Menu {
         }
     }
 
+    private void handleViewAllProducts() {
+        printBreadcrumbHeader("MAIN MENU > [1] PRODUCTS > [1] View All Products");
+        List<Product> products = this.productController.getAllProducts();
+        renderProductTable(products);
+    }
+
+    private void handleSearchProducts() {
+        printBreadcrumbHeader("MAIN MENU > [1] PRODUCTS > [2] Search Products");
+        String keyword = ConsoleUtil.readOptionalString("Enter search keyword (ID, Name, Category, or Unit): ");
+        List<Product> matches = this.productController.search(keyword);
+        renderProductTable(matches);
+    }
+
     private void handleAddProduct() {
-        printSectionHeader("ADD NEW PRODUCT (Enter 0 as ID to Cancel)");
+        printBreadcrumbHeader("MAIN MENU > [1] PRODUCTS > [3] Add New Product");
         String suggestedId = this.productController.generateNextProductId();
         String productId = promptProductId(suggestedId);
         if (productId == null) {
@@ -88,13 +97,9 @@ public class ProductMenu extends Menu {
         double price = ConsoleUtil.readDouble("Enter unit selling price (VND, > 0): ", 0.0, true);
 
         Product product = new Product(productId, name, category, unit, price);
-        Batch initialBatch = null;
-        if (ConsoleUtil.confirm("Do you want to import an initial inventory batch now?")) {
-            initialBatch = promptNewBatchForProduct(productId);
-        }
 
         try {
-            this.productController.addProduct(product, initialBatch);
+            this.productController.addProduct(product);
             System.out.printf("  [OK] Product %s ('%s') added successfully.%n",
                     product.getId(), product.getName());
         } catch (IllegalArgumentException e) {
@@ -103,8 +108,8 @@ public class ProductMenu extends Menu {
     }
 
     private void handleUpdateProduct() {
-        printSectionHeader("UPDATE PRODUCT CATALOG INFORMATION (Enter 0 to Cancel)");
-        String rawId = ConsoleUtil.readNonEmptyString("Enter Product ID to update (e.g., P00001): ");
+        printBreadcrumbHeader("MAIN MENU > [1] PRODUCTS > [4] Update Product Information");
+        String rawId = ConsoleUtil.readNonEmptyString("Enter Product ID to update (e.g., P00001, or 0 to cancel): ");
         if ("0".equals(rawId)) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
@@ -151,8 +156,8 @@ public class ProductMenu extends Menu {
     }
 
     private void handleDeleteProduct() {
-        printSectionHeader("DELETE PRODUCT (Enter 0 to Cancel)");
-        String rawId = ConsoleUtil.readNonEmptyString("Enter Product ID to delete (e.g., P00001): ");
+        printBreadcrumbHeader("MAIN MENU > [1] PRODUCTS > [5] Remove Product");
+        String rawId = ConsoleUtil.readNonEmptyString("Enter Product ID to remove (e.g., P00001, or 0 to cancel): ");
         if ("0".equals(rawId)) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
@@ -167,54 +172,15 @@ public class ProductMenu extends Menu {
         System.out.printf("  Selected Product: %s - %s (Available Stock: %d %s)%n",
                 existing.getId(), existing.getName(),
                 existing.getAvailableStock(), existing.getUnit());
-        if (!ConsoleUtil.confirm("Confirm soft-deleting product " + existing.getId() + "?")) {
-            System.out.println("  [INFO] Deletion cancelled.");
+        if (!ConsoleUtil.confirm("Confirm removing product " + existing.getId() + "?")) {
+            System.out.println("  [INFO] Removal cancelled.");
             return;
         }
 
         if (this.productController.deleteProduct(existing.getId())) {
-            System.out.printf("  [OK] Product %s has been soft-deleted.%n", existing.getId());
+            System.out.printf("  [OK] Product %s has been removed successfully.%n", existing.getId());
         } else {
-            System.out.println("  [ERROR] Could not delete product.");
-        }
-    }
-
-    private void handleViewAllProducts() {
-        printSectionHeader("ALL ACTIVE PRODUCTS IN CATALOG");
-        List<Product> products = this.productController.getAllProducts();
-        renderProductTable(products);
-    }
-
-    private void handleViewAvailableProducts() {
-        printSectionHeader("AVAILABLE IN-STOCK PRODUCTS (NON-EXPIRED STOCK > 0)");
-        List<Product> available = this.productController.getAvailableProducts();
-        renderProductTable(available);
-    }
-
-    private void handleSearchProducts() {
-        printSectionHeader("SEARCH PRODUCTS");
-        System.out.println("  [1] Search by Product Name or Keyword");
-        System.out.println("  [2] Search by Category");
-        System.out.println("  [3] Search by Batch Expiration Date (Expiring On or Before Date)");
-        System.out.println("  [0] Cancel");
-        int mode = ConsoleUtil.readInt("Select search mode [0-3]: ", 0, 3);
-        if (mode == 0) {
-            return;
-        }
-
-        if (mode == 1) {
-            String keyword = ConsoleUtil.readOptionalString("Enter product name or keyword: ");
-            List<Product> matches = this.productController.search(keyword);
-            renderProductTable(matches);
-        } else if (mode == 2) {
-            String category = promptCategoryFilter();
-            List<Product> matches = this.productController.searchByCategory(category);
-            renderProductTable(matches);
-        } else if (mode == 3) {
-            LocalDate targetDate = ConsoleUtil.readDate(
-                    "Enter target expiration date (dd/MM/yyyy): ");
-            List<Product> matches = this.productController.searchByExpirationDate(targetDate);
-            renderProductTable(matches);
+            System.out.println("  [ERROR] Could not remove product.");
         }
     }
 
