@@ -233,11 +233,12 @@ public class Product {
 
     /**
      * Sets and validates the product identifier (BR1).
+     * Immutable outside of constructor.
      *
      * @param id the 6-character product ID (P00001-P99999)
      * @throws IllegalArgumentException if id is invalid
      */
-    public final void setId(String id) {
+    private void setId(String id) {
         this.id = InputValidator.validateProductId(id);
     }
 

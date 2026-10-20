@@ -37,18 +37,6 @@ public class CustomerController {
     }
 
     /**
-     * Constructs a CustomerController bound to the specified CSV path string.
-     *
-     * @param csvPath the file path string for customers.csv
-     * @throws IllegalArgumentException if csvPath is null or blank
-     */
-    public CustomerController(String csvPath) {
-        this((csvPath == null || csvPath.trim().isEmpty())
-                ? null
-                : Paths.get(csvPath.trim()));
-    }
-
-    /**
      * Constructs a CustomerController bound to the specified Path and loads
      * existing customer records from disk.
      *

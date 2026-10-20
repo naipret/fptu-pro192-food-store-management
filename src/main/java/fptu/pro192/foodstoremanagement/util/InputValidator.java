@@ -5,7 +5,11 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -14,6 +18,28 @@ import java.util.regex.Pattern;
  * mobile phone numbers, prices, integer quantities, and dd/MM/yyyy dates.
  */
 public final class InputValidator {
+
+    /**
+     * Standard currency display symbol.
+     */
+    public static final String CURRENCY_UNIT = "VND";
+
+    /**
+     * Standard baseline retail categories.
+     */
+    public static final Set<String> DEFAULT_CATEGORIES = Collections.unmodifiableSet(
+            new LinkedHashSet<>(Arrays.asList(
+                    "Grains", "Noodles", "Meat", "Seafood", "Produce",
+                    "Dairy", "Frozen", "Canned", "Beverages", "Condiments",
+                    "Snacks", "Bakery")));
+
+    /**
+     * Standard baseline retail measurement units.
+     */
+    public static final Set<String> DEFAULT_UNITS = Collections.unmodifiableSet(
+            new LinkedHashSet<>(Arrays.asList(
+                    "Pack", "Box", "Bottle", "Can", "Bag", "Tray",
+                    "Kg", "Gram", "Jar", "Carton")));
 
     /**
      * Standard console date display and input pattern (dd/MM/yyyy).
@@ -453,5 +479,16 @@ public final class InputValidator {
      */
     public static String formatCurrency(double amount) {
         return String.format(Locale.US, "%,.0f", amount);
+    }
+
+    /**
+     * Formats a numeric VND amount using Locale.US comma separators with the
+     * standard currency unit suffix.
+     *
+     * @param amount the monetary value in VND
+     * @return the formatted currency string with unit (for example, "165,000 VND")
+     */
+    public static String formatCurrencyWithUnit(double amount) {
+        return String.format(Locale.US, "%,.0f %s", amount, CURRENCY_UNIT);
     }
 }

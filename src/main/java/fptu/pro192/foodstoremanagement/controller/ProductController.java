@@ -44,13 +44,6 @@ public class ProductController {
             "batchId", "productId", "importDate", "productionDate", "expirationDate", "quantity"
     };
 
-    private static final List<String> DEFAULT_CATEGORIES = Arrays.asList(
-            "Grains", "Noodles", "Meat", "Seafood", "Produce", "Dairy",
-            "Frozen", "Canned", "Beverages", "Condiments", "Snacks", "Bakery");
-
-    private static final List<String> DEFAULT_UNITS = Arrays.asList(
-            "Pack", "Box", "Bottle", "Can", "Bag", "Tray", "Kg", "Gram", "Jar", "Carton");
-
     private final Path productCsvPath;
     private final Path batchCsvPath;
     private final List<Product> products;
@@ -62,23 +55,6 @@ public class ProductController {
      */
     public ProductController() {
         this(Paths.get(DEFAULT_PRODUCTS_CSV), Paths.get(DEFAULT_BATCHES_CSV));
-    }
-
-    /**
-     * Constructs a ProductController bound to the specified CSV path strings.
-     *
-     * @param productCsvPath the file path string for products.csv
-     * @param batchCsvPath   the file path string for batches.csv
-     * @throws IllegalArgumentException if either path string is null or blank
-     */
-    public ProductController(String productCsvPath, String batchCsvPath) {
-        this(
-                (productCsvPath == null || productCsvPath.trim().isEmpty())
-                        ? null
-                        : Paths.get(productCsvPath.trim()),
-                (batchCsvPath == null || batchCsvPath.trim().isEmpty())
-                        ? null
-                        : Paths.get(batchCsvPath.trim()));
     }
 
     /**
@@ -99,8 +75,8 @@ public class ProductController {
         this.productCsvPath = productCsvPath;
         this.batchCsvPath = batchCsvPath;
         this.products = new ArrayList<>();
-        this.categories = new LinkedHashSet<>(DEFAULT_CATEGORIES);
-        this.units = new LinkedHashSet<>(DEFAULT_UNITS);
+        this.categories = new LinkedHashSet<>(InputValidator.DEFAULT_CATEGORIES);
+        this.units = new LinkedHashSet<>(InputValidator.DEFAULT_UNITS);
         loadFromCsv();
     }
 
@@ -112,9 +88,9 @@ public class ProductController {
     public final void loadFromCsv() {
         this.products.clear();
         this.categories.clear();
-        this.categories.addAll(DEFAULT_CATEGORIES);
+        this.categories.addAll(InputValidator.DEFAULT_CATEGORIES);
         this.units.clear();
-        this.units.addAll(DEFAULT_UNITS);
+        this.units.addAll(InputValidator.DEFAULT_UNITS);
 
         Map<String, Product> productMap = new LinkedHashMap<>();
         List<String[]> productRows = CsvUtil.readCsv(this.productCsvPath);
