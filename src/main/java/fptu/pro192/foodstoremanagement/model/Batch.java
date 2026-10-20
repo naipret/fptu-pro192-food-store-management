@@ -157,48 +157,12 @@ public class Batch {
     }
 
     /**
-     * Sets the production date after verifying it is not after the current
-     * expiration date (BR7).
-     *
-     * @param productionDate the non-null production LocalDate
-     * @throws IllegalArgumentException if productionDate is null or after
-     *                                  expirationDate
-     */
-    public void setProductionDate(LocalDate productionDate) {
-        if (productionDate == null) {
-            throw new IllegalArgumentException("Production date cannot be null.");
-        }
-        if (this.expirationDate != null) {
-            InputValidator.validateDateOrder(productionDate, this.expirationDate);
-        }
-        this.productionDate = productionDate;
-    }
-
-    /**
      * Returns the batch expiration date.
      *
      * @return the expiration LocalDate
      */
     public LocalDate getExpirationDate() {
         return expirationDate;
-    }
-
-    /**
-     * Sets the expiration date after verifying it is not before the current
-     * production date (BR7).
-     *
-     * @param expirationDate the non-null expiration LocalDate
-     * @throws IllegalArgumentException if expirationDate is null or before
-     *                                  productionDate
-     */
-    public void setExpirationDate(LocalDate expirationDate) {
-        if (expirationDate == null) {
-            throw new IllegalArgumentException("Expiration date cannot be null.");
-        }
-        if (this.productionDate != null) {
-            InputValidator.validateDateOrder(this.productionDate, expirationDate);
-        }
-        this.expirationDate = expirationDate;
     }
 
     /**

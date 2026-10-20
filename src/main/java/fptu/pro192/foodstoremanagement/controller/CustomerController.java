@@ -98,7 +98,7 @@ public class CustomerController {
      * Atomically writes all customer records (including soft-deleted ones) to
      * customers.csv with a standard header row at line 0 (BR27).
      */
-    public void saveToCsv() {
+    public final void saveToCsv() {
         List<String[]> rows = new ArrayList<>();
         rows.add(CSV_HEADERS);
 

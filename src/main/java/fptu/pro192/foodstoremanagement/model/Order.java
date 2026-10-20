@@ -309,15 +309,6 @@ public class Order {
     }
 
     /**
-     * Alias for getDiscount for caller compatibility (BR13, BR15).
-     *
-     * @return the discount amount
-     */
-    public double getDiscountAmount() {
-        return discount;
-    }
-
-    /**
      * Sets the loyalty discount amount in VND (BR13, BR15).
      *
      * @param discount the non-negative discount amount

@@ -1,6 +1,5 @@
 package fptu.pro192.foodstoremanagement.controller;
 
-import fptu.pro192.foodstoremanagement.model.Batch;
 import fptu.pro192.foodstoremanagement.model.Customer;
 import fptu.pro192.foodstoremanagement.model.Order;
 import fptu.pro192.foodstoremanagement.model.OrderDetail;

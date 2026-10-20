@@ -1,7 +1,6 @@
 package fptu.pro192.foodstoremanagement.model;
 
 import fptu.pro192.foodstoremanagement.util.InputValidator;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
