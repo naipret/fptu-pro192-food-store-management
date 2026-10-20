@@ -1,12 +1,10 @@
 package fptu.pro192.foodstoremanagement.view;
 
 import fptu.pro192.foodstoremanagement.controller.ProductController;
-import fptu.pro192.foodstoremanagement.model.Batch;
 import fptu.pro192.foodstoremanagement.model.Product;
 import fptu.pro192.foodstoremanagement.util.ConsoleUtil;
 import fptu.pro192.foodstoremanagement.util.InputValidator;
 import fptu.pro192.foodstoremanagement.util.TableFormatter;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,16 +36,11 @@ public class ProductMenu extends Menu {
      * @throws IllegalArgumentException if productController is null
      */
     public ProductMenu(ProductController productController) {
-        super("PRODUCTS", MENU_OPTIONS);
+        super("MAIN MENU > [1] PRODUCTS", MENU_OPTIONS);
         if (productController == null) {
             throw new IllegalArgumentException("ProductController cannot be null.");
         }
         this.productController = productController;
-    }
-
-    @Override
-    protected String getBreadcrumbPrefix() {
-        return "MAIN MENU > [1] PRODUCTS";
     }
 
     @Override
@@ -332,14 +325,5 @@ public class ProductMenu extends Menu {
                 System.out.println("  [ERROR] " + e.getMessage());
             }
         }
-    }
-
-    /**
-     * Returns the shared ProductController collaborator.
-     *
-     * @return the ProductController instance
-     */
-    public ProductController getProductController() {
-        return productController;
     }
 }

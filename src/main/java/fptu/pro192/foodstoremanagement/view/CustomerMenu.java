@@ -35,16 +35,11 @@ public class CustomerMenu extends Menu {
      * @throws IllegalArgumentException if customerController is null
      */
     public CustomerMenu(CustomerController customerController) {
-        super("CUSTOMERS", MENU_OPTIONS);
+        super("MAIN MENU > [2] CUSTOMERS", MENU_OPTIONS);
         if (customerController == null) {
             throw new IllegalArgumentException("CustomerController cannot be null.");
         }
         this.customerController = customerController;
-    }
-
-    @Override
-    protected String getBreadcrumbPrefix() {
-        return "MAIN MENU > [2] CUSTOMERS";
     }
 
     @Override
@@ -296,14 +291,5 @@ public class CustomerMenu extends Menu {
         System.out.println("    [2] VIP     (10% Discount)");
         int choice = ConsoleUtil.readInt("Enter tier choice [1-2]: ", 1, 2);
         return (choice == 2) ? "VIP" : "Regular";
-    }
-
-    /**
-     * Returns the shared CustomerController collaborator.
-     *
-     * @return the CustomerController instance
-     */
-    public CustomerController getCustomerController() {
-        return customerController;
     }
 }

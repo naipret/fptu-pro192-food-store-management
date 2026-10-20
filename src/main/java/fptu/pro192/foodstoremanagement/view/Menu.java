@@ -60,7 +60,7 @@ public abstract class Menu {
             } else {
                 ConsoleUtil.clearScreen();
                 if (shouldShowBreadcrumb()) {
-                    printBreadcrumbHeader(getBreadcrumbPrefix() + " > [" + choice + "] " + this.options[choice - 1]);
+                    printBreadcrumbHeader(this.title + " > [" + choice + "] " + this.options[choice - 1]);
                 }
                 handleChoice(choice);
                 if (shouldPauseAfterAction()) {
@@ -116,16 +116,6 @@ public abstract class Menu {
     }
 
     /**
-     * Returns the breadcrumb prefix for this menu, e.g. "MAIN MENU > PRODUCTS".
-     * Defaults to "MAIN MENU > " + this.title.
-     *
-     * @return the breadcrumb prefix
-     */
-    protected String getBreadcrumbPrefix() {
-        return "MAIN MENU > " + this.title;
-    }
-
-    /**
      * Hook method returning the label for option [0]. Defaults to
      * "Back to Main Menu" and is overridden in MainMenu to "Exit Application".
      *
@@ -152,17 +142,6 @@ public abstract class Menu {
         System.out.println(DOUBLE_BORDER);
         System.out.println(TableFormatter.center(breadcrumb, TableFormatter.SCREEN_WIDTH));
         System.out.println(DOUBLE_BORDER);
-    }
-
-    /**
-     * Prints a formatted 80-column section header banner for a sub-operation.
-     *
-     * @param heading the section title to display
-     */
-    protected void printSectionHeader(String heading) {
-        System.out.println(SINGLE_BORDER);
-        System.out.println(TableFormatter.center(heading, TableFormatter.SCREEN_WIDTH));
-        System.out.println(SINGLE_BORDER);
     }
 
     /**

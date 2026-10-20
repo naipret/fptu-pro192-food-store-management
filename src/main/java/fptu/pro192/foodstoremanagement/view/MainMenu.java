@@ -1,10 +1,5 @@
 package fptu.pro192.foodstoremanagement.view;
 
-import fptu.pro192.foodstoremanagement.controller.CustomerController;
-import fptu.pro192.foodstoremanagement.controller.OrderController;
-import fptu.pro192.foodstoremanagement.controller.ProductController;
-import fptu.pro192.foodstoremanagement.controller.ReportController;
-
 /**
  * Top-level 80-column console menu orchestrating navigation across all five
  * application modules: Product Catalog Management, Customer Management,
