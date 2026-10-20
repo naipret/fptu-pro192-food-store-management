@@ -129,11 +129,12 @@ public abstract class Customer {
 
     /**
      * Sets and validates the customer identifier (BR2).
+     * Immutable outside of constructor.
      *
      * @param id the 6-character customer ID (C00001-C99999)
      * @throws IllegalArgumentException if id is invalid
      */
-    public final void setId(String id) {
+    private void setId(String id) {
         this.id = InputValidator.validateCustomerId(id);
     }
 

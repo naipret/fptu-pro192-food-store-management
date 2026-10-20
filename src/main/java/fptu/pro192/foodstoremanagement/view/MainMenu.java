@@ -28,32 +28,6 @@ public class MainMenu extends Menu {
     private final ReportMenu reportMenu;
 
     /**
-     * Constructs a MainMenu wired to default controllers and submenus.
-     */
-    public MainMenu() {
-        this(createDefaultProductController(), createDefaultCustomerController());
-    }
-
-    private MainMenu(ProductController productController,
-            CustomerController customerController) {
-        this(
-                productController,
-                customerController,
-                new OrderController(productController, customerController));
-    }
-
-    private MainMenu(ProductController productController,
-            CustomerController customerController,
-            OrderController orderController) {
-        this(
-                new ProductMenu(productController),
-                new CustomerMenu(customerController),
-                new SalesMenu(orderController, productController, customerController),
-                new InventoryMenu(productController),
-                new ReportMenu(new ReportController(orderController, productController, customerController)));
-    }
-
-    /**
      * Constructs a MainMenu with explicitly injected submenus.
      *
      * @param productMenu   the Product Catalog submenu
@@ -78,14 +52,6 @@ public class MainMenu extends Menu {
         this.salesMenu = salesMenu;
         this.inventoryMenu = inventoryMenu;
         this.reportMenu = reportMenu;
-    }
-
-    private static ProductController createDefaultProductController() {
-        return new ProductController();
-    }
-
-    private static CustomerController createDefaultCustomerController() {
-        return new CustomerController();
     }
 
     /**

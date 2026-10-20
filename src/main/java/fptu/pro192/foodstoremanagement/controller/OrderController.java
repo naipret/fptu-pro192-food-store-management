@@ -66,28 +66,6 @@ public class OrderController {
     }
 
     /**
-     * Constructs an OrderController bound to the specified CSV path strings
-     * and shared controller collaborators.
-     *
-     * @param ordersCsvPath      the file path string for orders.csv
-     * @param detailsCsvPath     the file path string for order_details.csv
-     * @param productController  the shared ProductController instance
-     * @param customerController the shared CustomerController instance
-     */
-    public OrderController(String ordersCsvPath, String detailsCsvPath,
-            ProductController productController, CustomerController customerController) {
-        this(
-                (ordersCsvPath == null || ordersCsvPath.trim().isEmpty())
-                        ? null
-                        : Paths.get(ordersCsvPath.trim()),
-                (detailsCsvPath == null || detailsCsvPath.trim().isEmpty())
-                        ? null
-                        : Paths.get(detailsCsvPath.trim()),
-                productController,
-                customerController);
-    }
-
-    /**
      * Constructs an OrderController with explicit CSV Paths and shared
      * controller collaborators, immediately loading completed historical
      * orders from disk.
