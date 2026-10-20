@@ -168,7 +168,6 @@
     <!-- xterm.js & addons -->
     <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-web-links@0.9.0/lib/addon-web-links.js"></script>
 
     <!-- CheerpJ 3.0 WebAssembly Loader -->
     <script src="https://cjrtnc.leaningtech.com/3.0/cj3loader.js"></script>
@@ -231,7 +230,6 @@
 
         const fitAddon = new FitAddon.FitAddon();
         term.loadAddon(fitAddon);
-        term.loadAddon(new WebLinksAddon.WebLinksAddon());
 
         const terminalContainer = document.getElementById('terminal-container');
         term.open(terminalContainer);
@@ -337,11 +335,14 @@
                 updateStatus('ready');
                 term.focus();
 
+                // Calculate dynamic path prefix for GitHub Pages subdirectory or custom domains
+                const rawPath = window.location.pathname;
+                const basePath = rawPath.substring(0, rawPath.lastIndexOf('/'));
+                const appPrefix = `/app${basePath}`;
+                const classPath = `${appPrefix}/web-runner.jar:${appPrefix}/fptu-pro192-food-store-management.jar`;
+
                 // Run web.WebMain with both web-runner.jar and the core application JAR on classpath
-                await cheerpjRunMain(
-                    'web.WebMain',
-                    '/app/web-runner.jar:/app/fptu-pro192-food-store-management.jar'
-                );
+                await cheerpjRunMain('web.WebMain', classPath);
             } catch (err) {
                 console.error('CheerpJ execution error:', err);
                 updateStatus('error', err.message);
