@@ -321,9 +321,10 @@
                                 inputResolver = resolve;
                             });
                         },
-                        async Java_web_WebTerminalManager_print(lib, nullSelf, text) {
-                            if (text) {
-                                term.write(text.replace(/\r?\n/g, '\r\n'));
+                        async Java_web_WebTerminalManager_print(lib, text) {
+                            const message = typeof text === 'string' ? text : String(text || '');
+                            if (message) {
+                                term.write(message.replace(/\r?\n/g, '\r\n'));
                             }
                         }
                     }
