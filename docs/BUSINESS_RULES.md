@@ -1,65 +1,51 @@
 # Business Rules Specification
 
-This document defines the domain invariants, validation constraints, inventory algorithms, and transactional policies governing the Food Store Management System. Every business rule is assigned a stable identifier (`BR1` through `BR27`) that is referenced directly inside the Javadoc of the methods enforcing that rule.
+This document defines the domain invariants, validation constraints, inventory algorithms, and transactional policies governing the Food Store Management System. Every rule corresponds directly to the project's Software Requirements Specification (SRS) baseline (BR1 through BR23) followed by essential architectural and transactional extensions (BR24 through BR34).
 
 ---
 
-## 1. Product Catalog and Identification Rules
+## 1. Baseline SRS Business Rules (BR1 - BR23)
 
 | Rule ID | Rule Name | Specification |
 | :--- | :--- | :--- |
-| `BR1` | Unique Product Identifier | Every product must have a unique, non-empty identifier normalized to the 6-character format `P` followed by 5 digits (`P00001` through `P99999`). Typing a shorthand number such as `P1` or `1` normalizes automatically to `P00001`. |
-| `BR3` | Text Sanitization and CSV Injection Guard | Product names, customer names, and addresses must not be blank and must contain only Unicode letters (`\p{L}`), digits, spaces, and standard punctuation. To prevent CSV formula injection when opening files in spreadsheet software, no text field may begin with `=`, `+`, `-`, or `@`. |
-| `BR4` | Positive Selling Price | A product's unit selling price (`price`) must be strictly greater than zero (`price > 0`). |
-| `BR5` | Standardized Category and Unit Registry | Every product belongs to a single-word retail grocery category (`Grains`, `Noodles`, `Meat`, `Seafood`, `Produce`, `Dairy`, `Frozen`, `Canned`, `Beverages`, `Condiments`, `Snacks`, `Bakery`) and a standard measurement unit (`Pack`, `Box`, `Bottle`, `Can`, `Bag`, `Tray`, `Kg`, `Gram`, `Jar`, `Carton`) managed in a `Set<String>` registry. Users select from the existing set or register a new single-concept entry. |
+| `BR1` | Immutable Unique Product Identifier | Each Product ID must be unique across the system and cannot be modified after creation. Input shorthand formats (such as `P1` or `1`) are automatically normalized to the 6-character format `P` followed by 5 digits (`P00001` through `P99999`). |
+| `BR2` | Immutable Unique Customer Identifier | Each Customer ID must be unique across the system and cannot be modified after creation. Shorthand numbers normalize automatically to the 6-character format `C` followed by 5 digits (`C00001` through `C99999`). |
+| `BR3` | Non-Empty Product Name and Category | Product name and category must not be empty or blank. |
+| `BR4` | Non-Empty Product Measurement Unit | Product unit must not be empty or blank. |
+| `BR5` | Positive Selling Price | Product unit selling price must be strictly greater than zero (`price > 0`). |
+| `BR6` | Non-Negative Stock Quantity | Product stock quantity cannot be negative (`stock >= 0`). |
+| `BR7` | Valid Production and Expiration Dates | Production date cannot be after the expiration date (`!productionDate.isAfter(expirationDate)`). |
+| `BR8` | Product Existence Before Sale | A product must exist in active inventory before it can be added to a sales transaction. |
+| `BR9` | Positive Sale Quantity | The quantity sold in an order item must be strictly greater than zero (`quantity > 0`). |
+| `BR10` | Available Stock Quantity Limit | The quantity sold cannot exceed the available non-expired stock of the product. |
+| `BR11` | Expired Food Product Sale Prohibition | Expired food products cannot be sold. Stock from expired batches is excluded from available sellable stock during sales transactions. |
+| `BR12` | Minimum Item Requirement for Sale | A sales transaction must contain at least one valid food product before it can be confirmed and completed. |
+| `BR13` | Total Transaction Amount Formula | Total gross amount equals the sum of line item subtotals: `Sum of (Product Price * Quantity)`. |
+| `BR14` | Immediate Inventory Deduction on Sale | Stock quantity is reduced immediately and atomically after a successful sales checkout. |
+| `BR15` | Regular Customer Discount Policy | Regular customers receive a 0% discount on orders (`discount = 0.0`). |
+| `BR16` | VIP Customer Discount Policy | VIP customers receive a 10% discount on the order subtotal (`discount = totalAmount * 0.10`). |
+| `BR17` | Final Payable Amount Formula | Final payable amount equals `Total Amount - Discount` (guaranteed non-negative). |
+| `BR18` | Mandatory Input Validation | All user input must be sanitized and validated before processing to preserve system invariants. |
+| `BR19` | Low Stock Warning Threshold | A food product is considered low stock when its total non-expired available quantity is less than or equal to 5 units (`stock <= 5`). |
+| `BR20` | Close to Expiration Alert Window | A product batch is considered close to expiration when its expiration date is within 7 days relative to the current date. |
+| `BR21` | Best-Selling Products Ranking by Period | Best-selling food products are determined based on the total quantity sold during a selected period (or across all completed orders if no period is specified), with gross revenue as a secondary ranking key. |
+| `BR22` | Highest-Spending Customers Ranking by Period | Highest-spending customers are determined based on their cumulative net purchase value (`finalAmount`) during a selected period (or across all completed orders if no period is specified). |
+| `BR23` | Completed Transactions Revenue Accounting | Total revenue calculations aggregate completed sales transactions only. Cancelled or in-progress draft orders are excluded. |
 
 ---
 
-## 2. Inventory, Batch, and FEFO Stock Rules
+## 2. System and Architectural Extensions (BR24 - BR34)
 
 | Rule ID | Rule Name | Specification |
 | :--- | :--- | :--- |
-| `BR6` | Non-Negative Batch Quantity | Every inventory batch must have a unique 6-character identifier (`B00001` through `B99999`). When a new batch is received, its initial quantity must be a positive integer (`quantity > 0`). As items are sold, the remaining batch quantity may decrease to zero (`quantity >= 0`) and is never allowed to become negative. |
-| `BR7` | Chronological Production and Expiration Dates | Every batch records an `importDate`, a `productionDate`, and an `expirationDate`. Interactive console prompts accept and display dates in `dd/MM/yyyy` format, while CSV files store dates in ISO-8601 `yyyy-MM-dd` format. A batch is valid only when `productionDate` is on or before `expirationDate` (`!productionDate.isAfter(expirationDate)`). |
-| `BR11` | Expired Stock Exclusion | A batch is considered expired when the current system date is strictly after its `expirationDate` (`LocalDate.now().isAfter(expirationDate)`). A batch whose `expirationDate` equals today remains valid until the end of the day. Expired batches remain stored in inventory for auditing and reporting but are excluded from available sellable stock and cannot be deducted during checkout. |
-| `BR19` | Low-Stock Warning Threshold | A product is flagged as low in stock when its total non-expired sellable quantity (`getAvailableStock()`) is greater than or equal to zero and less than or equal to the default threshold of `5` units (or a custom threshold specified by the user). |
-| `BR20` | Near-Expiry Warning Window | A batch is flagged as near expiry when it has remaining stock (`quantity > 0`), has not yet expired (`!isExpired()`), and its `expirationDate` falls within the next `7` calendar days (or a custom number of days specified by the user) relative to `LocalDate.now()`. |
-| `BR24` | FEFO Stock Deduction | When an order is finalized, inventory is deducted across the product's active, non-expired batches using the First-Expired-First-Out (`FEFO`) algorithm. Valid batches with `quantity > 0` are sorted in ascending order of `expirationDate` (with `importDate` and `batchId` as tie-breakers), and stock is consumed sequentially from the earliest-expiring batch until the order quantity is satisfied. |
-| `BR26` | Integer Quantity Constraint | All batch quantities, stock adjustments, and order line-item quantities are represented as 32-bit integers (`int`) rather than floating-point numbers to eliminate IEEE 754 rounding errors during inventory deduction. |
-
----
-
-## 3. Customer Identity and Loyalty Tier Rules
-
-| Rule ID | Rule Name | Specification |
-| :--- | :--- | :--- |
-| `BR2` | Unique Customer Identifier | Every registered customer must have a unique, non-empty identifier normalized to the 6-character format `C` followed by 5 digits (`C00001` through `C99999`). |
-| `BR15` | Loyalty Tier Discount Calculation | Each registered customer belongs to a concrete subclass of `Customer` that determines discount eligibility via polymorphism. `RegularCustomer` receives a `0%` discount, whereas `VIPCustomer` receives a `10%` discount (`amount * 0.10`) on the order subtotal. |
-| `BR16` | Guest Checkout Policy | Customers who purchase items without registering or providing a customer identifier are processed as guest customers (`customerId = null` in runtime memory, serialized as `GUEST` in `orders.csv`). Guest orders are always charged the full subtotal with `0%` discount. |
-| `BR25` | Phone Number Normalization and Uniqueness | Every registered customer must provide a valid Vietnamese mobile phone number. Raw input may contain spaces, hyphens, dots, or the international prefix `+84` / `84`, which `InputValidator.normalizePhone` strips and normalizes into a 10-digit string matching `^0[35789]\d{8}$`. Each active customer phone number must be unique across the customer registry. |
-
----
-
-## 4. Sales Order and Checkout Lifecycle Rules
-
-| Rule ID | Rule Name | Specification |
-| :--- | :--- | :--- |
-| `BR8` | Order Requirement of Line Items | Every sales order must be assigned a unique 6-character identifier (`O00001` through `O99999`) and must contain at least one `OrderDetail` line item before checkout can be completed. |
-| `BR9` | Positive Line-Item Quantity | Each `OrderDetail` added to an order must specify a strictly positive integer quantity (`quantity > 0`). Adding the same product multiple times within the same draft order merges the requested quantities into the existing line item. |
-| `BR10` | Available Stock Sufficiency | The cumulative quantity of a product requested in an order cannot exceed the product's currently available non-expired stock (`product.getAvailableStock()`). If requested quantity exceeds available stock either while building the cart or at final checkout, `InsufficientStockException` is thrown. |
-| `BR12` | Line-Item Subtotal Formula | The subtotal of each `OrderDetail` is calculated as `quantity * unitPrice`, where `unitPrice` is a historical snapshot of the product's selling price captured at the moment the item is added to the order. |
-| `BR13` | Order Financial Totals Formula | The gross `totalAmount` of an `Order` is the sum of all line-item subtotals. The `discount` is determined by passing `totalAmount` to the associated customer's `calculateDiscount(totalAmount)` method (or `0.0` for guest orders), and `finalAmount` equals `Math.max(0.0, totalAmount - discount)`. |
-| `BR14` | Transactional Stock Deduction on Completion | Creating a draft order and adding items to the shopping cart do not mutate product batch quantities. Actual `FEFO` stock deduction (`BR24`) and CSV persistence occur atomically only when `OrderController.finalizeOrder` succeeds. |
-| `BR17` | Immutable Completed Orders | Once an order is finalized and persisted to `orders.csv` and `order_details.csv`, its line items, captured unit prices, discount, and timestamps are immutable historical records and cannot be edited or deleted. |
-
----
-
-## 5. Reporting, Persistence, and Data Integrity Rules
-
-| Rule ID | Rule Name | Specification |
-| :--- | :--- | :--- |
-| `BR18` | Referential Integrity Across Entities | Every `Batch` must reference an existing `productId`. Every `Order` with a non-guest customer must reference an existing `customerId`, and every `OrderDetail` must reference both a valid `orderId` and an existing `productId`. |
-| `BR21` | Daily and Monthly Revenue Aggregation | Daily and monthly revenue reports aggregate only completed orders matching the requested `LocalDate` or `YearMonth`. Revenue figures always sum the net `finalAmount` (after VIP discounts) rather than the pre-discount subtotal. |
-| `BR22` | Best-Selling Product Ranking | Best-selling product rankings aggregate total units sold (`quantity`) and total gross line-item revenue across all completed orders, sorted in descending order of total quantity sold (with gross revenue as the secondary sort key). |
-| `BR23` | Customer Spending Aggregation | Customer spending summaries aggregate total completed order count and cumulative net spending (`finalAmount`) per registered customer, sorted in descending order of total spending. Guest transactions (`GUEST`) are excluded from registered customer loyalty rankings. |
-| `BR27` | Soft Delete and Identifier Reservation | Deleting a `Product` or `Customer` sets its `isDeleted` flag to `true` rather than removing the record from the CSV file. Soft-deleted entities are hidden from active catalog, search, and checkout selection screens, but their identifiers remain permanently reserved (`existsById` checks both active and soft-deleted records) so historical orders and reports always resolve the original product and customer names. |
+| `BR24` | First-Expired-First-Out (FEFO) Stock Deduction | Stock deduction consumes inventory sequentially from active non-expired batches sorted in ascending order of expiration date (`expirationDate`), using import date and batch identifier as deterministic tie-breakers. |
+| `BR25` | Normalized Unique Vietnamese Phone Number | Registered customer phone numbers must be valid Vietnamese mobile numbers normalized into a 10-digit format matching `^0[35789]\d{8}$`. Active customer phone numbers must be unique across the customer registry. |
+| `BR26` | 32-Bit Integer Stock Quantities | All batch quantities, cart line-item quantities, and inventory adjustments are tracked using 32-bit integers (`int`) to prevent floating-point rounding discrepancies. |
+| `BR27` | Soft Deletion and Identifier Reservation | Deleting a product or customer sets its `isDeleted` flag to `true` instead of deleting the CSV record. Soft-deleted identifiers remain permanently reserved (`existsById` checks both active and inactive records) to preserve historical referential integrity. |
+| `BR28` | Walk-in Guest Checkout Support | Customers purchasing goods without registering an account are processed as guest buyers (`customerId = null` in memory, serialized as `GUEST` in `orders.csv`). Guest transactions receive a 0% discount. |
+| `BR29` | Finalized Transaction Immutability | Once a sales transaction is completed and persisted to CSV storage, its line items, captured unit prices, discount calculations, and timestamps are immutable and cannot be modified or deleted. |
+| `BR30` | Cross-Entity Referential Integrity | Every inventory batch must reference a valid Product ID. Every completed order detail must reference an existing Order ID and Product ID. |
+| `BR31` | Set-Based Category and Unit Registry | Product categories and measurement units are managed dynamically in `Set<String>` collections (`LinkedHashSet`), populated with standardized grocery defaults and extensible when new items are added. |
+| `BR32` | CSV Formula Injection Prevention | Text fields entered by users (names, addresses) must not begin with formula execution characters (`=`, `+`, `-`, `@`) to protect CSV exports from spreadsheet execution vulnerabilities. |
+| `BR33` | Canonical 6-Character Identifier Standard | All entity identifiers follow a 6-character uppercase standard (`P00001` - `P99999`, `B00001` - `B99999`, `C00001` - `C99999`, `O00001` - `O99999`). Shorthand inputs automatically zero-pad to canonical format. |
+| `BR34` | Point-in-Time Unit Price Snapshotting | Each order line item records an immutable historical snapshot of the product's selling price at the precise moment it is added to the shopping cart, shielding historical invoices from future catalog price changes. |
