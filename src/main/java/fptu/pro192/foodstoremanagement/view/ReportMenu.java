@@ -38,16 +38,11 @@ public class ReportMenu extends Menu {
      * @throws IllegalArgumentException if reportController is null
      */
     public ReportMenu(ReportController reportController) {
-        super("REPORTS", MENU_OPTIONS);
+        super("MAIN MENU > [5] REPORTS", MENU_OPTIONS);
         if (reportController == null) {
             throw new IllegalArgumentException("ReportController cannot be null.");
         }
         this.reportController = reportController;
-    }
-
-    @Override
-    protected String getBreadcrumbPrefix() {
-        return "MAIN MENU > [5] REPORTS";
     }
 
     /**
@@ -246,14 +241,5 @@ public class ReportMenu extends Menu {
             return "Up to " + InputValidator.formatDisplayDate(toDate);
         }
         return "All-time";
-    }
-
-    /**
-     * Returns the shared ReportController collaborator.
-     *
-     * @return the ReportController instance
-     */
-    public ReportController getReportController() {
-        return reportController;
     }
 }

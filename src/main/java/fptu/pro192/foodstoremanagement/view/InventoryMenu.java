@@ -42,16 +42,11 @@ public class InventoryMenu extends Menu {
      * @throws IllegalArgumentException if productController is null
      */
     public InventoryMenu(ProductController productController) {
-        super("INVENTORY", MENU_OPTIONS);
+        super("MAIN MENU > [4] INVENTORY", MENU_OPTIONS);
         if (productController == null) {
             throw new IllegalArgumentException("ProductController cannot be null.");
         }
         this.productController = productController;
-    }
-
-    @Override
-    protected String getBreadcrumbPrefix() {
-        return "MAIN MENU > [4] INVENTORY";
     }
 
     @Override
@@ -314,14 +309,5 @@ public class InventoryMenu extends Menu {
         }
         System.out.println(BATCH_TABLE_BORDER);
         System.out.printf("  Total batches listed: %d%n", batches.size());
-    }
-
-    /**
-     * Returns the shared ProductController collaborator.
-     *
-     * @return the ProductController instance
-     */
-    public ProductController getProductController() {
-        return productController;
     }
 }

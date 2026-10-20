@@ -11,7 +11,6 @@ import fptu.pro192.foodstoremanagement.model.Product;
 import fptu.pro192.foodstoremanagement.util.ConsoleUtil;
 import fptu.pro192.foodstoremanagement.util.InputValidator;
 import fptu.pro192.foodstoremanagement.util.TableFormatter;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
@@ -49,7 +48,7 @@ public class SalesMenu extends Menu {
     public SalesMenu(OrderController orderController,
             ProductController productController,
             CustomerController customerController) {
-        super("SALES", MENU_OPTIONS);
+        super("MAIN MENU > [3] SALES", MENU_OPTIONS);
         if (orderController == null) {
             throw new IllegalArgumentException("OrderController cannot be null.");
         }
@@ -62,11 +61,6 @@ public class SalesMenu extends Menu {
         this.orderController = orderController;
         this.productController = productController;
         this.customerController = customerController;
-    }
-
-    @Override
-    protected String getBreadcrumbPrefix() {
-        return "MAIN MENU > [3] SALES";
     }
 
     /**

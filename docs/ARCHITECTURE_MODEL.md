@@ -169,7 +169,6 @@ classDiagram
         +findById(String id) Product
         +findByIdIncludeDeleted(String id) Product
         +search(String keyword) List~Product~
-        +getAvailableProducts() List~Product~
         +getLowStockProducts(int threshold) List~Product~
         +getExpiredBatches() List~Batch~
         +getNearExpiryBatches(int daysThreshold) List~Batch~
@@ -226,7 +225,6 @@ classDiagram
         #handleChoice(int choice)* void
         #shouldPauseAfterAction() boolean
         #shouldShowBreadcrumb() boolean
-        #getBreadcrumbPrefix() String
         +printBreadcrumbHeader(String breadcrumb) void
     }
 

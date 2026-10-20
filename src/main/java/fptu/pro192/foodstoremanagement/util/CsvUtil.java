@@ -28,20 +28,6 @@ public final class CsvUtil {
     }
 
     /**
-     * Reads all non-empty rows from a CSV file at the specified path string.
-     * Returns an empty list if the file does not exist.
-     *
-     * @param filePath the path string of the CSV file to read
-     * @return a list of string arrays representing parsed CSV rows
-     */
-    public static List<String[]> read(String filePath) {
-        if (filePath == null || filePath.trim().isEmpty()) {
-            throw new IllegalArgumentException("CSV file path cannot be null or empty.");
-        }
-        return readCsv(Paths.get(filePath.trim()));
-    }
-
-    /**
      * Reads all non-empty rows from a CSV file at the specified Path.
      * Returns an empty list if the file does not exist.
      *
@@ -74,28 +60,6 @@ public final class CsvUtil {
             throw new RuntimeException("Failed to read CSV file: " + path, e);
         }
         return records;
-    }
-
-    /**
-     * Atomically writes a header row and data rows to the specified file path.
-     *
-     * @param filePath the target CSV file path string
-     * @param headers  the column header names written at line 0, may be null or
-     *                 empty
-     * @param rows     the data rows to write after the header row
-     */
-    public static void writeAtomic(String filePath, List<String> headers, List<String[]> rows) {
-        if (filePath == null || filePath.trim().isEmpty()) {
-            throw new IllegalArgumentException("CSV file path cannot be null or empty.");
-        }
-        List<String[]> combined = new ArrayList<>();
-        if (headers != null && !headers.isEmpty()) {
-            combined.add(headers.toArray(new String[0]));
-        }
-        if (rows != null) {
-            combined.addAll(rows);
-        }
-        writeAtomic(Paths.get(filePath.trim()), combined);
     }
 
     /**

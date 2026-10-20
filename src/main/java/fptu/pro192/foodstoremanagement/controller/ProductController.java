@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -620,22 +619,6 @@ public class ProductController {
             remaining -= deductFromBatch;
         }
         saveToCsv();
-    }
-
-    /**
-     * Returns all active products that currently have positive non-expired
-     * sellable stock relative to today (BR10, BR11).
-     *
-     * @return an unmodifiable list of available in-stock products
-     */
-    public List<Product> getAvailableProducts() {
-        List<Product> result = new ArrayList<>();
-        for (Product product : this.products) {
-            if (!product.isDeleted() && product.getAvailableStock() > 0) {
-                result.add(product);
-            }
-        }
-        return Collections.unmodifiableList(result);
     }
 
     /**

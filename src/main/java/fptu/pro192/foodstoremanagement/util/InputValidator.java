@@ -408,21 +408,6 @@ public final class InputValidator {
     }
 
     /**
-     * Checks whether a date string conforms to the strict dd/MM/yyyy format (BR7).
-     *
-     * @param raw the date string to test
-     * @return true if raw is a valid dd/MM/yyyy calendar date, false otherwise
-     */
-    public static boolean isValidDate(String raw) {
-        try {
-            parseDisplayDate(raw, "Date");
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
-
-    /**
      * Formats a LocalDate into the standard console display format dd/MM/yyyy
      * (BR7).
      *

@@ -178,8 +178,11 @@ public class CoreInfrastructureTest {
             }
         };
         sampleMenu.display();
+        assertEquals("SAMPLE TEST MENU", sampleMenu.getTitle(), "Menu title must match constructor input");
+        assertEquals(1, sampleMenu.getOptions().length, "Menu options length must match constructor input");
+        assertEquals("Action One", sampleMenu.getOptions()[0], "Menu option label must match constructor input");
         assertEquals(1, handledChoice[0], "Menu must dispatch option 1 before exiting on 0");
-        ScannerManager.getInstance().setInputStream(System.in);
+        ScannerManager.getInstance().reset();
     }
 
     private static void assertTrue(boolean condition, String message) {

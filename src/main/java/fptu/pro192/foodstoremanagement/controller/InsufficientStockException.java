@@ -7,6 +7,8 @@ package fptu.pro192.foodstoremanagement.controller;
  */
 public class InsufficientStockException extends Exception {
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * Constructs an InsufficientStockException with a descriptive message.
      *
