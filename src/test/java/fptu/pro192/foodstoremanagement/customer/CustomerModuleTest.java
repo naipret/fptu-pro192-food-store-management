@@ -67,7 +67,7 @@ public class CustomerModuleTest {
                 lines.get(0), "customers.csv header at line 0");
 
         CustomerController reloaded = new CustomerController(customersCsv);
-        assertEquals(2, reloaded.getAllCustomers().size(), "Reloaded customer count");
+        assertEquals(2, reloaded.getAllActive().size(), "Reloaded customer count");
         Customer loadedVip = reloaded.findById("C2");
         assertTrue(loadedVip instanceof VIPCustomer, "Reloaded C00002 instantiated as VIPCustomer");
         assertEquals(15000.0, loadedVip.calculateDiscount(150000.0), "Reloaded VIP discount calculation");

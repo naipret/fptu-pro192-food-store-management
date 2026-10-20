@@ -179,7 +179,7 @@ public class CoreInfrastructureTest {
         };
         sampleMenu.display();
         assertEquals(1, handledChoice[0], "Menu must dispatch option 1 before exiting on 0");
-        ScannerManager.getInstance().resetToStandardInput();
+        ScannerManager.getInstance().setInputStream(System.in);
     }
 
     private static void assertTrue(boolean condition, String message) {
