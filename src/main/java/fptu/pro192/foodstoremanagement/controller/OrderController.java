@@ -483,22 +483,4 @@ public class OrderController {
     public List<Order> getAllOrders() {
         return Collections.unmodifiableList(this.orders);
     }
-
-    /**
-     * Returns the shared ProductController collaborator.
-     *
-     * @return the ProductController instance
-     */
-    public ProductController getProductController() {
-        return productController;
-    }
-
-    /**
-     * Returns the shared CustomerController collaborator.
-     *
-     * @return the CustomerController instance
-     */
-    public CustomerController getCustomerController() {
-        return customerController;
-    }
 }
