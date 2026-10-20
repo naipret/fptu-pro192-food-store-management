@@ -27,7 +27,14 @@ Every menu rendered via `Menu.display()` lists numbered options starting from `[
 2. In submenus (`ProductMenu`, `InventoryMenu`, `CustomerMenu`, `SalesMenu`, `ReportMenu`), selecting `[0]` returns immediately to `MainMenu`.
 3. During multi-step data entry flows (such as adding a product, registering a customer, or adding items to a shopping cart), entering `0` at the primary prompt cancels the operation safely without mutating state.
 
-### 2.2. Standardized Status Prefixes
+### 2.2. Screen Clearing and Breadcrumb Navigation
+
+To maintain a clean and focused user experience during terminal interaction:
+
+1. **Terminal Screen Reset (`ConsoleUtil.clearScreen()`):** Before rendering any menu frame and after completing major workflow actions, the terminal viewport is cleared using ANSI escape sequence `\033[H\033[2J` supplemented by a 25-blank-lines fallback to support legacy Windows `cmd.exe` and IDE console windows without ANSI support.
+2. **Centered Breadcrumb Headers (`Menu.printBreadcrumbHeader(String)`):** Every dispatched submenu action renders an 80-column centered breadcrumb banner at the top of the screen before executing the selected handler. The banner follows the format `MAIN MENU > [<MenuIndex>] <MENU_NAME> > [<ChoiceIndex>] <Action Name>` (for example, `MAIN MENU > [1] PRODUCTS > [3] Add New Product`) and is centered horizontally using `TableFormatter.center(...)` without redundant prefix tags like `LOCATION:`.
+
+### 2.3. Standardized Status Prefixes
 
 All user feedback messages printed to the console use explicit ASCII status prefixes:
 
@@ -60,16 +67,16 @@ Every ASCII table is constructed so the sum of its column content widths plus bo
 
 ```text
 ================================================================================
-                         FOOD STORE MANAGEMENT SYSTEM
+                          FOOD STORE MANAGEMENT SYSTEM                          
 ================================================================================
-  [1] Product Catalog Management
-  [2] Customer Management
-  [3] Sales & Checkout Management
-  [4] Inventory & Batch Management
-  [5] Analytical & Revenue Reports
+  [1] Products
+  [2] Customers
+  [3] Sales
+  [4] Inventory
+  [5] Reports
   [0] Exit Application
 --------------------------------------------------------------------------------
-Enter your choice [0-5]:
+Enter your choice [0-5]: 
 ```
 
 ### 4.2. Product Catalog Table (`79` Columns)
@@ -132,3 +139,57 @@ Formula: `1 + (5) + 1 + (8) + 1 + (24) + 1 + (7) + 1 + (13) + 1 + (14) + 1 = 78`
 | `Qty` | `5` | `7` | Integer quantity |
 | `Unit Price` | `11` | `13` | Snapshot selling price |
 | `Subtotal` | `12` | `14` | Line-item subtotal (`Qty * Unit Price`) |
+
+---
+
+## 5. Submenu Hierarchies and Universal Search
+
+### 5.1. Streamlined Menu Hierarchies
+
+1. **Products Menu (`ProductMenu`):**
+   - `[1] View All Products` (lists all active food products and their available inventory)
+   - `[2] Search Products` (universal multi-field query across ID, Name, Category, and Unit)
+   - `[3] Add New Product` (prompts for name, category, unit, price, and initial batch)
+   - `[4] Update Product` (allows updating name, category, unit, price with Enter to keep current)
+   - `[5] Remove Product` (soft-deletes product after confirmation)
+   - `[0] Back to Main Menu`
+
+2. **Customers Menu (`CustomerMenu`):**
+   - `[1] View All Customers` (lists all registered customers and their tiers)
+   - `[2] Search Customers` (universal multi-field query across ID, Full Name, Phone, and Address)
+   - `[3] Add New Customer` (prompts for full name, phone, address, and loyalty tier)
+   - `[4] Update Customer` (allows updating name, phone, address, tier with Enter to keep current)
+   - `[5] Remove Customer` (soft-deletes customer after confirmation)
+   - `[0] Back to Main Menu`
+
+3. **Sales Menu (`SalesMenu`):**
+   - `[1] Create New Order (Checkout)` (prompts for customer ID or Guest; typing non-ID product keyword shows matching search candidates, but requires explicit Product ID confirmation before adding to cart)
+   - `[2] View All Orders` (lists all completed sales orders)
+   - `[3] Search Orders` (universal query across Order ID, Customer ID, and Date patterns like `2026`, `10/2026`, `19/10/2026`)
+   - `[4] View Order Details` (displays itemized invoice breakdown by Order ID)
+   - `[0] Back to Main Menu`
+
+4. **Inventory Menu (`InventoryMenu`):**
+   - `[1] Import New Batch for Product`
+   - `[2] Replenish Existing Batch Quantity (+Stock)`
+   - `[3] Adjust Existing Batch Quantity (Set Exact Stock)`
+   - `[4] View All Batches of a Product`
+   - `[5] View Low-Stock Products Alert`
+   - `[6] View Near-Expiry Batches Alert`
+   - `[7] View Expired Batches Report`
+   - `[0] Back to Main Menu`
+
+5. **Reports Menu (`ReportMenu`):**
+   - `[1] Daily Revenue Report (by Date)`
+   - `[2] Monthly Sales & Revenue Report (by Month/Year)`
+   - `[3] Best-Selling Products Ranking` (supports optional From Date and To Date period filtering per BR21)
+   - `[4] Customer Spending Summary Ranking` (supports optional From Date and To Date period filtering per BR22)
+   - `[5] Inventory Health Alerts (Low Stock & Expiry)`
+   - `[0] Back to Main Menu`
+
+### 5.2. Universal Multi-Field Search Specification
+
+To provide maximum usability for grocery store clerks:
+- **Product Search:** Case-insensitive substring matching against Product ID, Product Name, Category, or Measurement Unit.
+- **Customer Search:** Case-insensitive substring matching against Customer ID, Full Name, Phone Number, or Residential Address (enabling lookups by city or street such as `Quảng Ngãi` or `Lê Lợi`).
+- **Order Search:** Substring matching against Order ID, Customer ID, or Order Date representations (e.g. `2026`, `10/2026`, `19/10/2026`).
