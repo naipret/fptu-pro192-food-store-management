@@ -164,17 +164,42 @@ public class ReportController {
     /**
      * Aggregates and ranks best-selling products across all completed orders,
      * sorted by total quantity sold descending, then gross revenue descending,
-     * then product ID ascending (BR18, BR22, BR27).
+     * then product ID ascending (BR18, BR21, BR27).
      *
      * @param limit the maximum number of top products to return (or zero or
      *              negative for all)
      * @return an unmodifiable list of ProductSalesSummary objects
      */
     public List<ProductSalesSummary> getTopSellingProducts(int limit) {
+        return getTopSellingProducts(null, null, limit);
+    }
+
+    /**
+     * Aggregates and ranks best-selling products during an optional calendar period,
+     * sorted by total quantity sold descending, then gross revenue descending,
+     * then product ID ascending (BR18, BR21, BR27).
+     *
+     * @param fromDate the inclusive start date, or null for unbounded start
+     * @param toDate   the inclusive end date, or null for unbounded end
+     * @param limit    the maximum number of top products to return (or zero or negative for all)
+     * @return an unmodifiable list of ProductSalesSummary objects
+     * @throws IllegalArgumentException if fromDate is after toDate
+     */
+    public List<ProductSalesSummary> getTopSellingProducts(LocalDate fromDate, LocalDate toDate, int limit) {
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+            throw new IllegalArgumentException("From date cannot be after to date.");
+        }
         Map<String, Integer> qtyByProduct = new LinkedHashMap<>();
         Map<String, Double> revByProduct = new LinkedHashMap<>();
 
         for (Order order : this.orderController.getAllOrders()) {
+            LocalDate orderDate = order.getOrderDate().toLocalDate();
+            if (fromDate != null && orderDate.isBefore(fromDate)) {
+                continue;
+            }
+            if (toDate != null && orderDate.isAfter(toDate)) {
+                continue;
+            }
             for (OrderDetail item : order.getItems()) {
                 String key = item.getProductId().toUpperCase(Locale.ROOT);
                 Integer prevQty = qtyByProduct.get(key);
@@ -220,7 +245,7 @@ public class ReportController {
     }
 
     /**
-     * Alias for getTopSellingProducts maintained for caller compatibility (BR22).
+     * Alias for getTopSellingProducts maintained for caller compatibility (BR21).
      *
      * @param limit the maximum number of products to return
      * @return an unmodifiable list of ProductSalesSummary objects
@@ -230,27 +255,68 @@ public class ReportController {
     }
 
     /**
+     * Alias for getTopSellingProducts with date range filtering (BR21).
+     *
+     * @param fromDate the inclusive start date, or null for unbounded start
+     * @param toDate   the inclusive end date, or null for unbounded end
+     * @param limit    the maximum number of products to return
+     * @return an unmodifiable list of ProductSalesSummary objects
+     */
+    public List<ProductSalesSummary> getBestSellingProducts(LocalDate fromDate, LocalDate toDate, int limit) {
+        return getTopSellingProducts(fromDate, toDate, limit);
+    }
+
+    /**
      * Aggregates and ranks registered customer spending across all completed
      * orders (excluding walk-in GUEST orders), sorted by total net spending
      * descending, then order count descending, then customer ID ascending
-     * (BR16, BR18, BR23, BR27).
+     * (BR16, BR18, BR22, BR27).
      *
      * @return an unmodifiable list of CustomerSpendingSummary objects
      */
     public List<CustomerSpendingSummary> getCustomerSpendingSummary() {
-        return getHighestSpendingCustomers(0);
+        return getHighestSpendingCustomers(null, null, 0);
+    }
+
+    /**
+     * Aggregates and ranks registered customer spending during an optional calendar
+     * period (BR16, BR18, BR22, BR27).
+     *
+     * @param fromDate the inclusive start date, or null for unbounded start
+     * @param toDate   the inclusive end date, or null for unbounded end
+     * @return an unmodifiable list of CustomerSpendingSummary objects
+     */
+    public List<CustomerSpendingSummary> getCustomerSpendingSummary(LocalDate fromDate, LocalDate toDate) {
+        return getHighestSpendingCustomers(fromDate, toDate, 0);
     }
 
     /**
      * Aggregates and ranks registered customer spending up to the specified limit
      * (or all customers with orders if limit is zero or negative) (BR16, BR18,
-     * BR23, BR27).
+     * BR22, BR27).
      *
      * @param limit the maximum number of customers to return (or zero or negative
      *              for all)
      * @return an unmodifiable list of CustomerSpendingSummary objects
      */
     public List<CustomerSpendingSummary> getHighestSpendingCustomers(int limit) {
+        return getHighestSpendingCustomers(null, null, limit);
+    }
+
+    /**
+     * Aggregates and ranks registered customer spending during an optional calendar
+     * period up to the specified limit (BR16, BR18, BR22, BR27).
+     *
+     * @param fromDate the inclusive start date, or null for unbounded start
+     * @param toDate   the inclusive end date, or null for unbounded end
+     * @param limit    the maximum number of customers to return (or zero or negative for all)
+     * @return an unmodifiable list of CustomerSpendingSummary objects
+     * @throws IllegalArgumentException if fromDate is after toDate
+     */
+    public List<CustomerSpendingSummary> getHighestSpendingCustomers(LocalDate fromDate, LocalDate toDate, int limit) {
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+            throw new IllegalArgumentException("From date cannot be after to date.");
+        }
         Map<String, Integer> countByCustomer = new LinkedHashMap<>();
         Map<String, Double> spendByCustomer = new LinkedHashMap<>();
 
@@ -258,6 +324,13 @@ public class ReportController {
             String customerId = order.getCustomerId();
             if (customerId == null || customerId.trim().isEmpty()
                     || Order.GUEST_CUSTOMER_ID.equalsIgnoreCase(customerId.trim())) {
+                continue;
+            }
+            LocalDate orderDate = order.getOrderDate().toLocalDate();
+            if (fromDate != null && orderDate.isBefore(fromDate)) {
+                continue;
+            }
+            if (toDate != null && orderDate.isAfter(toDate)) {
                 continue;
             }
             String key = customerId.toUpperCase(Locale.ROOT);

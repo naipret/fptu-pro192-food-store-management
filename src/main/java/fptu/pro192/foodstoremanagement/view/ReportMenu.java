@@ -61,18 +61,23 @@ public class ReportMenu extends Menu {
     protected void handleChoice(int choice) {
         switch (choice) {
             case 1:
+                printBreadcrumbHeader("MAIN MENU > [5] REPORTS > [1] Daily Revenue Report");
                 handleDailyRevenueReport();
                 break;
             case 2:
+                printBreadcrumbHeader("MAIN MENU > [5] REPORTS > [2] Monthly Sales & Revenue Report");
                 handleMonthlyRevenueReport();
                 break;
             case 3:
+                printBreadcrumbHeader("MAIN MENU > [5] REPORTS > [3] Best-Selling Products Ranking");
                 handleBestSellingProductsReport();
                 break;
             case 4:
+                printBreadcrumbHeader("MAIN MENU > [5] REPORTS > [4] Customer Spending Summary Ranking");
                 handleCustomerSpendingReport();
                 break;
             case 5:
+                printBreadcrumbHeader("MAIN MENU > [5] REPORTS > [5] Inventory Health Alerts");
                 handleInventoryHealthAlerts();
                 break;
             default:
@@ -139,18 +144,37 @@ public class ReportMenu extends Menu {
 
     /**
      * Displays the ranked table of best-selling products by quantity sold and
-     * gross revenue (BR22, BR27).
+     * gross revenue for an optional period (BR21, BR27).
      */
     public void handleBestSellingProductsReport() {
         printSectionHeader("BEST-SELLING PRODUCTS RANKING");
+        LocalDate fromDate = ConsoleUtil.readOptionalDate(
+                "Enter from date (dd/MM/yyyy, or Enter for all-time): ");
+        LocalDate toDate = null;
+        if (fromDate != null) {
+            while (true) {
+                toDate = ConsoleUtil.readOptionalDate(
+                        "Enter to date (dd/MM/yyyy, or Enter for no end limit): ");
+                if (toDate == null || !toDate.isBefore(fromDate)) {
+                    break;
+                }
+                System.out.println("  [ERROR] To date cannot be before from date ("
+                        + InputValidator.formatDisplayDate(fromDate) + ").");
+            }
+        } else {
+            toDate = ConsoleUtil.readOptionalDate(
+                    "Enter to date (dd/MM/yyyy, or Enter for all-time): ");
+        }
         int limit = ConsoleUtil.readInt(
                 "Enter top N limit (0 for all sold products): ", 0, 1000);
-        List<ProductSalesSummary> rankings = this.reportController.getTopSellingProducts(limit);
+        List<ProductSalesSummary> rankings = this.reportController.getTopSellingProducts(fromDate, toDate, limit);
         if (rankings.isEmpty()) {
-            System.out.println("  [INFO] No completed product sales recorded yet.");
+            System.out.println("  [INFO] No completed product sales recorded for this period.");
             return;
         }
 
+        String periodLabel = formatPeriodLabel(fromDate, toDate);
+        System.out.println("  [INFO] Period: " + periodLabel);
         System.out.println(TOP_PRODUCTS_BORDER);
         System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
                 TableFormatter.fit("Rank", 4),
@@ -177,16 +201,35 @@ public class ReportMenu extends Menu {
 
     /**
      * Displays the ranked table of registered customers by cumulative net
-     * spending (BR23, BR27).
+     * spending for an optional period (BR22, BR27).
      */
     public void handleCustomerSpendingReport() {
         printSectionHeader("CUSTOMER SPENDING SUMMARY RANKING");
-        List<CustomerSpendingSummary> summaries = this.reportController.getCustomerSpendingSummary();
+        LocalDate fromDate = ConsoleUtil.readOptionalDate(
+                "Enter from date (dd/MM/yyyy, or Enter for all-time): ");
+        LocalDate toDate = null;
+        if (fromDate != null) {
+            while (true) {
+                toDate = ConsoleUtil.readOptionalDate(
+                        "Enter to date (dd/MM/yyyy, or Enter for no end limit): ");
+                if (toDate == null || !toDate.isBefore(fromDate)) {
+                    break;
+                }
+                System.out.println("  [ERROR] To date cannot be before from date ("
+                        + InputValidator.formatDisplayDate(fromDate) + ").");
+            }
+        } else {
+            toDate = ConsoleUtil.readOptionalDate(
+                    "Enter to date (dd/MM/yyyy, or Enter for all-time): ");
+        }
+        List<CustomerSpendingSummary> summaries = this.reportController.getCustomerSpendingSummary(fromDate, toDate);
         if (summaries.isEmpty()) {
-            System.out.println("  [INFO] No registered customer orders recorded yet.");
+            System.out.println("  [INFO] No registered customer orders recorded for this period.");
             return;
         }
 
+        String periodLabel = formatPeriodLabel(fromDate, toDate);
+        System.out.println("  [INFO] Period: " + periodLabel);
         System.out.println(CUSTOMER_SPEND_BORDER);
         System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
                 TableFormatter.fit("Rank", 4),
@@ -209,6 +252,18 @@ public class ReportMenu extends Menu {
                     TableFormatter.fitRight(spentStr, 14));
         }
         System.out.println(CUSTOMER_SPEND_BORDER);
+    }
+
+    private String formatPeriodLabel(LocalDate fromDate, LocalDate toDate) {
+        if (fromDate != null && toDate != null) {
+            return InputValidator.formatDisplayDate(fromDate) + " to "
+                    + InputValidator.formatDisplayDate(toDate);
+        } else if (fromDate != null) {
+            return "From " + InputValidator.formatDisplayDate(fromDate) + " onwards";
+        } else if (toDate != null) {
+            return "Up to " + InputValidator.formatDisplayDate(toDate);
+        }
+        return "All-time";
     }
 
     /**

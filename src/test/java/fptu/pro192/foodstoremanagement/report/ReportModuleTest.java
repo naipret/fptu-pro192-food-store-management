@@ -90,12 +90,28 @@ public class ReportModuleTest {
         List<ProductSalesSummary> topProducts = reportController.getTopSellingProducts(5);
         assertEquals(2, topProducts.size(), "2 sold products ranked");
         assertEquals("P00002", topProducts.get(0).getProductId(),
-                "P00002 ranked #1 with 6 units sold vs 2 units of P00001 (BR22)");
+                "P00002 ranked #1 with 6 units sold vs 2 units of P00001 (BR21)");
+
+        List<ProductSalesSummary> filteredTop = reportController.getTopSellingProducts(
+                today.minusDays(1), today.plusDays(1), 5);
+        assertEquals(2, filteredTop.size(), "2 sold products ranked within current date range (BR21)");
+
+        List<ProductSalesSummary> emptyTop = reportController.getTopSellingProducts(
+                today.plusDays(1), today.plusDays(10), 5);
+        assertEquals(0, emptyTop.size(), "0 products sold in future date range (BR21)");
 
         List<CustomerSpendingSummary> topCustomers = reportController.getCustomerSpendingSummary();
         assertEquals(2, topCustomers.size(), "2 registered customers ranked");
         assertEquals("C00002", topCustomers.get(0).getCustomerId(),
-                "C00002 ranked #1 with 270,000 VND spent (BR23)");
+                "C00002 ranked #1 with 270,000 VND spent (BR22)");
+
+        List<CustomerSpendingSummary> filteredCust = reportController.getCustomerSpendingSummary(
+                today.minusDays(1), today.plusDays(1));
+        assertEquals(2, filteredCust.size(), "2 customers ranked within current date range (BR22)");
+
+        List<CustomerSpendingSummary> emptyCust = reportController.getCustomerSpendingSummary(
+                today.plusDays(1), today.plusDays(10));
+        assertEquals(0, emptyCust.size(), "0 customers ranked in future date range (BR22)");
 
         assertEquals(1, reportController.getLowStockReport().size(),
                 "P00002 has 4 remaining units (<= 5 low-stock threshold) (BR19)");
@@ -104,7 +120,7 @@ public class ReportModuleTest {
 
         ReportMenu reportMenu = new ReportMenu(reportController);
         String menuInput = "2\n" + today.getMonthValue() + "\n" + today.getYear()
-                + "\n\n3\n5\n\n4\n\n5\n\n0\n";
+                + "\n\n3\n\n\n5\n\n4\n\n\n\n5\n\n0\n";
         ScannerManager.getInstance().setInputStream(
                 new ByteArrayInputStream(menuInput.getBytes(StandardCharsets.UTF_8)));
         reportMenu.display();

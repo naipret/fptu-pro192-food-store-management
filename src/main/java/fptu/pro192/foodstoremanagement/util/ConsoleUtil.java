@@ -151,6 +151,27 @@ public final class ConsoleUtil {
     }
 
     /**
+     * Prompts the user for an optional date in dd/MM/yyyy format or allows
+     * an empty input to skip filtering (BR7, BR18, BR21, BR22).
+     *
+     * @param prompt the prompt message displayed to the user
+     * @return the parsed LocalDate instance, or null if the user entered empty input
+     */
+    public static LocalDate readOptionalDate(String prompt) {
+        while (true) {
+            String raw = readOptionalString(prompt);
+            if (raw.isEmpty()) {
+                return null;
+            }
+            try {
+                return InputValidator.parseDisplayDate(raw, "Date");
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Prompts the user for a Yes or No confirmation (Y/N).
      *
      * @param prompt the confirmation question displayed to the user

@@ -53,24 +53,31 @@ public class InventoryMenu extends Menu {
     protected void handleChoice(int choice) {
         switch (choice) {
             case 1:
+                printBreadcrumbHeader("MAIN MENU > [4] INVENTORY > [1] Import New Batch");
                 handleImportNewBatch();
                 break;
             case 2:
+                printBreadcrumbHeader("MAIN MENU > [4] INVENTORY > [2] Replenish Existing Batch Stock");
                 handleReplenishBatch();
                 break;
             case 3:
+                printBreadcrumbHeader("MAIN MENU > [4] INVENTORY > [3] Adjust Batch Quantity");
                 handleAdjustBatchQuantity();
                 break;
             case 4:
+                printBreadcrumbHeader("MAIN MENU > [4] INVENTORY > [4] View Product Batches");
                 handleViewProductBatches();
                 break;
             case 5:
+                printBreadcrumbHeader("MAIN MENU > [4] INVENTORY > [5] View Low-Stock Products Alert");
                 handleViewLowStockProducts();
                 break;
             case 6:
+                printBreadcrumbHeader("MAIN MENU > [4] INVENTORY > [6] View Near-Expiry Batches Alert");
                 handleViewNearExpiryBatches();
                 break;
             case 7:
+                printBreadcrumbHeader("MAIN MENU > [4] INVENTORY > [7] View Expired Batches Report");
                 handleViewExpiredBatches();
                 break;
             default:

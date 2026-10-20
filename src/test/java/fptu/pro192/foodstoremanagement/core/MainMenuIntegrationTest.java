@@ -93,7 +93,7 @@ public class MainMenuIntegrationTest {
                 + "1\nC00001\n1\nP00001\n2\n3\nY\n\n"
                 + "0\n"
                 + "5\n"
-                + "4\n\n"
+                + "4\n\n\n\n"
                 + "0\n"
                 + "0\n";
 
