@@ -32,6 +32,7 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+_site/
 
 # Visual Studio Code
 .vscode/*
@@ -49,8 +50,7 @@ src/main/main.iml
 src/test/test.iml
 
 # Application runtime temporary files
-data/*.tmp
-data/backup/
+data/
 
 # Operating system temporary and metadata files
 .DS_Store

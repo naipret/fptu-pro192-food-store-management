@@ -1,0 +1,65 @@
+name: Deploy Web Terminal to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+
+      - name: Install Apache Ant
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ant
+
+      - name: Compile and Package Core Application JAR
+        run: ant clean compile jar
+
+      - name: Run Automated Test Verification
+        run: ant test
+
+      - name: Compile Web Bridge and Prepare Deployment Payload
+        run: |
+          mkdir -p _site/web-classes
+          javac -cp dist/fptu-pro192-food-store-management.jar -d _site/web-classes web/bridge/*.java
+          jar -cf _site/web-runner.jar -C _site/web-classes .
+          rm -rf _site/web-classes
+          cp web/index.html _site/index.html
+          cp dist/fptu-pro192-food-store-management.jar _site/fptu-pro192-food-store-management.jar
+          cp -r data _site/data
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
