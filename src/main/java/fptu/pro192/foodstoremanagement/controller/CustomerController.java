@@ -379,7 +379,8 @@ public class CustomerController {
             boolean matchPhone = customer.getPhone().contains(lower)
                     || (!digitsOnly.isEmpty() && customer.getPhone().contains(digitsOnly));
             boolean matchAddress = customer.getAddress().toLowerCase(Locale.ROOT).contains(lower);
-            if (matchId || matchName || matchPhone || matchAddress) {
+            boolean matchTier = customer.getCustomerType().toLowerCase(Locale.ROOT).contains(lower);
+            if (matchId || matchName || matchPhone || matchAddress || matchTier) {
                 matches.add(customer);
             }
         }
