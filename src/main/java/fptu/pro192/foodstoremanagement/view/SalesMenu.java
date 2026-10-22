@@ -257,7 +257,7 @@ public class SalesMenu extends Menu {
      */
     public void handleSearchOrders() {
         String keyword = ConsoleUtil
-                .readOptionalString("Enter search keyword (Order ID, Customer ID, or Date e.g. 2026, 10/2026): ");
+                .readOptionalString("Enter search keyword (Order ID, Customer ID, or Date): ");
         List<Order> matching = this.orderController.searchOrders(keyword);
         renderOrdersSummaryTable(matching);
     }
@@ -334,11 +334,11 @@ public class SalesMenu extends Menu {
             }
         }
         System.out.println(INVOICE_BORDER);
-        System.out.printf("  Gross Total : %18s%n",
+        System.out.printf("| Gross Total  | %61s |%n",
                 InputValidator.formatCurrency(order.getTotalAmount()));
-        System.out.printf("  Discount    : %18s%n",
+        System.out.printf("| Discount     | %61s |%n",
                 InputValidator.formatCurrency(order.getDiscount()));
-        System.out.printf("  Final Total : %18s%n",
+        System.out.printf("| Final Total  | %61s |%n",
                 InputValidator.formatCurrency(order.getFinalAmount()));
         System.out.println(INVOICE_BORDER);
     }
