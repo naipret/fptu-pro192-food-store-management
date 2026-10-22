@@ -107,7 +107,8 @@ public abstract class Menu {
     /**
      * Hook method controlling whether an automatic breadcrumb banner is rendered
      * before executing a chosen menu action. Defaults to true. MainMenu overrides
-     * this to return false so that top-level dispatching does not print a breadcrumb.
+     * this to return false so that top-level dispatching does not print a
+     * breadcrumb.
      *
      * @return true to show automatic breadcrumb header, false otherwise
      */
@@ -117,7 +118,7 @@ public abstract class Menu {
 
     /**
      * Hook method returning the label for option [0]. Defaults to
-     * "Back to Main Menu" and is overridden in MainMenu to "Exit Application".
+     * "Back to Main Menu" and is overridden in MainMenu to "Exit".
      *
      * @return the display label for choice 0
      */
@@ -135,7 +136,8 @@ public abstract class Menu {
      * Prints a formatted 80-column section header banner for a sub-operation
      * featuring a centered breadcrumb navigation indicator.
      *
-     * @param breadcrumb the hierarchical navigation trail (e.g. "MAIN MENU > [1]
+     * @param breadcrumb the hierarchical navigation trail (e.g. "FOOD STORE
+     *                   MANAGEMENT SYSTEM > [1]
      *                   PRODUCTS > [3] Add product")
      */
     protected void printBreadcrumbHeader(String breadcrumb) {

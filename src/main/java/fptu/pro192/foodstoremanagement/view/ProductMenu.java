@@ -36,7 +36,7 @@ public class ProductMenu extends Menu {
      * @throws IllegalArgumentException if productController is null
      */
     public ProductMenu(ProductController productController) {
-        super("MAIN MENU > [1] PRODUCTS", MENU_OPTIONS);
+        super("FOOD STORE MANAGEMENT SYSTEM > [1] PRODUCTS", MENU_OPTIONS);
         if (productController == null) {
             throw new IllegalArgumentException("ProductController cannot be null.");
         }

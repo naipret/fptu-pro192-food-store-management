@@ -38,7 +38,7 @@ public class ReportMenu extends Menu {
      * @throws IllegalArgumentException if reportController is null
      */
     public ReportMenu(ReportController reportController) {
-        super("MAIN MENU > [5] REPORTS", MENU_OPTIONS);
+        super("FOOD STORE MANAGEMENT SYSTEM > [5] REPORTS", MENU_OPTIONS);
         if (reportController == null) {
             throw new IllegalArgumentException("ReportController cannot be null.");
         }

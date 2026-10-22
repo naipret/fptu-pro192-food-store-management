@@ -48,7 +48,7 @@ public class SalesMenu extends Menu {
     public SalesMenu(OrderController orderController,
             ProductController productController,
             CustomerController customerController) {
-        super("MAIN MENU > [3] SALES", MENU_OPTIONS);
+        super("FOOD STORE MANAGEMENT SYSTEM > [3] SALES", MENU_OPTIONS);
         if (orderController == null) {
             throw new IllegalArgumentException("OrderController cannot be null.");
         }

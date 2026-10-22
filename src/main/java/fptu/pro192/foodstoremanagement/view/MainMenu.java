@@ -103,11 +103,11 @@ public class MainMenu extends Menu {
     /**
      * Returns the exit label for option [0] on the root menu.
      *
-     * @return "Exit Application"
+     * @return "Exit"
      */
     @Override
     protected String getZeroOptionLabel() {
-        return "Exit Application";
+        return "Exit";
     }
 
     /**

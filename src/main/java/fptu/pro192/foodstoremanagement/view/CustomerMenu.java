@@ -35,7 +35,7 @@ public class CustomerMenu extends Menu {
      * @throws IllegalArgumentException if customerController is null
      */
     public CustomerMenu(CustomerController customerController) {
-        super("MAIN MENU > [2] CUSTOMERS", MENU_OPTIONS);
+        super("FOOD STORE MANAGEMENT SYSTEM > [2] CUSTOMERS", MENU_OPTIONS);
         if (customerController == null) {
             throw new IllegalArgumentException("CustomerController cannot be null.");
         }
