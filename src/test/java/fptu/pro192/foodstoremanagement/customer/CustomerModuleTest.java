@@ -71,6 +71,10 @@ public class CustomerModuleTest {
         Customer loadedVip = reloaded.findById("C2");
         assertTrue(loadedVip instanceof VIPCustomer, "Reloaded C00002 instantiated as VIPCustomer");
         assertEquals(15000.0, loadedVip.calculateDiscount(150000.0), "Reloaded VIP discount calculation");
+        assertEquals(1, reloaded.search("C2").size(), "Search customer with shorthand C2");
+        assertEquals("C00002", reloaded.search("C2").get(0).getId(), "Search customer matches C00002");
+        assertEquals(1, reloaded.search("c1").size(), "Search customer with lowercase c1");
+        assertEquals("C00001", reloaded.search("c1").get(0).getId(), "Search customer matches C00001");
 
         Files.deleteIfExists(customersCsv);
         Files.deleteIfExists(tempDir);

@@ -362,13 +362,19 @@ public class CustomerController {
         }
         String lower = keyword.trim().toLowerCase(Locale.ROOT);
         String digitsOnly = keyword.trim().replaceAll("[\\s.\\-()]", "");
+        String normalizedId = null;
+        try {
+            normalizedId = InputValidator.normalizeCustomerId(keyword.trim());
+        } catch (IllegalArgumentException ignored) {
+        }
         List<Customer> matches = new ArrayList<>();
 
         for (Customer customer : this.customers) {
             if (customer.isDeleted()) {
                 continue;
             }
-            boolean matchId = customer.getId().toLowerCase(Locale.ROOT).contains(lower);
+            boolean matchId = customer.getId().toLowerCase(Locale.ROOT).contains(lower)
+                    || (normalizedId != null && customer.getId().equalsIgnoreCase(normalizedId));
             boolean matchName = customer.getFullName().toLowerCase(Locale.ROOT).contains(lower);
             boolean matchPhone = customer.getPhone().contains(lower)
                     || (!digitsOnly.isEmpty() && customer.getPhone().contains(digitsOnly));

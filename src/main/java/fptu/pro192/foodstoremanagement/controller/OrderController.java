@@ -459,11 +459,24 @@ public class OrderController {
             return getAllOrders();
         }
         String lower = keyword.trim().toLowerCase(Locale.ROOT);
+        String normalizedOrderId = null;
+        try {
+            normalizedOrderId = InputValidator.normalizeOrderId(keyword.trim());
+        } catch (IllegalArgumentException ignored) {
+        }
+        String normalizedCustomerId = null;
+        try {
+            normalizedCustomerId = InputValidator.normalizeCustomerId(keyword.trim());
+        } catch (IllegalArgumentException ignored) {
+        }
         List<Order> result = new ArrayList<>();
         for (Order order : this.orders) {
-            boolean matchOrderId = order.getOrderId().toLowerCase(Locale.ROOT).contains(lower);
+            boolean matchOrderId = order.getOrderId().toLowerCase(Locale.ROOT).contains(lower)
+                    || (normalizedOrderId != null && order.getOrderId().equalsIgnoreCase(normalizedOrderId));
             boolean matchCustomerId = (order.getCustomerId() != null
-                    && order.getCustomerId().toLowerCase(Locale.ROOT).contains(lower))
+                    && (order.getCustomerId().toLowerCase(Locale.ROOT).contains(lower)
+                            || (normalizedCustomerId != null
+                                    && order.getCustomerId().equalsIgnoreCase(normalizedCustomerId))))
                     || (order.getCustomerId() == null && "guest".contains(lower));
             String dateDisplay = InputValidator.formatDisplayDate(order.getOrderDate().toLocalDate());
             String dateIso = order.getOrderDate().toLocalDate().toString();

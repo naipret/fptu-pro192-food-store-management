@@ -105,6 +105,10 @@ public class OrderModuleTest {
         assertTrue(loadedOrder != null, "Reloaded order O00001 found");
         assertEquals(1, loadedOrder.getItems().size(), "Reloaded order has 1 OrderDetail line");
         assertEquals(216000.0, loadedOrder.getFinalAmount(), "Reloaded order finalAmount");
+        assertEquals(1, reloaded.searchOrders("O1").size(), "Search order with shorthand O1");
+        assertEquals("O00001", reloaded.searchOrders("O1").get(0).getOrderId(), "Search order matches O00001");
+        assertEquals(1, reloaded.searchOrders("o1").size(), "Search order with lowercase o1");
+        assertEquals(1, reloaded.searchOrders("C1").size(), "Search order with customer shorthand C1");
 
         Files.deleteIfExists(productsCsv);
         Files.deleteIfExists(batchesCsv);

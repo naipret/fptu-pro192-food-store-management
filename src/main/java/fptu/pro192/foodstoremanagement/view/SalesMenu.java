@@ -142,7 +142,7 @@ public class SalesMenu extends Menu {
             } else if (action == 3) {
                 if (draft.getItems().isEmpty()) {
                     System.out.println(
-                            "  [ERROR] Cart is empty. Add at least one item before checkout or press 0 to cancel (BR9).");
+                            "  [ERROR] Cart is empty. Add at least one item before checkout or press 0 to cancel.");
                 } else {
                     ConsoleUtil.clearScreen();
                     renderInvoiceTable(draft);
@@ -186,7 +186,7 @@ public class SalesMenu extends Menu {
 
     private void promptAddItemToCart(Order draft) {
         String rawInput = ConsoleUtil.readNonEmptyString(
-                "Enter Product ID or search keyword (or 0 to return): ");
+                "Enter Product ID or search keyword (or 0 to cancel): ");
         if ("0".equals(rawInput)) {
             return;
         }
@@ -256,10 +256,15 @@ public class SalesMenu extends Menu {
      * Prompts for search criteria and displays matching sales orders.
      */
     public void handleSearchOrders() {
-        String keyword = ConsoleUtil
-                .readOptionalString("Enter search keyword (Order ID, Customer ID, or Date): ");
-        List<Order> matching = this.orderController.searchOrders(keyword);
-        renderOrdersSummaryTable(matching);
+        while (true) {
+            String keyword = ConsoleUtil
+                    .readOptionalString("Enter search keyword (0 to cancel): ");
+            if ("0".equals(keyword.trim())) {
+                break;
+            }
+            List<Order> matching = this.orderController.searchOrders(keyword);
+            renderOrdersSummaryTable(matching);
+        }
     }
 
     /**

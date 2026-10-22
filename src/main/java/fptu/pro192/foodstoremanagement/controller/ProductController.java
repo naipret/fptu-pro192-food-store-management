@@ -635,12 +635,18 @@ public class ProductController {
             return getAllProducts();
         }
         String lower = keyword.trim().toLowerCase(Locale.ROOT);
+        String normalizedId = null;
+        try {
+            normalizedId = InputValidator.normalizeProductId(keyword.trim());
+        } catch (IllegalArgumentException ignored) {
+        }
         List<Product> matches = new ArrayList<>();
         for (Product product : this.products) {
             if (product.isDeleted()) {
                 continue;
             }
-            boolean matchId = product.getId().toLowerCase(Locale.ROOT).contains(lower);
+            boolean matchId = product.getId().toLowerCase(Locale.ROOT).contains(lower)
+                    || (normalizedId != null && product.getId().equalsIgnoreCase(normalizedId));
             boolean matchName = product.getName().toLowerCase(Locale.ROOT).contains(lower);
             boolean matchCat = product.getCategory().toLowerCase(Locale.ROOT).contains(lower);
             boolean matchUnit = product.getUnit().toLowerCase(Locale.ROOT).contains(lower);

@@ -137,6 +137,10 @@ public class ProductModuleTest {
         assertTrue(loadedRice != null, "Reloaded product found via shorthand P1");
         assertEquals("ST25 Fragrant Rice 5kg", loadedRice.getName(), "Reloaded product name");
         assertEquals(30, loadedRice.getAvailableStock(), "Reloaded batch stock joined to product");
+        assertEquals(1, reloaded.search("P1").size(), "Search product with shorthand P1");
+        assertEquals("P00001", reloaded.search("P1").get(0).getId(), "Search product matches P00001");
+        assertEquals(1, reloaded.search("p1").size(), "Search product with lowercase p1");
+        assertEquals(1, reloaded.search("1").size(), "Search product with digit 1");
 
         Files.deleteIfExists(productsCsv);
         Files.deleteIfExists(batchesCsv);

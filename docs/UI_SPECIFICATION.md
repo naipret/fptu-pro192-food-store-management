@@ -221,6 +221,6 @@ Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 
 
 To provide maximum usability for grocery store clerks:
 
-- **Product Search:** Case-insensitive substring matching against Product ID, Product Name, Category, or Measurement Unit.
-- **Customer Search:** Case-insensitive substring matching against Customer ID, Full Name, Phone Number, or Residential Address (enabling lookups by city or street such as `Quảng Ngãi` or `Lê Lợi`).
-- **Order Search:** Substring matching against Order ID, Customer ID, or Order Date representations (e.g. `2026`, `10/2026`, `19/10/2026`).
+- **Product Search:** Case-insensitive substring matching against Product ID, Product Name, Category, or Measurement Unit. Supports shorthand ID normalization (e.g., `P1` or `1` matches `P00001`). Prompts loop continuously until `0` is entered to cancel to the menu.
+- **Customer Search:** Case-insensitive substring matching against Customer ID, Full Name, Phone Number, or Residential Address (enabling lookups by city or street such as `Quảng Ngãi` or `Lê Lợi`). Supports shorthand ID normalization (e.g., `C1` or `1` matches `C00001`). Prompts loop continuously until `0` is entered to cancel to the menu.
+- **Order Search:** Substring matching against Order ID, Customer ID, or Order Date representations (e.g. `2026`, `10/2026`, `19/10/2026`). Supports shorthand ID normalization for both Order ID (`O1` -> `O00001`) and Customer ID (`C1` -> `C00001`). Prompts loop continuously until `0` is entered to cancel to the menu.
