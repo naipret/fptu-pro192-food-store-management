@@ -65,9 +65,9 @@ public class Order {
      * @param orderDate   the timestamp of the order
      * @param items       the list of OrderDetail line items, may be null or empty
      *                    for drafts
-     * @param totalAmount the gross pre-discount total in VND
-     * @param discount    the loyalty discount amount in VND
-     * @param finalAmount the net payable amount in VND
+     * @param totalAmount the gross pre-discount total
+     * @param discount    the loyalty discount amount
+     * @param finalAmount the net payable amount
      * @throws IllegalArgumentException if any identifier, date, or monetary amount
      *                                  is invalid
      */
@@ -269,7 +269,7 @@ public class Order {
     }
 
     /**
-     * Returns the pre-discount gross total amount in VND (BR13).
+     * Returns the pre-discount gross total amount (BR13).
      *
      * @return the gross total amount
      */
@@ -300,7 +300,7 @@ public class Order {
     }
 
     /**
-     * Returns the loyalty discount amount in VND (BR13, BR15).
+     * Returns the loyalty discount amount (BR13, BR15).
      *
      * @return the discount amount
      */
@@ -309,7 +309,7 @@ public class Order {
     }
 
     /**
-     * Sets the loyalty discount amount in VND (BR13, BR15).
+     * Sets the loyalty discount amount (BR13, BR15).
      *
      * @param discount the non-negative discount amount
      * @throws IllegalArgumentException if discount is negative
@@ -322,7 +322,7 @@ public class Order {
     }
 
     /**
-     * Returns the final net payable amount after discount in VND (BR13).
+     * Returns the final net payable amount after discount (BR13).
      *
      * @return the net payable amount
      */
@@ -331,7 +331,7 @@ public class Order {
     }
 
     /**
-     * Sets the final net payable amount in VND (BR13).
+     * Sets the final net payable amount (BR13).
      *
      * @param finalAmount the non-negative final payable amount
      * @throws IllegalArgumentException if finalAmount is negative

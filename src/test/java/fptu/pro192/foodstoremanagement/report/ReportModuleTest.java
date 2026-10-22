@@ -82,7 +82,8 @@ public class ReportModuleTest {
                 "Daily net revenue equals 270,000 + 30,000 = 300,000 (BR21)");
 
         YearMonth currentYm = YearMonth.of(today.getYear(), today.getMonthValue());
-        assertEquals(2, reportController.getOrdersByMonth(currentYm).size(), "2 completed orders in current month");
+        assertEquals(2, reportController.getOrdersByMonth(currentYm).size(),
+                "2 completed orders in current month");
         assertEquals(300000.0, reportController.getMonthlyRevenue(currentYm), "Monthly net revenue (BR21)");
 
         List<ProductSalesSummary> topProducts = reportController.getTopSellingProducts(5);
@@ -101,7 +102,7 @@ public class ReportModuleTest {
         List<CustomerSpendingSummary> topCustomers = reportController.getHighestSpendingCustomers(5);
         assertEquals(2, topCustomers.size(), "2 registered customers ranked");
         assertEquals("C00002", topCustomers.get(0).getCustomerId(),
-                "C00002 ranked #1 with 270,000 VND spent (BR22)");
+                "C00002 ranked #1 with 270,000 spent (BR22)");
 
         List<CustomerSpendingSummary> filteredCust = reportController.getHighestSpendingCustomers(
                 today.minusDays(1), today.plusDays(1), 5);

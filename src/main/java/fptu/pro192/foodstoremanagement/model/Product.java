@@ -38,7 +38,7 @@ public class Product {
      * @param name     the non-empty product display name
      * @param category the single-word retail category name
      * @param unit     the single-word measurement unit
-     * @param price    the positive unit selling price in VND
+     * @param price    the positive unit selling price
      * @throws IllegalArgumentException if any parameter violates domain invariants
      */
     public Product(String id, String name, String category, String unit, double price) {
@@ -53,7 +53,7 @@ public class Product {
      * @param name      the non-empty product display name
      * @param category  the single-word retail category name
      * @param unit      the single-word measurement unit
-     * @param price     the positive unit selling price in VND
+     * @param price     the positive unit selling price
      * @param isDeleted true if the product is soft-deleted, false if active
      * @throws IllegalArgumentException if any parameter violates domain invariants
      */
@@ -258,7 +258,7 @@ public class Product {
     }
 
     /**
-     * Returns the unit selling price in VND.
+     * Returns the unit selling price .
      *
      * @return the positive selling price
      */
@@ -267,7 +267,7 @@ public class Product {
     }
 
     /**
-     * Sets and validates the unit selling price in VND (BR4).
+     * Sets and validates the unit selling price (BR4).
      *
      * @param price the positive selling price
      * @throws IllegalArgumentException if price is not greater than zero

@@ -20,11 +20,6 @@ import java.util.regex.Pattern;
 public final class InputValidator {
 
     /**
-     * Standard currency display symbol.
-     */
-    public static final String CURRENCY_UNIT = "VND";
-
-    /**
      * Standard baseline retail categories.
      */
     public static final Set<String> DEFAULT_CATEGORIES = Collections.unmodifiableSet(
@@ -445,24 +440,13 @@ public final class InputValidator {
     }
 
     /**
-     * Formats a numeric VND amount using Locale.US comma separators without
+     * Formats a numeric amount using Locale.US comma separators without
      * decimals.
      *
-     * @param amount the monetary value in VND
+     * @param amount the monetary value
      * @return the formatted currency string (for example, "165,000")
      */
     public static String formatCurrency(double amount) {
         return String.format(Locale.US, "%,.0f", amount);
-    }
-
-    /**
-     * Formats a numeric VND amount using Locale.US comma separators with the
-     * standard currency unit suffix.
-     *
-     * @param amount the monetary value in VND
-     * @return the formatted currency string with unit (for example, "165,000 VND")
-     */
-    public static String formatCurrencyWithUnit(double amount) {
-        return String.format(Locale.US, "%,.0f %s", amount, CURRENCY_UNIT);
     }
 }

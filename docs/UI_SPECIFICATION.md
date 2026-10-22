@@ -13,7 +13,7 @@ This document defines the terminal layout constraints, localization policy, navi
 | Interface Language | Full English across all menu titles, prompts, table headers, status messages, categories, and units |
 | Proper Name Support | Full Unicode letter support (`\p{L}`) for user-entered product names, customer names, and addresses |
 | Date Format | `dd/MM/yyyy` for all console prompts and table columns (converted to ISO `yyyy-MM-dd` only when reading/writing CSV files) |
-| Currency and Number Format | `Locale.US` comma-separated integers for VND amounts (`8,000 VND`, `1,250,000 VND`) and plain integers (`int`) for stock and cart quantities |
+| Currency and Number Format | `Locale.US` comma-separated integers amounts (`8,000`, `1,250,000`) and plain integers (`int`) for stock and cart quantities |
 
 ---
 
@@ -66,24 +66,26 @@ Every ASCII table is constructed so the sum of its column content widths plus bo
 ### 4.1. Standard Menu Frames (`80` Columns)
 
 #### Root Main Menu
+
 ```text
 ================================================================================
-                          FOOD STORE MANAGEMENT SYSTEM                          
+                          FOOD STORE MANAGEMENT SYSTEM
 ================================================================================
   [1] Products
   [2] Customers
   [3] Sales
   [4] Inventory
   [5] Reports
-  [0] Exit Application
+  [0] Exit
 --------------------------------------------------------------------------------
-Enter your choice [0-5]: 
+Enter your choice [0-5]:
 ```
 
 #### Level-2 Submenu (Hierarchical Breadcrumb Header)
+
 ```text
 ================================================================================
-                            MAIN MENU > [1] PRODUCTS                            
+                            MAIN MENU > [1] PRODUCTS
 ================================================================================
   [1] View All Products
   [2] Search Products
@@ -92,7 +94,7 @@ Enter your choice [0-5]:
   [5] Remove Product
   [0] Back to Main Menu
 --------------------------------------------------------------------------------
-Enter your choice [0-5]: 
+Enter your choice [0-5]:
 ```
 
 ### 4.2. Product Catalog Table (`80` Columns)
@@ -105,12 +107,12 @@ Formula: `1 + (8) + 1 + (24) + 1 + (14) + 1 + (8) + 1 + (12) + 1 + (7) + 1 = 80`
 | `Product Name` | `22` | `24` | Left |
 | `Category` | `12` | `14` | Left |
 | `Unit` | `6` | `8` | Left |
-| `Price (VND)` | `10` | `12` | Right |
+| `Price` | `10` | `12` | Right |
 | `Stock` | `5` | `7` | Right |
 
 ```text
 +--------+------------------------+--------------+--------+------------+-------+
-| ID     | Product Name           | Category     | Unit   | Price(VND) | Stock |
+| ID     | Product Name           | Category     | Unit   | Price      | Stock |
 +--------+------------------------+--------------+--------+------------+-------+
 | P00001 | ST25 Fragrant Rice 5kg | Grains       | Bag    |    165,000 |    45 |
 | P00002 | Vinamilk Fresh Milk 1L | Dairy        | Carton |     36,000 |    12 |
@@ -165,9 +167,9 @@ Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 
 | `OrdID` | `8` | `10` | Order identifier |
 | `CustID` | `8` | `10` | Customer identifier |
 | `Date` | `10` | `12` | Order date (`dd/MM/yyyy`) |
-| `Gross(VND)` | `11` | `13` | Gross amount before discount |
-| `Disc(VND)` | `11` | `13` | Loyalty discount amount |
-| `Final(VND)` | `13` | `15` | Net finalized payment |
+| `Gross` | `11` | `13` | Gross amount before discount |
+| `Discount` | `11` | `13` | Loyalty discount amount |
+| `Final` | `13` | `15` | Net finalized payment |
 
 ---
 
@@ -218,6 +220,7 @@ Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 
 ### 5.2. Universal Multi-Field Search Specification
 
 To provide maximum usability for grocery store clerks:
+
 - **Product Search:** Case-insensitive substring matching against Product ID, Product Name, Category, or Measurement Unit.
 - **Customer Search:** Case-insensitive substring matching against Customer ID, Full Name, Phone Number, or Residential Address (enabling lookups by city or street such as `Quảng Ngãi` or `Lê Lợi`).
 - **Order Search:** Substring matching against Order ID, Customer ID, or Order Date representations (e.g. `2026`, `10/2026`, `19/10/2026`).

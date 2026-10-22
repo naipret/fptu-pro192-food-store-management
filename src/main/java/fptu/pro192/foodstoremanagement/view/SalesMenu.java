@@ -152,7 +152,7 @@ public class SalesMenu extends Menu {
                             Order finalized = this.orderController.finalizeOrder(draft);
                             System.out.println("  [OK] Order " + finalized.getOrderId()
                                     + " finalized! Final amount: "
-                                    + InputValidator.formatCurrency(finalized.getFinalAmount()) + " VND");
+                                    + InputValidator.formatCurrency(finalized.getFinalAmount()));
                             shopping = false;
                         } catch (InsufficientStockException | IllegalArgumentException e) {
                             System.out.println("  [ERROR] " + e.getMessage());
@@ -202,7 +202,7 @@ public class SalesMenu extends Menu {
             for (Product p : matches) {
                 System.out.printf("    - %s | %s | %s | Available Stock: %d%n",
                         p.getId(), p.getName(),
-                        InputValidator.formatCurrencyWithUnit(p.getPrice()),
+                        InputValidator.formatCurrency(p.getPrice()),
                         p.getAvailableStock());
             }
             String confirmedId = ConsoleUtil.readNonEmptyString(
@@ -230,7 +230,7 @@ public class SalesMenu extends Menu {
         }
 
         System.out.println("  Selected: " + product.getId() + " - " + product.getName()
-                + " | Price: " + InputValidator.formatCurrencyWithUnit(product.getPrice())
+                + " | Price: " + InputValidator.formatCurrency(product.getPrice())
                 + " | Available to add: " + remainingStock + " " + product.getUnit());
 
         int qty = ConsoleUtil.readPositiveInt("Enter quantity to add (1-" + remainingStock + "): ", false);
@@ -238,7 +238,7 @@ public class SalesMenu extends Menu {
             this.orderController.addItemToDraft(draft, product.getId(), qty);
             System.out.println("  [OK] Added " + qty + " x " + product.getName()
                     + " to cart. Current total: "
-                    + InputValidator.formatCurrencyWithUnit(draft.getFinalAmount()));
+                    + InputValidator.formatCurrency(draft.getFinalAmount()));
         } catch (InsufficientStockException | IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
         }
@@ -334,11 +334,11 @@ public class SalesMenu extends Menu {
             }
         }
         System.out.println(INVOICE_BORDER);
-        System.out.printf("  Gross Total : %18s VND%n",
+        System.out.printf("  Gross Total : %18s%n",
                 InputValidator.formatCurrency(order.getTotalAmount()));
-        System.out.printf("  Discount    : %18s VND%n",
+        System.out.printf("  Discount    : %18s%n",
                 InputValidator.formatCurrency(order.getDiscount()));
-        System.out.printf("  Final Total : %18s VND%n",
+        System.out.printf("  Final Total : %18s%n",
                 InputValidator.formatCurrency(order.getFinalAmount()));
         System.out.println(INVOICE_BORDER);
     }
@@ -358,9 +358,9 @@ public class SalesMenu extends Menu {
                 TableFormatter.fit("OrdID", 8),
                 TableFormatter.fit("CustID", 8),
                 TableFormatter.fit("Date", 10),
-                TableFormatter.fitRight("Gross(VND)", 11),
-                TableFormatter.fitRight("Disc(VND)", 11),
-                TableFormatter.fitRight("Final(VND)", 13));
+                TableFormatter.fitRight("Gross", 11),
+                TableFormatter.fitRight("Discount", 11),
+                TableFormatter.fitRight("Final", 13));
         System.out.println(ORDERS_BORDER);
         for (Order order : orders) {
             String custId = (order.getCustomerId() == null)

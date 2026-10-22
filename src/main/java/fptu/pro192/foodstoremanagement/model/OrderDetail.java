@@ -20,7 +20,7 @@ public class OrderDetail {
      * @param orderId   the 6-character order identifier (O00001-O99999)
      * @param productId the 6-character product identifier (P00001-P99999)
      * @param quantity  the positive integer quantity purchased
-     * @param unitPrice the positive snapshot unit selling price in VND
+     * @param unitPrice the positive snapshot unit selling price
      * @throws IllegalArgumentException if any parameter violates domain invariants
      */
     public OrderDetail(String orderId, String productId, int quantity, double unitPrice) {
@@ -57,7 +57,7 @@ public class OrderDetail {
     /**
      * Computes the line-item subtotal as quantity multiplied by unitPrice (BR12).
      *
-     * @return the line-item subtotal in VND
+     * @return the line-item subtotal
      */
     public double getSubTotal() {
         return this.quantity * this.unitPrice;
@@ -66,7 +66,7 @@ public class OrderDetail {
     /**
      * Alias for getSubTotal for caller compatibility (BR12).
      *
-     * @return the line-item subtotal in VND
+     * @return the line-item subtotal
      */
     public double getSubtotal() {
         return getSubTotal();
@@ -132,7 +132,7 @@ public class OrderDetail {
     /**
      * Returns the historical unit selling price captured at checkout.
      *
-     * @return the positive unit selling price in VND
+     * @return the positive unit selling price
      */
     public double getUnitPrice() {
         return unitPrice;
@@ -141,7 +141,7 @@ public class OrderDetail {
     /**
      * Sets and validates the captured unit selling price (BR4, BR12).
      *
-     * @param unitPrice the positive unit selling price in VND
+     * @param unitPrice the positive unit selling price
      * @throws IllegalArgumentException if unitPrice is not greater than zero
      */
     public final void setUnitPrice(double unitPrice) {

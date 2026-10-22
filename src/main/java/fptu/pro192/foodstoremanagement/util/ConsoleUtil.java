@@ -145,7 +145,8 @@ public final class ConsoleUtil {
      * an empty input to skip filtering (BR7, BR18, BR21, BR22).
      *
      * @param prompt the prompt message displayed to the user
-     * @return the parsed LocalDate instance, or null if the user entered empty input
+     * @return the parsed LocalDate instance, or null if the user entered empty
+     *         input
      */
     public static LocalDate readOptionalDate(String prompt) {
         while (true) {

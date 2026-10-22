@@ -86,7 +86,7 @@ public class ReportMenu extends Menu {
                 + InputValidator.formatDisplayDate(targetDate));
         System.out.println("  [INFO] Completed Orders : " + dailyOrders.size());
         System.out.println("  [INFO] Net Daily Revenue: "
-                + InputValidator.formatCurrency(dailyRevenue) + " VND");
+                + InputValidator.formatCurrency(dailyRevenue));
 
         if (!dailyOrders.isEmpty()) {
             SalesMenu.renderOrdersSummaryTable(dailyOrders);
@@ -112,7 +112,7 @@ public class ReportMenu extends Menu {
         System.out.printf("  [INFO] Report Period    : %02d/%04d%n", month, year);
         System.out.println("  [INFO] Completed Orders : " + monthlyOrders.size());
         System.out.println("  [INFO] Net Monthly Revenue: "
-                + InputValidator.formatCurrency(monthlyRevenue) + " VND");
+                + InputValidator.formatCurrency(monthlyRevenue));
 
         if (!monthlyOrders.isEmpty()) {
             SalesMenu.renderOrdersSummaryTable(monthlyOrders);
@@ -158,7 +158,7 @@ public class ReportMenu extends Menu {
                 TableFormatter.fit("Product Name", 23),
                 TableFormatter.fit("Category", 10),
                 TableFormatter.fitRight("Sold", 5),
-                TableFormatter.fitRight("Gross(VND)", 13));
+                TableFormatter.fitRight("Gross", 13));
         System.out.println(TOP_PRODUCTS_BORDER);
 
         for (int i = 0; i < rankings.size(); i++) {
@@ -199,7 +199,8 @@ public class ReportMenu extends Menu {
         }
         int limit = ConsoleUtil.readInt(
                 "Enter top N limit (0 for all customers): ", 0, 1000);
-        List<CustomerSpendingSummary> summaries = this.reportController.getHighestSpendingCustomers(fromDate, toDate, limit);
+        List<CustomerSpendingSummary> summaries = this.reportController.getHighestSpendingCustomers(fromDate, toDate,
+                limit);
         if (summaries.isEmpty()) {
             System.out.println("  [INFO] No registered customer orders recorded for this period.");
             return;

@@ -120,7 +120,7 @@ public class CoreInfrastructureTest {
 
         assertEquals(165000.0, InputValidator.validatePositivePrice(165000.0), "Valid positive price");
         assertEquals(10, InputValidator.validatePositiveQuantity(10, "Qty"), "Valid positive int qty");
-        assertEquals("165,000", InputValidator.formatCurrency(165000.0), "Formatted VND currency");
+        assertEquals("165,000", InputValidator.formatCurrency(165000.0), "Formatted currency");
     }
 
     private static void testTableFormatterAlignment() {

@@ -98,8 +98,8 @@ public abstract class Customer {
      * Calculates the monetary discount amount for a given pre-discount order
      * subtotal (BR15).
      *
-     * @param amount the pre-discount order subtotal in VND
-     * @return the discount amount in VND
+     * @param amount the pre-discount order subtotal
+     * @return the discount amount
      * @throws IllegalArgumentException if amount is negative
      */
     public abstract double calculateDiscount(double amount);

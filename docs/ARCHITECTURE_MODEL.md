@@ -269,7 +269,7 @@ Header row: `id,name,category,unit,price,isDeleted`
 | `1` | `name` | `String` | Non-empty product name (`BR3`) |
 | `2` | `category` | `String` | Single-word retail category registered in `ProductController` (`BR5`) |
 | `3` | `unit` | `String` | Measurement unit registered in `ProductController` (`BR5`) |
-| `4` | `price` | `double` | Positive selling price in VND (`> 0`, `BR4`) |
+| `4` | `price` | `double` | Positive selling price (`> 0`, `BR4`) |
 | `5` | `isDeleted` | `boolean` | `true` if soft-deleted, `false` if active (`BR27`) |
 
 ### 4.2. `data/batches.csv`

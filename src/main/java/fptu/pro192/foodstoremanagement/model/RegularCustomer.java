@@ -38,8 +38,7 @@ public class RegularCustomer extends Customer {
     }
 
     /**
-     * Calculates the discount for a Regular customer, which is always 0.0 VND
-     * (BR15).
+     * Calculates the discount for a Regular customer, which is always 0.0 (BR15).
      *
      * @param amount the pre-discount order subtotal
      * @return 0.0

@@ -25,7 +25,7 @@ public class ProductMenu extends Menu {
     };
 
     private static final String PRODUCT_TABLE_BORDER = "+--------+------------------------+--------------+--------+------------+-------+";
-    private static final String PRODUCT_TABLE_HEADER = "| ID     | Product Name           | Category     | Unit   | Price(VND) | Stock |";
+    private static final String PRODUCT_TABLE_HEADER = "| ID     | Product Name           | Category     | Unit   | Price      | Stock |";
 
     private final ProductController productController;
 
@@ -89,7 +89,7 @@ public class ProductMenu extends Menu {
         String name = promptValidatedText("Enter product name: ", "Product name");
         String category = promptCategorySelection();
         String unit = promptUnitSelection();
-        double price = ConsoleUtil.readDouble("Enter unit selling price (VND, > 0): ", 0.0, true);
+        double price = ConsoleUtil.readDouble("Enter unit selling price (> 0): ", 0.0, true);
 
         Product product = new Product(productId, name, category, unit, price);
 
@@ -121,7 +121,7 @@ public class ProductMenu extends Menu {
         }
 
         System.out.printf("  Current Product : %s - %s%n", existing.getId(), existing.getName());
-        System.out.printf("  Current Category: %s | Unit: %s | Price: %s VND | Available Stock: %d%n",
+        System.out.printf("  Current Category: %s | Unit: %s | Price: %s | Available Stock: %d%n",
                 existing.getCategory(), existing.getUnit(),
                 InputValidator.formatCurrency(existing.getPrice()),
                 existing.getAvailableStock());
