@@ -398,7 +398,7 @@ public final class InputValidator {
             return YearMonth.parse(raw.trim(), STRICT_MONTH_FORMATTER);
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException(
-                    "Invalid month/year '" + raw + "'. Please use MM/yyyy format (for example, 10/2026).");
+                    "Invalid month/year '" + raw + "'. Please use MM/yyyy format.");
         }
     }
 
