@@ -77,7 +77,7 @@ public class ReportMenu extends Menu {
      */
     public void handleDailyRevenueReport() {
         LocalDate targetDate = ConsoleUtil.readDate(
-                "Enter report date (dd/MM/yyyy, e.g., 19/10/2026): ");
+                "Enter report date (dd/MM/yyyy, or 0 to cancel): ");
         List<Order> dailyOrders = this.reportController.getOrdersByDate(targetDate);
         double dailyRevenue = this.reportController.getDailyRevenue(targetDate);
 
@@ -103,15 +103,19 @@ public class ReportMenu extends Menu {
             System.out.println("  [INFO] Operation cancelled. Returning to menu.");
             return;
         }
-        int year = ConsoleUtil.readInt("Enter year [2000-2100]: ", 2000, 2100);
+        int year = ConsoleUtil.readInt("Enter year [2000-2100] (or 0 to cancel): ", 2000, 2100);
+        if (year == 0) {
+            System.out.println("  [INFO] Operation cancelled. Returning to menu.");
+            return;
+        }
         YearMonth ym = YearMonth.of(year, month);
         List<Order> monthlyOrders = this.reportController.getOrdersByMonth(ym);
         double monthlyRevenue = this.reportController.getMonthlyRevenue(ym);
 
         System.out.println();
-        System.out.printf("  [INFO] Report Period    : %02d/%04d%n", month, year);
-        System.out.println("  [INFO] Completed Orders : " + monthlyOrders.size());
-        System.out.println("  [INFO] Net Monthly Revenue: "
+        System.out.printf("  [INFO] Report Period       : %02d/%04d%n", month, year);
+        System.out.println("  [INFO] Completed Orders    : " + monthlyOrders.size());
+        System.out.println("  [INFO] Net Monthly Revenue : "
                 + InputValidator.formatCurrency(monthlyRevenue));
 
         if (!monthlyOrders.isEmpty()) {

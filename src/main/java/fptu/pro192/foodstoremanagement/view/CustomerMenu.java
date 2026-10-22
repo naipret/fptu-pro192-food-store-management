@@ -72,9 +72,15 @@ public class CustomerMenu extends Menu {
     }
 
     private void handleSearchCustomers() {
-        String keyword = ConsoleUtil.readOptionalString("Enter search keyword (ID, Name, Phone, or Address): ");
-        List<Customer> matches = this.customerController.search(keyword);
-        renderCustomerTable(matches);
+        while (true) {
+            String keyword = ConsoleUtil
+                    .readOptionalString("Enter search keyword (0 to cancel): ");
+            if ("0".equals(keyword.trim())) {
+                break;
+            }
+            List<Customer> matches = this.customerController.search(keyword);
+            renderCustomerTable(matches);
+        }
     }
 
     private void handleRegisterCustomer() {

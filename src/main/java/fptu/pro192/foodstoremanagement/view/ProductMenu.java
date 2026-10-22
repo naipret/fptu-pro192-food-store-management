@@ -73,9 +73,15 @@ public class ProductMenu extends Menu {
     }
 
     private void handleSearchProducts() {
-        String keyword = ConsoleUtil.readOptionalString("Enter search keyword (ID, Name, Category, or Unit): ");
-        List<Product> matches = this.productController.search(keyword);
-        renderProductTable(matches);
+        while (true) {
+            String keyword = ConsoleUtil
+                    .readOptionalString("Enter search keyword (0 to cancel): ");
+            if ("0".equals(keyword.trim())) {
+                break;
+            }
+            List<Product> matches = this.productController.search(keyword);
+            renderProductTable(matches);
+        }
     }
 
     private void handleAddProduct() {
