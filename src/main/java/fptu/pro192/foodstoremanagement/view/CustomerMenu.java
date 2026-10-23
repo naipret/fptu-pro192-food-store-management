@@ -256,7 +256,7 @@ public class CustomerMenu extends Menu {
     private String promptUniquePhone(String currentCustomerId) {
         while (true) {
             String raw = ConsoleUtil.readNonEmptyString(
-                    "Enter Vietnamese mobile phone (e.g., 0901234567 or +84901234567): ");
+                    "Enter Vietnamese mobile phone: ");
             try {
                 String normalized = InputValidator.normalizePhone(raw);
                 Customer owner = this.customerController.findByPhone(normalized);
