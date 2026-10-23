@@ -53,7 +53,7 @@ public class ReportController {
 
     /**
      * Returns all completed orders whose order date matches the specified calendar
-     * date (BR21).
+     * date (BR23).
      *
      * @param date the target calendar date
      * @return an unmodifiable list of orders placed on date
@@ -74,7 +74,7 @@ public class ReportController {
 
     /**
      * Calculates the total net revenue (sum of finalAmount) for a specific calendar
-     * date (BR21).
+     * date (BR23).
      *
      * @param date the target calendar date
      * @return the net revenue for that date
@@ -89,7 +89,7 @@ public class ReportController {
 
     /**
      * Returns all completed orders whose order date falls within the specified
-     * YearMonth (BR21).
+     * YearMonth (BR23).
      *
      * @param month the target YearMonth
      * @return an unmodifiable list of orders placed in that month
@@ -110,7 +110,7 @@ public class ReportController {
 
     /**
      * Calculates the total net revenue (sum of finalAmount) for a specific
-     * YearMonth (BR21).
+     * YearMonth (BR23).
      *
      * @param month the target YearMonth
      * @return the net revenue for that month
@@ -124,23 +124,10 @@ public class ReportController {
     }
 
     /**
-     * Aggregates and ranks best-selling products across all completed orders,
-     * sorted by total quantity sold descending, then gross revenue descending,
-     * then product ID ascending (BR18, BR21, BR27).
-     *
-     * @param limit the maximum number of top products to return (or zero or
-     *              negative for all)
-     * @return an unmodifiable list of ProductSalesSummary objects
-     */
-    public List<ProductSalesSummary> getTopSellingProducts(int limit) {
-        return getTopSellingProducts(null, null, limit);
-    }
-
-    /**
      * Aggregates and ranks best-selling products during an optional calendar
      * period,
      * sorted by total quantity sold descending, then gross revenue descending,
-     * then product ID ascending (BR18, BR21, BR27).
+     * then product ID ascending (BR21, BR27).
      *
      * @param fromDate the inclusive start date, or null for unbounded start
      * @param toDate   the inclusive end date, or null for unbounded end
@@ -209,21 +196,8 @@ public class ReportController {
     }
 
     /**
-     * Aggregates and ranks registered customer spending up to the specified limit
-     * (or all customers with orders if limit is zero or negative) (BR16, BR18,
-     * BR22, BR27).
-     *
-     * @param limit the maximum number of customers to return (or zero or negative
-     *              for all)
-     * @return an unmodifiable list of CustomerSpendingSummary objects
-     */
-    public List<CustomerSpendingSummary> getHighestSpendingCustomers(int limit) {
-        return getHighestSpendingCustomers(null, null, limit);
-    }
-
-    /**
      * Aggregates and ranks registered customer spending during an optional calendar
-     * period up to the specified limit (BR16, BR18, BR22, BR27).
+     * period up to the specified limit (BR22, BR27).
      *
      * @param fromDate the inclusive start date, or null for unbounded start
      * @param toDate   the inclusive end date, or null for unbounded end

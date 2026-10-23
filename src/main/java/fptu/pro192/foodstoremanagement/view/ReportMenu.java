@@ -15,7 +15,7 @@ import java.util.Locale;
 /**
  * Console view for Analytical and Revenue Reports: daily and monthly sales
  * summaries, best-selling product rankings, and customer spending rankings
- * (BR18, BR21, BR22, BR23, BR27).
+ * (BR21, BR22, BR23, BR27).
  */
 public class ReportMenu extends Menu {
 
@@ -28,8 +28,6 @@ public class ReportMenu extends Menu {
 
     private static final String TOP_PRODUCTS_BORDER = "+------+--------+-------------------------+------------+-------+---------------+";
     private static final String CUSTOMER_SPEND_BORDER = "+------+--------+------------------------+---------+---------+-----------------+";
-
-    private static final LocalDate CANCEL_DATE = LocalDate.MIN;
 
     private final ReportController reportController;
 
@@ -47,11 +45,6 @@ public class ReportMenu extends Menu {
         this.reportController = reportController;
     }
 
-    /**
-     * Dispatches the user's selected report menu option.
-     *
-     * @param choice the selected 1-based option index
-     */
     @Override
     protected void handleChoice(int choice) {
         switch (choice) {
@@ -75,11 +68,12 @@ public class ReportMenu extends Menu {
 
     /**
      * Prompts for a calendar date in dd/MM/yyyy format and displays all orders
-     * and net revenue for that day (BR21).
+     * and net revenue for that day (BR23).
      */
     public void handleDailyRevenueReport() {
-        LocalDate targetDate = ConsoleUtil.readDate(
-                "Enter report date (dd/MM/yyyy, or 0 to cancel): ");
+        LocalDate targetDate = ConsoleUtil.readDateWithDefault(
+                "Enter report date (dd/MM/yyyy, Enter for today, or 0 to cancel): ",
+                LocalDate.now());
         if (targetDate == null) {
             System.out.println("  [INFO] Operation cancelled. Returning to menu.");
             return;
@@ -100,39 +94,22 @@ public class ReportMenu extends Menu {
     }
 
     /**
-     * Prompts for a month (1-12) and four-digit year and displays the monthly
-     * sales and revenue report (BR21).
+     * Prompts for a month and year in MM/yyyy format and displays the monthly
+     * sales and revenue report (BR23).
      */
     public void handleMonthlyRevenueReport() {
-        int month = ConsoleUtil.readInt("Enter month [1-12] (or 0 to cancel): ", 0, 12);
-        if (month == 0) {
+        YearMonth ym = ConsoleUtil.readMonthWithDefault(
+                "Enter report month (MM/yyyy, Enter for this month, or 0 to cancel): ",
+                YearMonth.now());
+        if (ym == null) {
             System.out.println("  [INFO] Operation cancelled. Returning to menu.");
             return;
         }
-        int year;
-        while (true) {
-            String raw = ConsoleUtil.readOptionalString("Enter year [2000-2100] (or 0 to cancel): ");
-            if ("0".equals(raw)) {
-                System.out.println("  [INFO] Operation cancelled. Returning to menu.");
-                return;
-            }
-            try {
-                int val = Integer.parseInt(raw);
-                if (val >= 2000 && val <= 2100) {
-                    year = val;
-                    break;
-                }
-                System.out.println("  [ERROR] Value must be between 2000 and 2100.");
-            } catch (NumberFormatException e) {
-                System.out.println("  [ERROR] Invalid number. Please enter an integer.");
-            }
-        }
-        YearMonth ym = YearMonth.of(year, month);
         List<Order> monthlyOrders = this.reportController.getOrdersByMonth(ym);
         double monthlyRevenue = this.reportController.getMonthlyRevenue(ym);
 
         System.out.println();
-        System.out.printf("  [INFO] Report Period       : %02d/%04d%n", month, year);
+        System.out.printf("  [INFO] Report Period       : %02d/%04d%n", ym.getMonthValue(), ym.getYear());
         System.out.println("  [INFO] Completed Orders    : " + monthlyOrders.size());
         System.out.println("  [INFO] Net Monthly Revenue : "
                 + InputValidator.formatCurrency(monthlyRevenue));
@@ -147,38 +124,42 @@ public class ReportMenu extends Menu {
      * gross revenue for an optional period (BR21, BR27).
      */
     public void handleBestSellingProductsReport() {
-        LocalDate fromDate = promptOptionalFilterDate(
-                "Enter from date (dd/MM/yyyy, Enter for all-time, or 0 to cancel): ");
-        if (fromDate == CANCEL_DATE) {
+        LocalDate fromDateInput = promptOptionalFilterDate(
+                "Enter from date (dd/MM/yyyy, Enter for all-time, or 0 to cancel): ", true);
+        if (fromDateInput == null) {
             System.out.println("  [INFO] Operation cancelled. Returning to menu.");
             return;
         }
+        LocalDate fromDate = (fromDateInput == LocalDate.MIN) ? null : fromDateInput;
+
         LocalDate toDate = null;
-        if (fromDate != null) {
-            while (true) {
-                toDate = promptOptionalFilterDate(
-                        "Enter to date (dd/MM/yyyy, Enter for no end limit, or 0 to cancel): ");
-                if (toDate == CANCEL_DATE) {
-                    System.out.println("  [INFO] Operation cancelled. Returning to menu.");
-                    return;
-                }
-                if (toDate == null || !toDate.isBefore(fromDate)) {
-                    break;
-                }
-                System.out.println("  [ERROR] To date cannot be before from date ("
-                        + InputValidator.formatDisplayDate(fromDate) + ").");
-            }
-        } else {
-            toDate = promptOptionalFilterDate(
-                    "Enter to date (dd/MM/yyyy, Enter for all-time, or 0 to cancel): ");
-            if (toDate == CANCEL_DATE) {
+        while (true) {
+            String toPrompt = (fromDate != null)
+                    ? "Enter to date (dd/MM/yyyy, Enter for no end limit, or 0 to cancel): "
+                    : "Enter to date (dd/MM/yyyy, Enter for all-time, or 0 to cancel): ";
+            LocalDate toDateInput = promptOptionalFilterDate(toPrompt, false);
+            if (toDateInput == null) {
                 System.out.println("  [INFO] Operation cancelled. Returning to menu.");
                 return;
             }
+            toDate = (toDateInput == LocalDate.MAX) ? null : toDateInput;
+            if (fromDate == null || toDate == null || !toDate.isBefore(fromDate)) {
+                break;
+            }
+            System.out.println("  [ERROR] To date cannot be before from date ("
+                    + InputValidator.formatDisplayDate(fromDate) + ").");
         }
-        int limit = promptTopNLimit(
-                "Enter top N limit (N, or Enter for all-product): ");
-        List<ProductSalesSummary> rankings = this.reportController.getTopSellingProducts(fromDate, toDate, limit);
+
+        Integer limit = ConsoleUtil.readIntWithDefault(
+                "Enter top N limit (N, Enter for all-products, or 0 to cancel): ",
+                1, Integer.MAX_VALUE, 0);
+        if (limit == null) {
+            System.out.println("  [INFO] Operation cancelled. Returning to menu.");
+            return;
+        }
+
+        List<ProductSalesSummary> rankings = this.reportController.getTopSellingProducts(
+                fromDate, toDate, limit);
         if (rankings.isEmpty()) {
             System.out.println("  [INFO] No completed product sales recorded for this period.");
             return;
@@ -215,39 +196,42 @@ public class ReportMenu extends Menu {
      * spending for an optional period (BR22, BR27).
      */
     public void handleCustomerSpendingReport() {
-        LocalDate fromDate = promptOptionalFilterDate(
-                "Enter from date (dd/MM/yyyy, Enter for all-time, or 0 to cancel): ");
-        if (fromDate == CANCEL_DATE) {
+        LocalDate fromDateInput = promptOptionalFilterDate(
+                "Enter from date (dd/MM/yyyy, Enter for all-time, or 0 to cancel): ", true);
+        if (fromDateInput == null) {
             System.out.println("  [INFO] Operation cancelled. Returning to menu.");
             return;
         }
+        LocalDate fromDate = (fromDateInput == LocalDate.MIN) ? null : fromDateInput;
+
         LocalDate toDate = null;
-        if (fromDate != null) {
-            while (true) {
-                toDate = promptOptionalFilterDate(
-                        "Enter to date (dd/MM/yyyy, Enter for no end limit, or 0 to cancel): ");
-                if (toDate == CANCEL_DATE) {
-                    System.out.println("  [INFO] Operation cancelled. Returning to menu.");
-                    return;
-                }
-                if (toDate == null || !toDate.isBefore(fromDate)) {
-                    break;
-                }
-                System.out.println("  [ERROR] To date cannot be before from date ("
-                        + InputValidator.formatDisplayDate(fromDate) + ").");
-            }
-        } else {
-            toDate = promptOptionalFilterDate(
-                    "Enter to date (dd/MM/yyyy, Enter for all-time, or 0 to cancel): ");
-            if (toDate == CANCEL_DATE) {
+        while (true) {
+            String toPrompt = (fromDate != null)
+                    ? "Enter to date (dd/MM/yyyy, Enter for no end limit, or 0 to cancel): "
+                    : "Enter to date (dd/MM/yyyy, Enter for all-time, or 0 to cancel): ";
+            LocalDate toDateInput = promptOptionalFilterDate(toPrompt, false);
+            if (toDateInput == null) {
                 System.out.println("  [INFO] Operation cancelled. Returning to menu.");
                 return;
             }
+            toDate = (toDateInput == LocalDate.MAX) ? null : toDateInput;
+            if (fromDate == null || toDate == null || !toDate.isBefore(fromDate)) {
+                break;
+            }
+            System.out.println("  [ERROR] To date cannot be before from date ("
+                    + InputValidator.formatDisplayDate(fromDate) + ").");
         }
-        int limit = promptTopNLimit(
-                "Enter top N limit (N, or Enter for all-customers): ");
-        List<CustomerSpendingSummary> summaries = this.reportController.getHighestSpendingCustomers(fromDate, toDate,
-                limit);
+
+        Integer limit = ConsoleUtil.readIntWithDefault(
+                "Enter top N limit (N, Enter for all-customers, or 0 to cancel): ",
+                1, Integer.MAX_VALUE, 0);
+        if (limit == null) {
+            System.out.println("  [INFO] Operation cancelled. Returning to menu.");
+            return;
+        }
+
+        List<CustomerSpendingSummary> summaries = this.reportController.getHighestSpendingCustomers(
+                fromDate, toDate, limit);
         if (summaries.isEmpty()) {
             System.out.println("  [INFO] No registered customer orders recorded for this period.");
             return;
@@ -279,39 +263,9 @@ public class ReportMenu extends Menu {
         System.out.println(CUSTOMER_SPEND_BORDER);
     }
 
-    private LocalDate promptOptionalFilterDate(String prompt) {
-        while (true) {
-            String raw = ConsoleUtil.readOptionalString(prompt);
-            if ("0".equals(raw)) {
-                return CANCEL_DATE;
-            }
-            if (raw.isEmpty()) {
-                return null;
-            }
-            try {
-                return InputValidator.parseDisplayDate(raw, "Date");
-            } catch (IllegalArgumentException e) {
-                System.out.println("  [ERROR] " + e.getMessage());
-            }
-        }
-    }
-
-    private int promptTopNLimit(String prompt) {
-        while (true) {
-            String raw = ConsoleUtil.readOptionalString(prompt);
-            if (raw.isEmpty()) {
-                return 0;
-            }
-            try {
-                int val = Integer.parseInt(raw);
-                if (val >= 0) {
-                    return val;
-                }
-                System.out.println("  [ERROR] Limit must be greater than or equal to 0.");
-            } catch (NumberFormatException e) {
-                System.out.println("  [ERROR] Invalid number. Please enter an integer or press Enter.");
-            }
-        }
+    private LocalDate promptOptionalFilterDate(String prompt, boolean isFromDate) {
+        LocalDate defaultVal = isFromDate ? LocalDate.MIN : LocalDate.MAX;
+        return ConsoleUtil.readDateWithDefault(prompt, defaultVal);
     }
 
     private String formatPeriodLabel(LocalDate fromDate, LocalDate toDate) {
