@@ -3,6 +3,7 @@ package fptu.pro192.foodstoremanagement.view;
 import fptu.pro192.foodstoremanagement.util.ConsoleUtil;
 import fptu.pro192.foodstoremanagement.util.TableFormatter;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 
 /**
  * Abstract base class for all 80-column interactive console menus,
@@ -46,26 +47,30 @@ public abstract class Menu {
      * Template Method executing the interactive menu loop until the user
      * selects 0 to exit or return to the parent menu.
      */
-    public void display() {
+    public final void display() {
         boolean running = true;
         while (running) {
             renderMenuFrame();
-            int choice = ConsoleUtil.readInt(
-                    "Enter your choice [0-" + this.options.length + "]: ",
-                    0,
-                    this.options.length);
-            if (choice == 0) {
-                onExit();
+            try {
+                int choice = ConsoleUtil.readInt(
+                        "Enter your choice [0-" + this.options.length + "]: ",
+                        0,
+                        this.options.length);
+                if (choice == 0) {
+                    onExit();
+                    running = false;
+                } else {
+                    ConsoleUtil.clearScreen();
+                    if (shouldShowBreadcrumb()) {
+                        printBreadcrumbHeader(this.title + " > [" + choice + "] " + this.options[choice - 1]);
+                    }
+                    handleChoice(choice);
+                    if (shouldPauseAfterAction(choice)) {
+                        ConsoleUtil.pressEnterToContinue();
+                    }
+                }
+            } catch (NoSuchElementException e) {
                 running = false;
-            } else {
-                ConsoleUtil.clearScreen();
-                if (shouldShowBreadcrumb()) {
-                    printBreadcrumbHeader(this.title + " > [" + choice + "] " + this.options[choice - 1]);
-                }
-                handleChoice(choice);
-                if (shouldPauseAfterAction()) {
-                    ConsoleUtil.pressEnterToContinue();
-                }
             }
         }
     }
@@ -92,6 +97,19 @@ public abstract class Menu {
      * @param choice the validated 1-based option index selected by the user
      */
     protected abstract void handleChoice(int choice);
+
+    /**
+     * Hook method controlling whether the menu pauses for the user to press
+     * Enter after completing an action. Subclasses can override this method
+     * to selectively suppress pausing for specific options (e.g. search or
+     * view loops).
+     *
+     * @param choice the 1-based option index that was executed
+     * @return true to pause after handleChoice, false otherwise
+     */
+    protected boolean shouldPauseAfterAction(int choice) {
+        return shouldPauseAfterAction();
+    }
 
     /**
      * Hook method controlling whether the menu pauses for the user to press
@@ -144,23 +162,5 @@ public abstract class Menu {
         System.out.println(DOUBLE_BORDER);
         System.out.println(TableFormatter.center(breadcrumb, TableFormatter.SCREEN_WIDTH));
         System.out.println(DOUBLE_BORDER);
-    }
-
-    /**
-     * Returns the menu title.
-     *
-     * @return the title string
-     */
-    public String getTitle() {
-        return title;
-    }
-
-    /**
-     * Returns a defensive copy of the menu options array.
-     *
-     * @return a copy of the options array
-     */
-    public String[] getOptions() {
-        return Arrays.copyOf(this.options, this.options.length);
     }
 }

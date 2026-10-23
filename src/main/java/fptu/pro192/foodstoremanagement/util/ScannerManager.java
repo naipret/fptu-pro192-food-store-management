@@ -50,10 +50,4 @@ public final class ScannerManager {
         this.scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name());
     }
 
-    /**
-     * Rebinds the underlying Scanner to the current System.in stream.
-     */
-    public void reset() {
-        this.scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
-    }
 }

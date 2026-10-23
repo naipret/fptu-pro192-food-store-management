@@ -70,13 +70,11 @@ public final class InputValidator {
 
     /**
      * Validates and normalizes an entity identifier to the canonical 6-character
-     * format consisting of the uppercase prefix followed by 5 digits (BR1, BR2,
-     * BR6, BR8).
+     * format consisting of the uppercase prefix followed by 5 digits (BR33).
      * Accepts shorthand numeric input such as "1" or "P1" and pads it to "P00001".
      * Rejects identifiers whose numeric portion is outside 1..99999 or that use a
      * non-canonical digit count when a prefix is already supplied (unless shorthand
-     * padding
-     * is explicitly enabled).
+     * padding is explicitly enabled).
      *
      * @param raw                   the raw identifier string
      * @param expectedPrefix        the required uppercase prefix ('P', 'B', 'C', or
@@ -128,7 +126,8 @@ public final class InputValidator {
     }
 
     /**
-     * Validates a strict 6-character Product ID (P00001 through P99999) (BR1).
+     * Validates a strict 6-character Product ID (P00001 through P99999) (BR1,
+     * BR33).
      *
      * @param raw the raw product ID string
      * @return the canonical 6-character product ID
@@ -140,7 +139,7 @@ public final class InputValidator {
 
     /**
      * Normalizes a user-entered Product ID (accepting shorthand like "1" or "P1" to
-     * "P00001") (BR1).
+     * "P00001") (BR1, BR33).
      *
      * @param raw the raw product ID input
      * @return the canonical 6-character product ID
@@ -151,7 +150,22 @@ public final class InputValidator {
     }
 
     /**
-     * Validates a strict 6-character Batch ID (B00001 through B99999) (BR6).
+     * Safely attempts to normalize a Product ID, returning null on failure (BR1,
+     * BR33).
+     *
+     * @param raw the raw product ID input
+     * @return the canonical 6-character product ID, or null if invalid
+     */
+    public static String tryNormalizeProductId(String raw) {
+        try {
+            return normalizeProductId(raw);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Validates a strict 6-character Batch ID (B00001 through B99999) (BR33).
      *
      * @param raw the raw batch ID string
      * @return the canonical 6-character batch ID
@@ -163,7 +177,7 @@ public final class InputValidator {
 
     /**
      * Normalizes a user-entered Batch ID (accepting shorthand like "1" or "B1" to
-     * "B00001") (BR6).
+     * "B00001") (BR33).
      *
      * @param raw the raw batch ID input
      * @return the canonical 6-character batch ID
@@ -174,7 +188,22 @@ public final class InputValidator {
     }
 
     /**
-     * Validates a strict 6-character Customer ID (C00001 through C99999) (BR2).
+     * Safely attempts to normalize a Batch ID, returning null on failure (BR33).
+     *
+     * @param raw the raw batch ID input
+     * @return the canonical 6-character batch ID, or null if invalid
+     */
+    public static String tryNormalizeBatchId(String raw) {
+        try {
+            return normalizeBatchId(raw);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Validates a strict 6-character Customer ID (C00001 through C99999) (BR2,
+     * BR33).
      *
      * @param raw the raw customer ID string
      * @return the canonical 6-character customer ID
@@ -186,7 +215,7 @@ public final class InputValidator {
 
     /**
      * Normalizes a user-entered Customer ID (accepting shorthand like "1" or "C1"
-     * to "C00001") (BR2).
+     * to "C00001") (BR2, BR33).
      *
      * @param raw the raw customer ID input
      * @return the canonical 6-character customer ID
@@ -197,7 +226,22 @@ public final class InputValidator {
     }
 
     /**
-     * Validates a strict 6-character Order ID (O00001 through O99999) (BR8).
+     * Safely attempts to normalize a Customer ID, returning null on failure (BR2,
+     * BR33).
+     *
+     * @param raw the raw customer ID input
+     * @return the canonical 6-character customer ID, or null if invalid
+     */
+    public static String tryNormalizeCustomerId(String raw) {
+        try {
+            return normalizeCustomerId(raw);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Validates a strict 6-character Order ID (O00001 through O99999) (BR33).
      *
      * @param raw the raw order ID string
      * @return the canonical 6-character order ID
@@ -209,7 +253,7 @@ public final class InputValidator {
 
     /**
      * Normalizes a user-entered Order ID (accepting shorthand like "1" or "O1" to
-     * "O00001") (BR8).
+     * "O00001") (BR33).
      *
      * @param raw the raw order ID input
      * @return the canonical 6-character order ID
@@ -220,8 +264,23 @@ public final class InputValidator {
     }
 
     /**
+     * Safely attempts to normalize an Order ID, returning null on failure (BR33).
+     *
+     * @param raw the raw order ID input
+     * @return the canonical 6-character order ID, or null if invalid
+     */
+    public static String tryNormalizeOrderId(String raw) {
+        try {
+            return normalizeOrderId(raw);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
      * Validates and normalizes a human-readable text field such as a product name,
-     * customer full name, or address (BR3). Enforces that the text is non-empty,
+     * customer full name, or address (BR3, BR32). Enforces that the text is
+     * non-empty,
      * contains at least one Unicode letter (\p{L}), does not start with a CSV
      * formula trigger ('=', '+', '-', '@'), and contains only safe characters.
      *
@@ -252,7 +311,7 @@ public final class InputValidator {
     }
 
     /**
-     * Validates a single-word category or measurement unit token (BR5).
+     * Validates a single-word category or measurement unit token (BR3, BR4, BR31).
      * Disallows slashes or multi-concept separators so each category and unit
      * represents a single atomic concept.
      *
@@ -312,8 +371,23 @@ public final class InputValidator {
     }
 
     /**
+     * Safely attempts to normalize a phone number, returning null on failure
+     * (BR25).
+     *
+     * @param raw the raw phone number string
+     * @return the normalized 10-digit phone number, or null if invalid
+     */
+    public static String tryNormalizePhone(String raw) {
+        try {
+            return normalizePhone(raw);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
      * Validates that a selling price is finite and strictly greater than zero
-     * (BR4).
+     * (BR5).
      *
      * @param price the unit selling price to validate
      * @return the validated price
@@ -328,7 +402,7 @@ public final class InputValidator {
     }
 
     /**
-     * Validates that an integer quantity is strictly positive (BR6, BR9, BR26).
+     * Validates that an integer quantity is strictly positive (BR9, BR26).
      *
      * @param quantity  the integer quantity to validate
      * @param fieldName the field label for error reporting
@@ -383,7 +457,7 @@ public final class InputValidator {
     }
 
     /**
-     * Parses a strict month and year in MM/yyyy format (BR21).
+     * Parses a strict month and year in MM/yyyy format (BR21, BR22).
      *
      * @param raw the raw month-year string in MM/yyyy format
      * @return the parsed YearMonth

@@ -1,12 +1,15 @@
 package fptu.pro192.foodstoremanagement.util;
 
+import java.io.IOException;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
  * Stateless utility for interactive console input reading, range-checked
- * numeric
- * prompts, date prompts, confirmation prompts, and screen navigation pauses.
+ * numeric prompts, date and month prompts, confirmation prompts, and screen
+ * navigation pauses.
  */
 public final class ConsoleUtil {
 
@@ -27,7 +30,7 @@ public final class ConsoleUtil {
         }
         Scanner scanner = ScannerManager.getInstance().getScanner();
         if (!scanner.hasNextLine()) {
-            return "";
+            throw new NoSuchElementException("End of input stream reached.");
         }
         return scanner.nextLine().trim();
     }
@@ -49,13 +52,84 @@ public final class ConsoleUtil {
     }
 
     /**
+     * Prompts the user for a non-empty string, returning null if 0 is entered to
+     * cancel.
+     *
+     * @param prompt the prompt message displayed to the user
+     * @return the non-empty trimmed string entered, or null if cancelled with 0
+     */
+    public static String readCancellableString(String prompt) {
+        while (true) {
+            String input = readOptionalString(prompt);
+            if ("0".equals(input)) {
+                return null;
+            }
+            if (!input.isEmpty()) {
+                return input;
+            }
+            System.out.println("  [ERROR] Input cannot be empty. Please try again.");
+        }
+    }
+
+    /**
+     * Prompts the user for a text field validated against Unicode and formula
+     * rules,
+     * returning null if 0 is entered to cancel.
+     *
+     * @param prompt    the prompt message displayed to the user
+     * @param fieldName the label of the field for error reporting
+     * @return the normalized text string, or null if cancelled with 0
+     */
+    public static String readValidatedText(String prompt, String fieldName) {
+        while (true) {
+            String raw = readCancellableString(prompt);
+            if (raw == null) {
+                return null;
+            }
+            try {
+                return InputValidator.normalizeText(raw, fieldName);
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Prompts the user for an optional text field, returning defaultValue when
+     * Enter
+     * is pressed, or null if 0 is entered to cancel.
+     *
+     * @param prompt       the prompt message displayed to the user
+     * @param fieldName    the label of the field for error reporting
+     * @param defaultValue the fallback value returned when input is empty
+     * @return the normalized text, the defaultValue on Enter, or null if cancelled
+     *         with 0
+     */
+    public static String readOptionalValidatedText(String prompt, String fieldName, String defaultValue) {
+        while (true) {
+            String raw = readOptionalString(prompt);
+            if ("0".equals(raw)) {
+                return null;
+            }
+            if (raw.isEmpty()) {
+                return defaultValue;
+            }
+            try {
+                return InputValidator.normalizeText(raw, fieldName);
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Repeatedly prompts the user until an integer within the inclusive range
-     * from min to max is entered (BR26).
+     * from min to max is entered.
      *
      * @param prompt the prompt message displayed to the user
      * @param min    the minimum allowed integer value (inclusive)
      * @param max    the maximum allowed integer value (inclusive)
-     * @return the validated integer within [min, max]
+     * @return the validated integer within min and max
      * @throws IllegalArgumentException if min is greater than max
      */
     public static int readInt(String prompt, int min, int max) {
@@ -79,64 +153,108 @@ public final class ConsoleUtil {
     }
 
     /**
-     * Repeatedly prompts the user until a positive integer greater than zero
-     * (or zero if allowZeroToCancel is true) is entered (BR6, BR9, BR26).
+     * Prompts the user for an integer within min and max, returning defaultValue
+     * on Enter, or null if 0 is entered to cancel.
      *
-     * @param prompt            the prompt message displayed to the user
-     * @param allowZeroToCancel true if entering 0 is allowed to cancel the
-     *                          operation
-     * @return a positive integer, or 0 if cancellation is allowed and selected
+     * @param prompt       the prompt message displayed to the user
+     * @param min          the minimum allowed value
+     * @param max          the maximum allowed value
+     * @param defaultValue the fallback integer returned on Enter
+     * @return the integer entered, the defaultValue on Enter, or null if cancelled
+     *         with 0
      */
-    public static int readPositiveInt(String prompt, boolean allowZeroToCancel) {
-        int min = allowZeroToCancel ? 0 : 1;
-        return readInt(prompt, min, Integer.MAX_VALUE);
-    }
-
-    /**
-     * Repeatedly prompts the user until a decimal number greater than or equal
-     * to min is entered (BR4).
-     *
-     * @param prompt          the prompt message displayed to the user
-     * @param min             the minimum allowed value
-     * @param strictlyGreater true if the value must be strictly greater than min
-     * @return the validated double value
-     */
-    public static double readDouble(String prompt, double min, boolean strictlyGreater) {
-        while (true) {
-            String raw = readOptionalString(prompt);
-            try {
-                double value = Double.parseDouble(raw);
-                if (Double.isNaN(value) || Double.isInfinite(value)) {
-                    System.out.println("  [ERROR] Please enter a finite numeric value.");
-                    continue;
-                }
-                if (strictlyGreater ? (value > min) : (value >= min)) {
-                    return value;
-                }
-                String relation = strictlyGreater ? "greater than" : "at least";
-                System.out.printf("  [ERROR] Value must be %s %s.%n", relation,
-                        InputValidator.formatCurrency(min));
-            } catch (NumberFormatException e) {
-                System.out.println("  [ERROR] Invalid number format. Please try again.");
-            }
-        }
-    }
-
-    /**
-     * Repeatedly prompts the user until a valid date in dd/MM/yyyy format is
-     * entered, or returns null if the user enters "0" to cancel (BR7).
-     *
-     * @param prompt the prompt message displayed to the user
-     * @return the parsed LocalDate instance, or null if cancelled with "0"
-     */
-    public static LocalDate readDate(String prompt) {
+    public static Integer readIntWithDefault(String prompt, int min, int max, Integer defaultValue) {
         while (true) {
             String raw = readOptionalString(prompt);
             if ("0".equals(raw)) {
                 return null;
             }
+            if (raw.isEmpty()) {
+                return defaultValue;
+            }
             try {
-                return InputValidator.parseDisplayDate(raw, "Date");
+                int value = Integer.parseInt(raw);
+                if (value >= min && value <= max) {
+                    return value;
+                }
+                System.out.printf("  [ERROR] Please enter a number between %d and %d.%n", min, max);
+            } catch (NumberFormatException e) {
+                System.out.printf("  [ERROR] Invalid integer. Please enter a number between %d and %d.%n",
+                        min, max);
+            }
+        }
+    }
+
+    /**
+     * Prompts the user for a strictly positive integer, returning null if 0 is
+     * entered to cancel.
+     *
+     * @param prompt the prompt message displayed to the user
+     * @return a positive integer, or null if cancelled with 0
+     */
+    public static Integer readPositiveInt(String prompt) {
+        return readPositiveInt(prompt, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Prompts the user for a strictly positive integer, returning null if 0 is entered to cancel.
+     *
+     * @param prompt            the prompt message displayed to the user
+     * @param allowZeroToCancel true if entering 0 cancels the operation
+     * @return a positive integer, or null if cancelled with 0
+     */
+    public static Integer readPositiveInt(String prompt, boolean allowZeroToCancel) {
+        return readPositiveInt(prompt, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Prompts the user for a strictly positive integer up to max, returning null if
+     * 0 is entered to cancel.
+     *
+     * @param prompt the prompt message displayed to the user
+     * @param max    the maximum allowed positive integer
+     * @return a positive integer between 1 and max, or null if cancelled with 0
+     */
+    public static Integer readPositiveInt(String prompt, int max) {
+        while (true) {
+            String raw = readCancellableString(prompt);
+            if (raw == null) {
+                return null;
+            }
+            try {
+                int value = Integer.parseInt(raw);
+                if (value >= 1 && value <= max) {
+                    return value;
+                }
+                if (max == Integer.MAX_VALUE) {
+                    System.out.println("  [ERROR] Value must be greater than zero.");
+                } else {
+                    System.out.printf("  [ERROR] Value must be between 1 and %d.%n", max);
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("  [ERROR] Invalid integer. Please enter a positive number.");
+            }
+        }
+    }
+
+    /**
+     * Prompts the user for a positive selling price, returning null if 0 is entered
+     * to cancel.
+     *
+     * @param prompt the prompt message displayed to the user
+     * @return the positive double price, or null if cancelled with 0
+     */
+    public static Double readPositivePrice(String prompt) {
+        while (true) {
+            String raw = readCancellableString(prompt);
+            if (raw == null) {
+                return null;
+            }
+            try {
+                double value = Double.parseDouble(raw);
+                return InputValidator.validatePositivePrice(value);
+            } catch (NumberFormatException e) {
+                System.out.println("  [ERROR] Invalid numeric price. Please try again.");
             } catch (IllegalArgumentException e) {
                 System.out.println("  [ERROR] " + e.getMessage());
             }
@@ -144,17 +262,47 @@ public final class ConsoleUtil {
     }
 
     /**
-     * Prompts the user for an optional date in dd/MM/yyyy format or allows
-     * an empty input to skip filtering (BR7, BR18, BR21, BR22).
+     * Prompts the user for an optional positive selling price, returning
+     * defaultValue
+     * on Enter, or null if 0 is entered to cancel.
      *
-     * @param prompt the prompt message displayed to the user
-     * @return the parsed LocalDate instance, or null if the user entered empty
-     *         input
+     * @param prompt       the prompt message displayed to the user
+     * @param defaultValue the fallback price returned when input is empty
+     * @return the positive price, the defaultValue on Enter, or null if cancelled
+     *         with 0
      */
-    public static LocalDate readOptionalDate(String prompt) {
+    public static Double readOptionalPositivePrice(String prompt, Double defaultValue) {
         while (true) {
             String raw = readOptionalString(prompt);
+            if ("0".equals(raw)) {
+                return null;
+            }
             if (raw.isEmpty()) {
+                return defaultValue;
+            }
+            try {
+                double value = Double.parseDouble(raw);
+                return InputValidator.validatePositivePrice(value);
+            } catch (NumberFormatException e) {
+                System.out.println("  [ERROR] Invalid numeric price. Please try again.");
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Prompts the user for a valid calendar date in dd/MM/yyyy format, returning
+     * null
+     * if 0 is entered to cancel.
+     *
+     * @param prompt the prompt message displayed to the user
+     * @return the parsed LocalDate, or null if cancelled with 0
+     */
+    public static LocalDate readDate(String prompt) {
+        while (true) {
+            String raw = readCancellableString(prompt);
+            if (raw == null) {
                 return null;
             }
             try {
@@ -166,10 +314,64 @@ public final class ConsoleUtil {
     }
 
     /**
-     * Prompts the user for a Yes or No confirmation (Y/N).
+     * Prompts the user for an optional calendar date in dd/MM/yyyy format,
+     * returning
+     * defaultValue when Enter is pressed, or null if 0 is entered to cancel.
+     *
+     * @param prompt       the prompt message displayed to the user
+     * @param defaultValue the fallback LocalDate returned on Enter
+     * @return the parsed LocalDate, the defaultValue on Enter, or null if cancelled
+     *         with 0
+     */
+    public static LocalDate readDateWithDefault(String prompt, LocalDate defaultValue) {
+        while (true) {
+            String raw = readOptionalString(prompt);
+            if ("0".equals(raw)) {
+                return null;
+            }
+            if (raw.isEmpty()) {
+                return defaultValue;
+            }
+            try {
+                return InputValidator.parseDisplayDate(raw, "Date");
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Prompts the user for an optional month and year in MM/yyyy format, returning
+     * defaultValue when Enter is pressed, or null if 0 is entered to cancel.
+     *
+     * @param prompt       the prompt message displayed to the user
+     * @param defaultValue the fallback YearMonth returned on Enter
+     * @return the parsed YearMonth, the defaultValue on Enter, or null if cancelled
+     *         with 0
+     */
+    public static YearMonth readMonthWithDefault(String prompt, YearMonth defaultValue) {
+        while (true) {
+            String raw = readOptionalString(prompt);
+            if ("0".equals(raw)) {
+                return null;
+            }
+            if (raw.isEmpty()) {
+                return defaultValue;
+            }
+            try {
+                return InputValidator.parseDisplayMonth(raw);
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Prompts the user for a Yes or No confirmation (Y/N). Entering N, NO, or 0
+     * resolves to false, while Y or YES resolves to true.
      *
      * @param prompt the confirmation question displayed to the user
-     * @return true if the user confirms with Y or YES, false if N or NO
+     * @return true if confirmed with Y/YES, false if cancelled with N/NO/0
      */
     public static boolean confirm(String prompt) {
         while (true) {
@@ -177,10 +379,10 @@ public final class ConsoleUtil {
             if ("Y".equalsIgnoreCase(raw) || "YES".equalsIgnoreCase(raw)) {
                 return true;
             }
-            if ("N".equalsIgnoreCase(raw) || "NO".equalsIgnoreCase(raw)) {
+            if ("N".equalsIgnoreCase(raw) || "NO".equalsIgnoreCase(raw) || "0".equals(raw)) {
                 return false;
             }
-            System.out.println("  [ERROR] Please enter Y for Yes or N for No.");
+            System.out.println("  [ERROR] Please enter Y for Yes or N for No (or 0 to cancel).");
         }
     }
 
@@ -196,7 +398,10 @@ public final class ConsoleUtil {
                 new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
                 return;
             }
-        } catch (Exception ignored) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (IOException e) {
+            System.err.print("");
         }
         System.out.print("\033[H\033[2J\033[3J");
         System.out.flush();
