@@ -267,7 +267,7 @@ public class ProductMenu extends Menu {
                     "Select category [1-" + customOption + "] (or 0 to cancel): ", 1, customOption);
         } else {
             selected = ConsoleUtil.readIntWithDefault(
-                    "Select new category [1-" + customOption + "] (Enter to keep, or 0 to cancel): ",
+                    "Select new category [1-" + customOption + "]: ",
                     1, customOption, -1);
         }
         if (selected == null) {
@@ -310,7 +310,7 @@ public class ProductMenu extends Menu {
                     "Select measurement unit [1-" + customOption + "] (or 0 to cancel): ", 1, customOption);
         } else {
             selected = ConsoleUtil.readIntWithDefault(
-                    "Select new measurement unit [1-" + customOption + "] (Enter to keep, or 0 to cancel): ",
+                    "Select new measurement unit [1-" + customOption + "]: ",
                     1, customOption, -1);
         }
         if (selected == null) {

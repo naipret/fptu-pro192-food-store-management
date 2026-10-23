@@ -304,7 +304,7 @@ public class CustomerMenu extends Menu {
             choice = ConsoleUtil.readInt("Enter tier choice [1-2] (or 0 to cancel): ", 1, 2);
         } else {
             choice = ConsoleUtil.readIntWithDefault(
-                    "Enter new tier choice [1-2] (Enter to keep, or 0 to cancel): ", 1, 2, -1);
+                    "Enter new tier choice [1-2]: ", 1, 2, -1);
         }
         if (choice == null) {
             return null;
