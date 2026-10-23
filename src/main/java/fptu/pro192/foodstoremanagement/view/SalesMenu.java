@@ -136,11 +136,12 @@ public class SalesMenu extends Menu {
                 ? null
                 : this.customerController.findById(draft.getCustomerId());
         String customerDisplay = (customer == null)
-                ? "Walk-in Guest (Regular - 0% discount)"
+                ? "Guest  - Regular"
                 : customer.getId() + " - " + customer.getFullName()
                         + " (" + customer.getCustomerType() + ")";
-        System.out.println("  [INFO] Draft Order ID: " + draft.getOrderId()
-                + " | Customer: " + customerDisplay);
+        System.out.println("  [INFO] Order ID: " + draft.getOrderId()
+                + " - " + InputValidator.formatDisplayDate(draft.getOrderDate().toLocalDate()) + "\n         Customer: "
+                + customerDisplay);
     }
 
     private int promptCartAction() {
@@ -180,7 +181,7 @@ public class SalesMenu extends Menu {
     private String promptCustomerOrGuest() {
         while (true) {
             String raw = ConsoleUtil.readCancellableString(
-                    "Enter Customer ID (e.g., C00001), 'GUEST' for walk-in, or 0 to cancel: ");
+                    "Enter Customer ID (e.g., C00001, 'GUEST', or 0 to cancel): ");
             if (raw == null) {
                 return "CANCEL";
             }
@@ -330,10 +331,10 @@ public class SalesMenu extends Menu {
                         + " (" + customer.getCustomerType() + ")";
 
         System.out.println(INVOICE_BORDER);
-        System.out.printf("  Order ID   : %-22s Date : %s%n",
+        System.out.printf("| Order ID: %s - %-57s |%n",
                 order.getOrderId(),
                 InputValidator.formatDisplayDate(order.getOrderDate().toLocalDate()));
-        System.out.printf("  Customer   : %s%n", TableFormatter.fit(customerText, 60));
+        System.out.printf("| Customer: %-65s  |%n", TableFormatter.fit(customerText, 56));
         System.out.println(INVOICE_BORDER);
         System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
                 TableFormatter.fit("No.", 3),
