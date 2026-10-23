@@ -124,14 +124,17 @@ public final class ConsoleUtil {
 
     /**
      * Repeatedly prompts the user until a valid date in dd/MM/yyyy format is
-     * entered (BR7).
+     * entered, or returns null if the user enters "0" to cancel (BR7).
      *
      * @param prompt the prompt message displayed to the user
-     * @return the parsed LocalDate instance
+     * @return the parsed LocalDate instance, or null if cancelled with "0"
      */
     public static LocalDate readDate(String prompt) {
         while (true) {
             String raw = readOptionalString(prompt);
+            if ("0".equals(raw)) {
+                return null;
+            }
             try {
                 return InputValidator.parseDisplayDate(raw, "Date");
             } catch (IllegalArgumentException e) {

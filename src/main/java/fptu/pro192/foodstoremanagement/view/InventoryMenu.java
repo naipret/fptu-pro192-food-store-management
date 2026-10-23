@@ -123,8 +123,16 @@ public class InventoryMenu extends Menu {
 
         int quantity = ConsoleUtil.readPositiveInt("Enter batch quantity (> 0): ", false);
         while (true) {
-            LocalDate productionDate = ConsoleUtil.readDate("Enter production date (dd/MM/yyyy): ");
-            LocalDate expirationDate = ConsoleUtil.readDate("Enter expiration date (dd/MM/yyyy): ");
+            LocalDate productionDate = ConsoleUtil.readDate("Enter production date (dd/MM/yyyy, or 0 to cancel): ");
+            if (productionDate == null) {
+                System.out.println("  [INFO] Operation cancelled.");
+                return;
+            }
+            LocalDate expirationDate = ConsoleUtil.readDate("Enter expiration date (dd/MM/yyyy, or 0 to cancel): ");
+            if (expirationDate == null) {
+                System.out.println("  [INFO] Operation cancelled.");
+                return;
+            }
             try {
                 Batch newBatch = new Batch(batchId, product.getId(), LocalDate.now(),
                         productionDate, expirationDate, quantity);
