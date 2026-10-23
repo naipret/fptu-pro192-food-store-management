@@ -229,7 +229,7 @@ public class OrderController {
     }
 
     /**
-     * Generates the next available 6-character Order ID (O00001-O99999) (BR8).
+     * Generates the next available 6-character Order ID (O00001-O99999) (BR33).
      *
      * @return the next canonical Order ID
      */
@@ -238,12 +238,9 @@ public class OrderController {
         for (Order order : this.orders) {
             String id = order.getOrderId();
             if (id != null && id.length() == 6 && (id.charAt(0) == 'O' || id.charAt(0) == 'o')) {
-                try {
-                    int num = Integer.parseInt(id.substring(1));
-                    if (num > maxNumber) {
-                        maxNumber = num;
-                    }
-                } catch (NumberFormatException ignored) {
+                int num = Integer.parseInt(id.substring(1));
+                if (num > maxNumber) {
+                    maxNumber = num;
                 }
             }
         }
@@ -424,7 +421,7 @@ public class OrderController {
 
     /**
      * Finds a completed Order by its identifier (case-insensitive, supporting
-     * shorthand like "O1" to "O00001") (BR8).
+     * shorthand like "O1" to "O00001") (BR33).
      *
      * @param orderId the order ID to look up
      * @return the matching Order, or null if not found
@@ -433,10 +430,8 @@ public class OrderController {
         if (orderId == null || orderId.trim().isEmpty()) {
             return null;
         }
-        String lookupId;
-        try {
-            lookupId = InputValidator.normalizeOrderId(orderId);
-        } catch (IllegalArgumentException e) {
+        String lookupId = InputValidator.tryNormalizeOrderId(orderId);
+        if (lookupId == null) {
             lookupId = orderId.trim();
         }
         for (Order order : this.orders) {
@@ -459,16 +454,8 @@ public class OrderController {
             return getAllOrders();
         }
         String lower = keyword.trim().toLowerCase(Locale.ROOT);
-        String normalizedOrderId = null;
-        try {
-            normalizedOrderId = InputValidator.normalizeOrderId(keyword.trim());
-        } catch (IllegalArgumentException ignored) {
-        }
-        String normalizedCustomerId = null;
-        try {
-            normalizedCustomerId = InputValidator.normalizeCustomerId(keyword.trim());
-        } catch (IllegalArgumentException ignored) {
-        }
+        String normalizedOrderId = InputValidator.tryNormalizeOrderId(keyword.trim());
+        String normalizedCustomerId = InputValidator.tryNormalizeCustomerId(keyword.trim());
         List<Order> result = new ArrayList<>();
         for (Order order : this.orders) {
             boolean matchOrderId = order.getOrderId().toLowerCase(Locale.ROOT).contains(lower)
@@ -489,7 +476,7 @@ public class OrderController {
     }
 
     /**
-     * Returns an unmodifiable list of all completed orders in the system (BR17).
+     * Returns an unmodifiable list of all completed orders in the system (BR23).
      *
      * @return an unmodifiable list of Order objects
      */

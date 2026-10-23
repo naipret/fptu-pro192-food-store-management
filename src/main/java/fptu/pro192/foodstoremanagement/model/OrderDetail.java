@@ -5,7 +5,7 @@ import fptu.pro192.foodstoremanagement.util.InputValidator;
 /**
  * Represents a single line item inside a sales Order, capturing an immutable
  * snapshot of the product's selling price at checkout time (BR8, BR9, BR12,
- * BR18, BR26).
+ * BR26, BR34).
  */
 public class OrderDetail {
 
@@ -15,7 +15,7 @@ public class OrderDetail {
     private double unitPrice;
 
     /**
-     * Constructs a validated OrderDetail line item (BR8, BR9, BR12, BR18, BR26).
+     * Constructs a validated OrderDetail line item (BR8, BR9, BR12, BR26, BR34).
      *
      * @param orderId   the 6-character order identifier (O00001-O99999)
      * @param productId the 6-character product identifier (P00001-P99999)
@@ -32,7 +32,7 @@ public class OrderDetail {
 
     /**
      * Constructs an OrderDetail by capturing the id and current selling price
-     * of an active Product instance (BR8, BR9, BR12, BR26, BR27).
+     * of an active Product instance (BR8, BR9, BR12, BR26, BR27, BR34).
      *
      * @param orderId  the 6-character order identifier (O00001-O99999)
      * @param product  the active Product being purchased
@@ -55,21 +55,12 @@ public class OrderDetail {
     }
 
     /**
-     * Computes the line-item subtotal as quantity multiplied by unitPrice (BR12).
+     * Computes the line-item subtotal as quantity multiplied by unitPrice (BR13).
      *
      * @return the line-item subtotal
      */
     public double getSubTotal() {
         return this.quantity * this.unitPrice;
-    }
-
-    /**
-     * Alias for getSubTotal for caller compatibility (BR12).
-     *
-     * @return the line-item subtotal
-     */
-    public double getSubtotal() {
-        return getSubTotal();
     }
 
     /**
@@ -82,7 +73,7 @@ public class OrderDetail {
     }
 
     /**
-     * Sets and validates the parent order identifier (BR8).
+     * Sets and validates the parent order identifier (BR33).
      *
      * @param orderId the 6-character order ID (O00001-O99999)
      * @throws IllegalArgumentException if orderId is invalid
@@ -101,7 +92,7 @@ public class OrderDetail {
     }
 
     /**
-     * Sets and validates the purchased product identifier (BR1, BR18).
+     * Sets and validates the purchased product identifier (BR1, BR30, BR33).
      *
      * @param productId the 6-character product ID (P00001-P99999)
      * @throws IllegalArgumentException if productId is invalid
@@ -139,7 +130,7 @@ public class OrderDetail {
     }
 
     /**
-     * Sets and validates the captured unit selling price (BR4, BR12).
+     * Sets and validates the captured unit selling price (BR5, BR34).
      *
      * @param unitPrice the positive unit selling price
      * @throws IllegalArgumentException if unitPrice is not greater than zero

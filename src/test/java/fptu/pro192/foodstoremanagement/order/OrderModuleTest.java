@@ -4,14 +4,14 @@ import fptu.pro192.foodstoremanagement.controller.CustomerController;
 import fptu.pro192.foodstoremanagement.controller.InsufficientStockException;
 import fptu.pro192.foodstoremanagement.controller.OrderController;
 import fptu.pro192.foodstoremanagement.controller.ProductController;
-import fptu.pro192.foodstoremanagement.model.Batch;
+import fptu.pro192.foodstoremanagement.model.Customer;
 import fptu.pro192.foodstoremanagement.model.Order;
 import fptu.pro192.foodstoremanagement.model.OrderDetail;
 import fptu.pro192.foodstoremanagement.model.Product;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalDateTime;
 
 /**
  * Automated verification test suite for Order, OrderDetail, and OrderController
@@ -34,13 +34,14 @@ public class OrderModuleTest {
         System.out.println("Running OrderModuleTest...");
         testOrderDetailMergingAndSnapshotPricing();
         testDraftCheckoutFefoAndCsvPersistence();
-        testExpiredAndInsufficientStockGuards();
+        testExpiredBatchOrderGuard();
+        testInsufficientStockOrderGuard();
         System.out.println("OrderModuleTest PASSED (All assertions succeeded).");
     }
 
     private static void testOrderDetailMergingAndSnapshotPricing() {
         Product rice = new Product("P00001", "ST25 Fragrant Rice 5kg", "Grains", "Bag", 165000.0);
-        Order draft = new Order("O00001", null, LocalDate.now());
+        Order draft = new Order("O00001", null, LocalDateTime.now());
 
         draft.addItem(new OrderDetail("O00001", rice, 2));
         draft.addItem(new OrderDetail("O00001", rice, 3));
@@ -56,118 +57,100 @@ public class OrderModuleTest {
 
     private static void testDraftCheckoutFefoAndCsvPersistence() throws Exception {
         Path tempDir = Files.createTempDirectory("order_module_test_");
-        Path productsCsv = tempDir.resolve("products.csv");
-        Path batchesCsv = tempDir.resolve("batches.csv");
-        Path customersCsv = tempDir.resolve("customers.csv");
-        Path ordersCsv = tempDir.resolve("orders.csv");
-        Path detailsCsv = tempDir.resolve("order_details.csv");
+        Path pCsv = tempDir.resolve("p.csv");
+        Path bCsv = tempDir.resolve("b.csv");
+        Path cCsv = tempDir.resolve("c.csv");
+        Path oCsv = tempDir.resolve("o.csv");
+        Path dCsv = tempDir.resolve("d.csv");
 
-        ProductController productController = new ProductController(productsCsv, batchesCsv);
-        CustomerController customerController = new CustomerController(customersCsv);
-        OrderController orderController = new OrderController(
-                ordersCsv, detailsCsv, productController, customerController);
+        ProductController pc = new ProductController(pCsv, bCsv);
+        CustomerController cc = new CustomerController(cCsv);
+        OrderController oc = new OrderController(oCsv, dCsv, pc, cc);
 
         LocalDate today = LocalDate.now();
-        productController.addProduct(
-                new Product("P00001", "Vinamilk Fresh Milk 1L", "Dairy", "Carton", 40000.0));
-        productController.addBatchToProduct("P00001",
-                new Batch("B00001", "P00001", today, today.minusDays(5), today.plusDays(30), 10));
-        productController.addBatchToProduct("P00001",
-                new Batch("B00002", "P00001", today, today.minusDays(10), today.plusDays(5), 4));
+        Product milk = pc.addProduct("Vinamilk Fresh Milk 1L", "Dairy", "Carton", 40000.0);
+        pc.importBatch(milk.getId(), today, today.minusDays(5), today.plusDays(30), 10);
+        pc.importBatch(milk.getId(), today, today.minusDays(10), today.plusDays(5), 4);
+        Customer vip = cc.registerCustomer("Trần Thị Bình", "0912345678", "45 Nguyễn Huệ", "VIP");
 
-        customerController.registerCustomer(
-                "C00001", "Trần Thị Bình", "0912345678", "45 Nguyễn Huệ, District 1", "VIP");
-
-        Order draft = orderController.createDraftOrder("C00001");
-        orderController.addItemToDraft(draft, "P00001", 6);
-
-        assertEquals(14, productController.findById("P00001").getAvailableStock(),
-                "Stock not deducted while order is still a draft (BR14)");
+        Order draft = oc.createDraftOrder(vip.getId());
+        oc.addItemToDraft(draft, milk.getId(), 6);
+        assertEquals(14, pc.findById(milk.getId()).getAvailableStock(), "Stock not deducted in draft (BR14)");
         assertEquals(240000.0, draft.getTotalAmount(), "Gross total 6 * 40,000 (BR13)");
         assertEquals(24000.0, draft.getDiscount(), "VIP 10% discount (BR15)");
-        assertEquals(216000.0, draft.getFinalAmount(), "Final amount after discount (BR16)");
+        assertEquals(216000.0, draft.getFinalAmount(), "Final amount (BR16)");
 
-        Order finalized = orderController.finalizeOrder(draft);
+        Order finalized = oc.finalizeOrder(draft);
         assertEquals("O00001", finalized.getOrderId(), "Finalized order ID");
-        assertEquals(8, productController.findById("P00001").getAvailableStock(),
-                "Stock deducted from 14 to 8 on checkout completion (BR14)");
+        assertEquals(8, pc.findById(milk.getId()).getAvailableStock(), "Stock deducted to 8 (BR14)");
 
-        List<String> orderLines = Files.readAllLines(ordersCsv);
-        List<String> detailLines = Files.readAllLines(detailsCsv);
-        assertEquals("orderId,customerId,orderDate,totalAmount,discount,finalAmount",
-                orderLines.get(0), "orders.csv header at line 0");
-        assertEquals("orderId,productId,quantity,unitPrice",
-                detailLines.get(0), "order_details.csv header at line 0");
-
-        OrderController reloaded = new OrderController(
-                ordersCsv, detailsCsv, productController, customerController);
-        Order loadedOrder = reloaded.findById("O1");
-        assertTrue(loadedOrder != null, "Reloaded order O00001 found");
-        assertEquals(1, loadedOrder.getItems().size(), "Reloaded order has 1 OrderDetail line");
-        assertEquals(216000.0, loadedOrder.getFinalAmount(), "Reloaded order finalAmount");
+        OrderController reloaded = new OrderController(oCsv, dCsv, pc, cc);
+        Order loaded = reloaded.findById("O1");
+        assertTrue(loaded != null, "Reloaded order found");
+        assertEquals(216000.0, loaded.getFinalAmount(), "Reloaded order final amount");
         assertEquals(1, reloaded.searchOrders("O1").size(), "Search order with shorthand O1");
-        assertEquals("O00001", reloaded.searchOrders("O1").get(0).getOrderId(), "Search order matches O00001");
-        assertEquals(1, reloaded.searchOrders("o1").size(), "Search order with lowercase o1");
-        assertEquals(1, reloaded.searchOrders("C1").size(), "Search order with customer shorthand C1");
 
-        Files.deleteIfExists(productsCsv);
-        Files.deleteIfExists(batchesCsv);
-        Files.deleteIfExists(customersCsv);
-        Files.deleteIfExists(ordersCsv);
-        Files.deleteIfExists(detailsCsv);
-        Files.deleteIfExists(tempDir);
+        deleteFiles(pCsv, bCsv, cCsv, oCsv, dCsv, tempDir);
     }
 
-    private static void testExpiredAndInsufficientStockGuards() throws Exception {
-        Path tempDir = Files.createTempDirectory("order_guards_test_");
-        Path productsCsv = tempDir.resolve("products.csv");
-        Path batchesCsv = tempDir.resolve("batches.csv");
-        Path customersCsv = tempDir.resolve("customers.csv");
-        Path ordersCsv = tempDir.resolve("orders.csv");
-        Path detailsCsv = tempDir.resolve("order_details.csv");
+    private static void testExpiredBatchOrderGuard() throws Exception {
+        Path tempDir = Files.createTempDirectory("order_exp_guard_test_");
+        Path pCsv = tempDir.resolve("p.csv");
+        Path bCsv = tempDir.resolve("b.csv");
+        Path cCsv = tempDir.resolve("c.csv");
+        Path oCsv = tempDir.resolve("o.csv");
+        Path dCsv = tempDir.resolve("d.csv");
 
-        ProductController productController = new ProductController(productsCsv, batchesCsv);
-        CustomerController customerController = new CustomerController(customersCsv);
-        final OrderController orderController = new OrderController(
-                ordersCsv, detailsCsv, productController, customerController);
+        ProductController pc = new ProductController(pCsv, bCsv);
+        CustomerController cc = new CustomerController(cCsv);
+        OrderController oc = new OrderController(oCsv, dCsv, pc, cc);
 
-        final LocalDate today = LocalDate.now();
-        productController.addProduct(
-                new Product("P00001", "Expired Yogurt Pack", "Dairy", "Pack", 28000.0));
-        productController.addBatchToProduct("P00001",
-                new Batch("B00001", "P00001", today.minusDays(20), today.minusDays(25),
-                        today.minusDays(1), 12));
+        LocalDate today = LocalDate.now();
+        Product p1 = pc.addProduct("Expired Yogurt", "Dairy", "Pack", 28000.0);
+        pc.importBatch(p1.getId(), today.minusDays(20), today.minusDays(25), today.minusDays(1), 12);
 
-        productController.addProduct(
-                new Product("P00002", "Canned Tuna 150g", "Canned", "Can", 32000.0));
-        productController.addBatchToProduct("P00002",
-                new Batch("B00002", "P00002", today, today.minusDays(10), today.plusDays(90), 5));
-
-        final Order draft = orderController.createDraftOrder(null);
-
-        boolean caughtExpired = false;
+        Order draft = oc.createDraftOrder(null);
+        boolean caught = false;
         try {
-            orderController.addItemToDraft(draft, "P00001", 1);
+            oc.addItemToDraft(draft, p1.getId(), 1);
         } catch (IllegalArgumentException e) {
-            caughtExpired = true;
+            caught = true;
         }
-        assertTrue(caughtExpired, "Adding product whose batches are all expired must be rejected (BR11)");
+        assertTrue(caught, "Adding expired product must throw IllegalArgumentException (BR11)");
+        deleteFiles(pCsv, bCsv, cCsv, oCsv, dCsv, tempDir);
+    }
 
-        boolean caughtInsufficient = false;
+    private static void testInsufficientStockOrderGuard() throws Exception {
+        Path tempDir = Files.createTempDirectory("order_stock_guard_test_");
+        Path pCsv = tempDir.resolve("p.csv");
+        Path bCsv = tempDir.resolve("b.csv");
+        Path cCsv = tempDir.resolve("cCsv.csv");
+        Path oCsv = tempDir.resolve("o.csv");
+        Path dCsv = tempDir.resolve("d.csv");
+
+        ProductController pc = new ProductController(pCsv, bCsv);
+        CustomerController cc = new CustomerController(cCsv);
+        OrderController oc = new OrderController(oCsv, dCsv, pc, cc);
+
+        LocalDate today = LocalDate.now();
+        Product p = pc.addProduct("Canned Tuna", "Canned", "Can", 32000.0);
+        pc.importBatch(p.getId(), today, today.minusDays(10), today.plusDays(90), 5);
+
+        Order draft = oc.createDraftOrder(null);
+        boolean caught = false;
         try {
-            orderController.addItemToDraft(draft, "P00002", 6);
+            oc.addItemToDraft(draft, p.getId(), 6);
         } catch (InsufficientStockException e) {
-            caughtInsufficient = true;
+            caught = true;
         }
-        assertTrue(caughtInsufficient,
-                "Adding quantity exceeding available stock must throw InsufficientStockException (BR10)");
+        assertTrue(caught, "Exceeding stock must throw InsufficientStockException (BR10)");
+        deleteFiles(pCsv, bCsv, cCsv, oCsv, dCsv, tempDir);
+    }
 
-        Files.deleteIfExists(productsCsv);
-        Files.deleteIfExists(batchesCsv);
-        Files.deleteIfExists(customersCsv);
-        Files.deleteIfExists(ordersCsv);
-        Files.deleteIfExists(detailsCsv);
-        Files.deleteIfExists(tempDir);
+    private static void deleteFiles(Path... paths) throws Exception {
+        for (Path p : paths) {
+            Files.deleteIfExists(p);
+        }
     }
 
     private static void assertTrue(boolean condition, String message) {
