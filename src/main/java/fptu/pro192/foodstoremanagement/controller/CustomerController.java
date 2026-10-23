@@ -118,21 +118,18 @@ public class CustomerController {
     /**
      * Generates the next available 6-character Customer ID (C00001-C99999),
      * checking both active and soft-deleted records so deleted IDs are never
-     * reused (BR2, BR27).
+     * reused (BR2, BR27, BR33).
      *
      * @return the next canonical Customer ID
      */
-    public String generateNextCustomerId() {
+    private String generateNextCustomerId() {
         int maxNumber = 0;
         for (Customer customer : this.customers) {
             String id = customer.getId();
             if (id != null && id.length() == 6 && (id.charAt(0) == 'C' || id.charAt(0) == 'c')) {
-                try {
-                    int num = Integer.parseInt(id.substring(1));
-                    if (num > maxNumber) {
-                        maxNumber = num;
-                    }
-                } catch (NumberFormatException ignored) {
+                int num = Integer.parseInt(id.substring(1));
+                if (num > maxNumber) {
+                    maxNumber = num;
                 }
             }
         }
@@ -144,7 +141,7 @@ public class CustomerController {
 
     /**
      * Checks whether a Customer ID already exists in the system across both
-     * active and soft-deleted records (BR2, BR27).
+     * active and soft-deleted records (BR2, BR27, BR33).
      *
      * @param id the customer ID to check
      * @return true if the ID is already used
@@ -154,26 +151,21 @@ public class CustomerController {
     }
 
     /**
-     * Registers a new customer after verifying ID uniqueness across all records
-     * and phone uniqueness across active customers, then persists to CSV
-     * (BR2, BR3, BR15, BR25, BR27).
+     * Registers a new customer with an auto-generated Customer ID after verifying
+     * phone uniqueness across active customers, then persists to CSV
+     * (BR2, BR15, BR16, BR25, BR27, BR33).
      *
-     * @param id       the 6-character customer ID (C00001-C99999)
      * @param fullName the customer's full name
      * @param phone    the customer's Vietnamese mobile phone number
      * @param address  the customer's residential address
      * @param type     the loyalty tier ("Regular" or "VIP")
      * @return the newly created and persisted Customer instance
-     * @throws IllegalArgumentException if any field is invalid or ID/phone is
+     * @throws IllegalArgumentException if any field is invalid or phone is
      *                                  duplicate
      */
-    public Customer registerCustomer(String id, String fullName, String phone,
+    public Customer registerCustomer(String fullName, String phone,
             String address, String type) {
-        String validatedId = InputValidator.validateCustomerId(id);
-        if (existsById(validatedId)) {
-            throw new IllegalArgumentException(
-                    "Customer ID '" + validatedId + "' already exists in the system.");
-        }
+        String id = generateNextCustomerId();
         String normalizedPhone = InputValidator.normalizePhone(phone);
         Customer existingByPhone = findByPhone(normalizedPhone);
         if (existingByPhone != null) {
@@ -182,7 +174,7 @@ public class CustomerController {
                             + existingByPhone.getId() + ".");
         }
 
-        Customer created = Customer.create(type, validatedId, fullName,
+        Customer created = Customer.create(type, id, fullName,
                 normalizedPhone, address, false);
         this.customers.add(created);
         saveToCsv();
@@ -293,10 +285,8 @@ public class CustomerController {
         if (id == null || id.trim().isEmpty()) {
             return null;
         }
-        String lookupId;
-        try {
-            lookupId = InputValidator.normalizeCustomerId(id);
-        } catch (IllegalArgumentException e) {
+        String lookupId = InputValidator.tryNormalizeCustomerId(id);
+        if (lookupId == null) {
             lookupId = id.trim();
         }
         for (Customer customer : this.customers) {
@@ -319,10 +309,8 @@ public class CustomerController {
         if (rawPhone == null || rawPhone.trim().isEmpty()) {
             return null;
         }
-        String normalized;
-        try {
-            normalized = InputValidator.normalizePhone(rawPhone);
-        } catch (IllegalArgumentException e) {
+        String normalized = InputValidator.tryNormalizePhone(rawPhone);
+        if (normalized == null) {
             return null;
         }
         for (Customer customer : this.customers) {
@@ -362,11 +350,7 @@ public class CustomerController {
         }
         String lower = keyword.trim().toLowerCase(Locale.ROOT);
         String digitsOnly = keyword.trim().replaceAll("[\\s.\\-()]", "");
-        String normalizedId = null;
-        try {
-            normalizedId = InputValidator.normalizeCustomerId(keyword.trim());
-        } catch (IllegalArgumentException ignored) {
-        }
+        String normalizedId = InputValidator.tryNormalizeCustomerId(keyword.trim());
         List<Customer> matches = new ArrayList<>();
 
         for (Customer customer : this.customers) {
