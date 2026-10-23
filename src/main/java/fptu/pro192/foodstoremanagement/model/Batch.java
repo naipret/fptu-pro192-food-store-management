@@ -97,7 +97,7 @@ public class Batch {
     }
 
     /**
-     * Sets and validates the batch identifier (BR6).
+     * Sets and validates the batch identifier (BR33).
      *
      * @param batchId the 6-character batch ID (B00001-B99999)
      * @throws IllegalArgumentException if batchId is invalid
@@ -116,7 +116,7 @@ public class Batch {
     }
 
     /**
-     * Sets and validates the parent product identifier (BR1, BR18).
+     * Sets and validates the parent product identifier (BR1, BR30, BR33).
      *
      * @param productId the 6-character product ID (P00001-P99999)
      * @throws IllegalArgumentException if productId is invalid

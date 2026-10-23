@@ -7,13 +7,16 @@ import fptu.pro192.foodstoremanagement.util.ConsoleUtil;
 import fptu.pro192.foodstoremanagement.util.InputValidator;
 import fptu.pro192.foodstoremanagement.util.TableFormatter;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Interactive 80-column console menu dedicated to warehouse inventory and
  * batch lifecycle management: importing new batches, replenishing or adjusting
  * batch quantities, inspecting product batches, and monitoring low-stock,
- * near-expiry, and expired inventory (BR6, BR7, BR11, BR19, BR20, BR24, BR26).
+ * near-expiry, and expired inventory (BR6, BR7, BR11, BR19, BR20, BR24, BR26,
+ * BR30, BR33).
  */
 public class InventoryMenu extends Menu {
 
@@ -79,9 +82,14 @@ public class InventoryMenu extends Menu {
         }
     }
 
+    @Override
+    protected boolean shouldPauseAfterAction(int choice) {
+        return choice != 4;
+    }
+
     private void handleImportNewBatch() {
-        String rawProdId = ConsoleUtil.readNonEmptyString("Enter Product ID (e.g., P00001, or 0 to cancel): ");
-        if ("0".equals(rawProdId)) {
+        String rawProdId = ConsoleUtil.readCancellableString("Enter Product ID (e.g., P00001, or 0 to cancel): ");
+        if (rawProdId == null) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
         }
@@ -95,61 +103,48 @@ public class InventoryMenu extends Menu {
                 product.getId(), product.getName(),
                 product.getAvailableStock(), product.getUnit());
 
-        String suggestedBatchId = this.productController.generateNextBatchId();
-        String batchId;
-        while (true) {
-            String rawBatchId = ConsoleUtil.readOptionalString(
-                    "Enter Batch ID [Press Enter for " + suggestedBatchId + ", or 0 to cancel]: ");
-            if ("0".equals(rawBatchId)) {
-                System.out.println("  [INFO] Operation cancelled.");
-                return;
-            }
-            if (rawBatchId.isEmpty()) {
-                batchId = suggestedBatchId;
-                break;
-            }
-            try {
-                String normalized = InputValidator.normalizeBatchId(rawBatchId);
-                if (this.productController.existsBatchId(normalized)) {
-                    System.out.println("  [ERROR] Batch ID '" + normalized + "' already exists.");
-                    continue;
-                }
-                batchId = normalized;
-                break;
-            } catch (IllegalArgumentException e) {
-                System.out.println("  [ERROR] " + e.getMessage());
-            }
+        Integer quantity = ConsoleUtil.readPositiveInt("Enter batch quantity (> 0, or 0 to cancel): ");
+        if (quantity == null) {
+            System.out.println("  [INFO] Operation cancelled.");
+            return;
         }
 
-        int quantity = ConsoleUtil.readPositiveInt("Enter batch quantity (> 0): ", false);
-        while (true) {
-            LocalDate productionDate = ConsoleUtil.readDate("Enter production date (dd/MM/yyyy, or 0 to cancel): ");
-            if (productionDate == null) {
-                System.out.println("  [INFO] Operation cancelled.");
-                return;
-            }
-            LocalDate expirationDate = ConsoleUtil.readDate("Enter expiration date (dd/MM/yyyy, or 0 to cancel): ");
-            if (expirationDate == null) {
-                System.out.println("  [INFO] Operation cancelled.");
-                return;
-            }
-            try {
-                Batch newBatch = new Batch(batchId, product.getId(), LocalDate.now(),
-                        productionDate, expirationDate, quantity);
-                this.productController.addBatchToProduct(product.getId(), newBatch);
-                System.out.printf("  [OK] Batch %s (%d %s) imported for product %s.%n",
-                        newBatch.getBatchId(), quantity, product.getUnit(), product.getId());
-                renderBatchTable(product.getBatches());
-                return;
-            } catch (IllegalArgumentException e) {
-                System.out.println("  [ERROR] " + e.getMessage());
-            }
+        LocalDate productionDate = ConsoleUtil.readDate("Enter production date (dd/MM/yyyy, or 0 to cancel): ");
+        if (productionDate == null) {
+            System.out.println("  [INFO] Operation cancelled.");
+            return;
+        }
+
+        LocalDate expirationDate = ConsoleUtil.readDate("Enter expiration date (dd/MM/yyyy, or 0 to cancel): ");
+        if (expirationDate == null) {
+            System.out.println("  [INFO] Operation cancelled.");
+            return;
+        }
+
+        if (productionDate.isAfter(expirationDate)) {
+            System.out.println("  [ERROR] Production date cannot be after expiration date (BR7).");
+            return;
+        }
+
+        if (!ConsoleUtil.confirm("Are you sure you want to import this batch?")) {
+            System.out.println("  [INFO] Operation cancelled.");
+            return;
+        }
+
+        try {
+            Batch newBatch = this.productController.importBatch(
+                    product.getId(), productionDate, expirationDate, quantity);
+            System.out.printf("  [OK] Batch %s (%d %s) imported for product %s.%n",
+                    newBatch.getBatchId(), quantity, product.getUnit(), product.getId());
+            renderBatchTable(product.getBatches());
+        } catch (IllegalArgumentException e) {
+            System.out.println("  [ERROR] " + e.getMessage());
         }
     }
 
     private void handleReplenishBatch() {
-        String rawProdId = ConsoleUtil.readNonEmptyString("Enter Product ID (e.g., P00001, or 0 to cancel): ");
-        if ("0".equals(rawProdId)) {
+        String rawProdId = ConsoleUtil.readCancellableString("Enter Product ID (e.g., P00001, or 0 to cancel): ");
+        if (rawProdId == null) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
         }
@@ -164,8 +159,25 @@ public class InventoryMenu extends Menu {
         }
         renderBatchTable(product.getBatches());
 
-        String rawBatchId = ConsoleUtil.readNonEmptyString("Enter Batch ID to replenish (e.g., B00001): ");
-        int addedQty = ConsoleUtil.readPositiveInt("Enter quantity to add (> 0): ", false);
+        String rawBatchId = ConsoleUtil
+                .readCancellableString("Enter Batch ID to replenish (e.g., B00001, or 0 to cancel): ");
+        if (rawBatchId == null) {
+            System.out.println("  [INFO] Operation cancelled.");
+            return;
+        }
+
+        Integer addedQty = ConsoleUtil.readPositiveInt("Enter quantity to add (> 0, or 0 to cancel): ");
+        if (addedQty == null) {
+            System.out.println("  [INFO] Operation cancelled.");
+            return;
+        }
+
+        if (!ConsoleUtil
+                .confirm("Are you sure you want to replenish batch " + rawBatchId.trim() + " by " + addedQty + "?")) {
+            System.out.println("  [INFO] Operation cancelled.");
+            return;
+        }
+
         try {
             this.productController.replenishBatch(product.getId(), rawBatchId, addedQty);
             System.out.printf("  [OK] Added %d %s to batch %s. Total available stock: %d.%n",
@@ -179,8 +191,8 @@ public class InventoryMenu extends Menu {
     }
 
     private void handleAdjustBatchQuantity() {
-        String rawProdId = ConsoleUtil.readNonEmptyString("Enter Product ID (e.g., P00001, or 0 to cancel): ");
-        if ("0".equals(rawProdId)) {
+        String rawProdId = ConsoleUtil.readCancellableString("Enter Product ID (e.g., P00001, or 0 to cancel): ");
+        if (rawProdId == null) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
         }
@@ -195,8 +207,21 @@ public class InventoryMenu extends Menu {
         }
         renderBatchTable(product.getBatches());
 
-        String rawBatchId = ConsoleUtil.readNonEmptyString("Enter Batch ID to adjust (e.g., B00001): ");
+        String rawBatchId = ConsoleUtil
+                .readCancellableString("Enter Batch ID to adjust (e.g., B00001, or 0 to cancel): ");
+        if (rawBatchId == null) {
+            System.out.println("  [INFO] Operation cancelled.");
+            return;
+        }
+
         int newQty = ConsoleUtil.readInt("Enter new exact batch quantity (>= 0): ", 0, Integer.MAX_VALUE);
+
+        if (!ConsoleUtil
+                .confirm("Are you sure you want to set batch " + rawBatchId.trim() + " quantity to " + newQty + "?")) {
+            System.out.println("  [INFO] Operation cancelled.");
+            return;
+        }
+
         try {
             this.productController.adjustBatchQuantity(product.getId(), rawBatchId, newQty);
             System.out.printf("  [OK] Batch %s quantity set to %d. Available product stock: %d.%n",
@@ -209,34 +234,33 @@ public class InventoryMenu extends Menu {
     }
 
     private void handleViewProductBatches() {
-        String rawProdId = ConsoleUtil.readNonEmptyString("Enter Product ID (e.g., P00001): ");
-        Product product = this.productController.findById(rawProdId);
-        if (product == null) {
-            System.out.println("  [ERROR] Active product not found with ID: " + rawProdId);
-            return;
+        while (true) {
+            String rawProdId = ConsoleUtil.readCancellableString("Enter Product ID (e.g., P00001, or 0 to cancel): ");
+            if (rawProdId == null) {
+                break;
+            }
+            Product product = this.productController.findById(rawProdId);
+            if (product == null) {
+                System.out.println("  [ERROR] Active product not found with ID: " + rawProdId);
+                continue;
+            }
+            System.out.printf("  Product: %s - %s | Available: %d %s | Physical Total: %d %s%n",
+                    product.getId(), product.getName(),
+                    product.getAvailableStock(), product.getUnit(),
+                    product.getTotalStock(), product.getUnit());
+            renderBatchTable(product.getBatches());
         }
-        System.out.printf("  Product: %s - %s | Available: %d %s | Physical Total: %d %s%n",
-                product.getId(), product.getName(),
-                product.getAvailableStock(), product.getUnit(),
-                product.getTotalStock(), product.getUnit());
-        renderBatchTable(product.getBatches());
     }
 
     private void handleViewLowStockProducts() {
-        String rawThreshold = ConsoleUtil.readOptionalString(
-                "Enter stock threshold [Press Enter for default "
-                        + Product.DEFAULT_LOW_STOCK_THRESHOLD + "]: ");
-        int threshold = Product.DEFAULT_LOW_STOCK_THRESHOLD;
-        if (!rawThreshold.isEmpty()) {
-            try {
-                threshold = InputValidator.validateNonNegativeQuantity(
-                        Integer.parseInt(rawThreshold), "Low-stock threshold");
-            } catch (Exception e) {
-                System.out.println("  [WARN] Invalid threshold input. Using default "
-                        + Product.DEFAULT_LOW_STOCK_THRESHOLD + ".");
-                threshold = Product.DEFAULT_LOW_STOCK_THRESHOLD;
-            }
+        Integer threshold = ConsoleUtil.readIntWithDefault(
+                "Enter stock threshold (N, Enter for default 5, or 0 to cancel): ",
+                1, Integer.MAX_VALUE, Product.DEFAULT_LOW_STOCK_THRESHOLD);
+        if (threshold == null) {
+            System.out.println("  [INFO] Operation cancelled.");
+            return;
         }
+
         List<Product> lowStock = this.productController.getLowStockProducts(threshold);
         if (lowStock.isEmpty()) {
             System.out.println("  [OK] No active products are at or below " + threshold + " units.");
@@ -259,26 +283,38 @@ public class InventoryMenu extends Menu {
     }
 
     private void handleViewNearExpiryBatches() {
-        String rawDays = ConsoleUtil.readOptionalString(
-                "Enter warning window in days [Press Enter for default "
-                        + Product.DEFAULT_NEAR_EXPIRY_DAYS + "]: ");
-        int days = Product.DEFAULT_NEAR_EXPIRY_DAYS;
-        if (!rawDays.isEmpty()) {
-            try {
-                days = InputValidator.validateNonNegativeQuantity(
-                        Integer.parseInt(rawDays), "Days threshold");
-            } catch (Exception e) {
-                System.out.println("  [WARN] Invalid days input. Using default "
-                        + Product.DEFAULT_NEAR_EXPIRY_DAYS + " days.");
-                days = Product.DEFAULT_NEAR_EXPIRY_DAYS;
-            }
+        Integer days = ConsoleUtil.readIntWithDefault(
+                "Enter warning window in days (N, Enter for default 7, or 0 to cancel): ",
+                1, Integer.MAX_VALUE, Product.DEFAULT_NEAR_EXPIRY_DAYS);
+        if (days == null) {
+            System.out.println("  [INFO] Operation cancelled.");
+            return;
         }
+
         List<Batch> nearBatches = this.productController.getNearExpiryBatches(days);
         renderBatchTable(nearBatches);
     }
 
     private void handleViewExpiredBatches() {
+        Integer windowDays = ConsoleUtil.readIntWithDefault(
+                "Enter look-back window in days (N, Enter for all-expired, or 0 to cancel): ",
+                1, Integer.MAX_VALUE, 0);
+        if (windowDays == null) {
+            System.out.println("  [INFO] Operation cancelled.");
+            return;
+        }
+
         List<Batch> expiredBatches = this.productController.getExpiredBatches();
+        if (windowDays > 0) {
+            LocalDate cutoff = LocalDate.now().minusDays(windowDays);
+            List<Batch> filtered = new ArrayList<>();
+            for (Batch b : expiredBatches) {
+                if (!b.getExpirationDate().isBefore(cutoff)) {
+                    filtered.add(b);
+                }
+            }
+            expiredBatches = filtered;
+        }
         renderBatchTable(expiredBatches);
     }
 
