@@ -306,7 +306,7 @@ public final class InputValidator {
         if (!PHONE_REGEX.matcher(cleaned).matches()) {
             throw new IllegalArgumentException(
                     "Invalid Vietnamese mobile phone number: '" + raw
-                            + "'. Expected 10 digits starting with 03, 05, 07, 08, or 09.");
+                            + "'.\n          Expected 10 digits starting with 03, 05, 07, 08, or 09.");
         }
         return cleaned;
     }
