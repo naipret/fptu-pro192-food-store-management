@@ -152,6 +152,8 @@ public class ProductMenu extends Menu {
             this.productController.updateProduct(
                     existing.getId(), newName, newCategory, newUnit, newPrice);
             System.out.printf("  [OK] Product %s updated successfully.%n", existing.getId());
+            Product updated = this.productController.findById(existing.getId());
+            renderProductTable(Collections.singletonList(updated != null ? updated : existing));
         } catch (IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
         }
