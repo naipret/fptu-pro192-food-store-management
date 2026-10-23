@@ -161,10 +161,13 @@ classDiagram
         -Set~String~ units
         +loadFromCsv() void
         +saveToCsv() void
-        +addProduct(Product product) void
+        +addProduct(String name, String category, String unit, double price) Product
         +updateProduct(String id, String name, String category, String unit, double price) void
         +deleteProduct(String id) boolean
-        +addBatchToProduct(String productId, Batch batch) void
+        +importBatch(String productId, LocalDate productionDate, LocalDate expirationDate, int quantity) Batch
+        +importBatch(String productId, LocalDate importDate, LocalDate productionDate, LocalDate expirationDate, int quantity) Batch
+        +replenishBatch(String productId, String batchId, int addedQuantity) Batch
+        +adjustBatch(String productId, String batchId, int exactQuantity) Batch
         +deductStockFEFO(String productId, int requestedQuantity) void
         +findById(String id) Product
         +findByIdIncludeDeleted(String id) Product
@@ -179,7 +182,7 @@ classDiagram
         -List~Customer~ customers
         +loadFromCsv() void
         +saveToCsv() void
-        +registerCustomer(String id, String fullName, String phone, String address, String type) Customer
+        +registerCustomer(String fullName, String phone, String address, String type) Customer
         +updateCustomer(String id, String newName, String newPhone, String newAddress, String newType) Customer
         +deleteCustomer(String id) void
         +findById(String id) Customer
@@ -211,9 +214,7 @@ classDiagram
         +getDailyRevenue(LocalDate date) double
         +getOrdersByMonth(YearMonth month) List~Order~
         +getMonthlyRevenue(YearMonth month) double
-        +getTopSellingProducts(int limit) List~ProductSalesSummary~
         +getTopSellingProducts(LocalDate fromDate, LocalDate toDate, int limit) List~ProductSalesSummary~
-        +getHighestSpendingCustomers(int limit) List~CustomerSpendingSummary~
         +getHighestSpendingCustomers(LocalDate fromDate, LocalDate toDate, int limit) List~CustomerSpendingSummary~
     }
 
@@ -224,6 +225,7 @@ classDiagram
         +display() void
         #handleChoice(int choice)* void
         #shouldPauseAfterAction() boolean
+        #shouldPauseAfterAction(int choice) boolean
         #shouldShowBreadcrumb() boolean
         +printBreadcrumbHeader(String breadcrumb) void
     }

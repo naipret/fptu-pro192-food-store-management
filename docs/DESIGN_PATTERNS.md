@@ -108,7 +108,7 @@ Every interactive console screen (`MainMenu`, `ProductMenu`, `InventoryMenu`, `C
 The abstract class `Menu` defines the `final` template method `display()`:
 
 ```java
-public void display() {
+public final void display() {
     boolean running = true;
     while (running) {
         renderMenuFrame();
@@ -122,7 +122,7 @@ public void display() {
                 printBreadcrumbHeader(this.title + " > [" + choice + "] " + this.options[choice - 1]);
             }
             handleChoice(choice);
-            if (shouldPauseAfterAction()) {
+            if (shouldPauseAfterAction(choice)) {
                 ConsoleUtil.pressEnterToContinue();
             }
         }
@@ -133,5 +133,6 @@ public void display() {
 Subclasses implement the abstract primitive operation `protected abstract void handleChoice(int choice)` and may override the hook methods:
 
 - `protected boolean shouldPauseAfterAction()`: defaults to `true` in `Menu` for leaf action screens and returns `false` in `MainMenu` so returning from a submenu does not trigger a redundant `Press Enter` prompt.
+- `protected boolean shouldPauseAfterAction(int choice)`: choice-sensitive pause hook that delegates to `shouldPauseAfterAction()` by default; overridden in submenus to return `false` on loop-based search and detail view screens (`1.2`, `2.2`, `3.3`, `3.4`, `4.4`) to prevent double prompts.
 - `protected boolean shouldShowBreadcrumb()`: defaults to `true` to automatically render the centered 80-column breadcrumb banner before executing the selected action handler; overridden in `MainMenu` to return `false`.
 - Each submenu passes its full hierarchical title directly into `super(...)` (e.g., `super("FOOD STORE MANAGEMENT SYSTEM > [1] PRODUCTS", MENU_OPTIONS)`), so the menu frame header and action breadcrumbs share a single unified source of truth.

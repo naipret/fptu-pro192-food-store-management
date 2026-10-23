@@ -19,22 +19,46 @@ This document defines the terminal layout constraints, localization policy, navi
 
 ## 2. Navigation and Input Conventions
 
-### 2.1. Menu Selection and Exit Convention
+### 2.1. Menu Selection and Universal Cancellation
 
 Every menu rendered via `Menu.display()` lists numbered options starting from `[1]` through `[N]` and places `[0]` at the bottom to exit or return to the parent menu:
 
 1. In `MainMenu`, selecting `[0]` exits the application cleanly.
 2. In submenus (`ProductMenu`, `InventoryMenu`, `CustomerMenu`, `SalesMenu`, `ReportMenu`), selecting `[0]` returns immediately to `MainMenu`.
-3. During multi-step data entry flows (such as adding a product, registering a customer, or adding items to a shopping cart), entering `0` at the primary prompt cancels the operation safely without mutating state.
+3. **Universal Cancellation with `0`:** Across all input fields in all menus (entity addition, update, batch replenishment, inventory adjustment, date prompts, search queries), entering `0` immediately cancels the ongoing operation and safely returns to the menu without modifying any data.
 
-### 2.2. Screen Clearing and Breadcrumb Navigation
+### 2.2. Default Values and Enter-to-Keep Convention
+
+1. **Update Workflows (`1.4`, `2.4`):** When modifying existing records, pressing `[Enter]` without typing any input retains the current value for that field. Current category and customer tier are displayed on a dedicated line above choice options supporting `Enter to keep, or 0 to cancel`.
+2. **Report Date/Period Defaults (`5.1`, `5.2`):**
+   - In Daily Revenue (`5.1`), pressing `[Enter]` defaults to today's date (`dd/MM/yyyy`).
+   - In Monthly Revenue (`5.2`), user inputs `MM/yyyy` directly (no separate month/year prompts), with `[Enter]` defaulting to the current month.
+3. **Report & Alert Threshold Defaults:**
+   - In Low Stock (`4.5`), pressing `[Enter]` defaults to threshold `5`.
+   - In Near-Expiry (`4.6`), pressing `[Enter]` defaults to window `7` days.
+   - In Expired Batches (`4.7`) and Rankings (`5.3`, `5.4`), pressing `[Enter]` skips date filters to include all records.
+
+### 2.3. System-Managed Identifiers
+
+All entity identifiers (`P00001` for products, `C00001` for customers, `B00001` for batches, `O00001` for orders) are generated automatically and sequentially by controllers (`BR1`, `BR2`, `BR6`, `BR8`, `BR33`). Users are never prompted to enter or invent IDs when creating new items.
+
+### 2.4. Dual Table Verification and [Y/N] Confirmation
+
+1. **Pre- and Post-Modification ASCII Tables:** In all update and adjustment flows (`1.4`, `1.5`, `2.4`, `2.5`, `4.2`, `4.3`), the system displays the current entity state in a formatted 80-column ASCII table before editing, and displays the refreshed table immediately after the change is persisted.
+2. **Explicit Confirmation (`ConsoleUtil.confirm`):** All create, update, adjust, remove, and checkout actions require an explicit `[Y/N]` confirmation step (`Are you sure ...? [Y/N]:`) before persisting changes.
+
+### 2.5. Continuous Search and Detail Inspection Loops
+
+Search screens (`1.2`, `2.2`, `3.3`) and detail viewers (`3.4` view invoice by ID, `4.4` view batches of product) loop continuously until `0` is entered to exit. They disable the redundant post-action pause prompt (`shouldPauseAfterAction(choice) == false`) for fluid, seamless user experience.
+
+### 2.6. Screen Clearing and Breadcrumb Navigation
 
 To maintain a clean and focused user experience during terminal interaction:
 
 1. **Terminal Screen Reset (`ConsoleUtil.clearScreen()`):** Before rendering any menu frame and after completing major workflow actions, the terminal viewport is cleared using ANSI escape sequence `\033[H\033[2J` supplemented by a 25-blank-lines fallback to support legacy Windows `cmd.exe` and IDE console windows without ANSI support.
 2. **Centered Breadcrumb Headers (`Menu.printBreadcrumbHeader(String)`):** Every dispatched submenu action renders an 80-column centered breadcrumb banner at the top of the screen before executing the selected handler. The banner follows the format `MAIN MENU > [<MenuIndex>] <MENU_NAME> > [<ChoiceIndex>] <Action Name>` (for example, `MAIN MENU > [1] PRODUCTS > [3] Add New Product`) and is centered horizontally using `TableFormatter.center(...)` without redundant prefix tags like `LOCATION:`.
 
-### 2.3. Standardized Status Prefixes
+### 2.7. Standardized Status Prefixes
 
 All user feedback messages printed to the console use explicit ASCII status prefixes:
 

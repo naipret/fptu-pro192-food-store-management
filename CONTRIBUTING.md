@@ -77,7 +77,7 @@ Every code or documentation change must be tracked by a GitHub Issue and merged 
 ### Issue Tracking
 
 1. Before starting work on a task, verify that a corresponding GitHub Issue exists and is assigned to the responsible team member.
-2. Each issue must state its objective, target files, enforced business rules (`BR1` through `BR27` where applicable), and testable acceptance criteria.
+2. Each issue must state its objective, target files, enforced business rules (`BR1` through `BR34` where applicable), and testable acceptance criteria.
 
 ### Pull Request Process
 

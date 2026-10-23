@@ -106,7 +106,7 @@ Test and interact with the application directly inside your web browser without 
 
 All architectural decisions, domain rules, and coding standards are maintained in the [`docs/`](docs/) directory:
 
-1. [Business Rules (`docs/BUSINESS_RULES.md`)](docs/BUSINESS_RULES.md) defines rules `BR1` through `BR27` governing product catalog management, batch inventory and FEFO deduction, customer loyalty tiers, sales checkout, reporting, and soft deletes.
+1. [Business Rules (`docs/BUSINESS_RULES.md`)](docs/BUSINESS_RULES.md) defines rules `BR1` through `BR34` governing product catalog management, batch inventory and FEFO deduction, customer loyalty tiers, sales checkout, reporting, soft deletes, and transaction immutability.
 2. [Architecture and Data Model (`docs/ARCHITECTURE_MODEL.md`)](docs/ARCHITECTURE_MODEL.md) details the 3-tier MVC package boundaries, the UML class diagram, and the column schemas for all five CSV files.
 3. [Design Principles (`docs/DESIGN_PRINCIPLES.md`)](docs/DESIGN_PRINCIPLES.md) explains how the four OOP pillars, the five SOLID principles, and core software engineering principles (`SoC`, `DRY`, `KISS`, `YAGNI`) are realized in the codebase.
 4. [Design Patterns (`docs/DESIGN_PATTERNS.md`)](docs/DESIGN_PATTERNS.md) documents the five patterns used in the project: Factory Method, Atomic CSV Persistence, Singleton, Strategy, and Template Method.
