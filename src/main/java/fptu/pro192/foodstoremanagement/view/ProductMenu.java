@@ -114,7 +114,7 @@ public class ProductMenu extends Menu {
             return;
         }
 
-        if (!ConsoleUtil.confirm("Are you sure you want to add this product?")) {
+        if (!ConsoleUtil.confirm("\nAre you sure you want to add this product?")) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
         }
@@ -144,7 +144,7 @@ public class ProductMenu extends Menu {
 
         System.out.println("  Current Product Details:");
         renderProductTable(Collections.singletonList(existing));
-        System.out.println("  (Press Enter to keep current value, or 0 to cancel)");
+        System.out.println("\n  (Press Enter to keep current value, or 0 to cancel)");
 
         String newName = ConsoleUtil.readOptionalValidatedText(
                 "Enter new product name [" + existing.getName() + "]: ",
@@ -176,7 +176,7 @@ public class ProductMenu extends Menu {
             return;
         }
 
-        if (!ConsoleUtil.confirm("Are you sure you want to update this product?")) {
+        if (!ConsoleUtil.confirm("\nAre you sure you want to update this product?")) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
         }
@@ -208,7 +208,7 @@ public class ProductMenu extends Menu {
         System.out.println("  Product to delete:");
         renderProductTable(Collections.singletonList(existing));
 
-        if (!ConsoleUtil.confirm("Confirm removing product " + existing.getId() + "?")) {
+        if (!ConsoleUtil.confirm("\nConfirm removing product " + existing.getId() + "?")) {
             System.out.println("  [INFO] Removal cancelled.");
             return;
         }

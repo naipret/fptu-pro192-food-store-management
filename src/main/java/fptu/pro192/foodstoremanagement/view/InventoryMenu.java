@@ -173,7 +173,7 @@ public class InventoryMenu extends Menu {
         }
 
         if (!ConsoleUtil
-                .confirm("Are you sure you want to replenish batch " + rawBatchId.trim() + " by " + addedQty + "?")) {
+                .confirm("\nAre you sure you want to replenish batch " + rawBatchId.trim() + " by " + addedQty + "?")) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
         }
@@ -217,7 +217,8 @@ public class InventoryMenu extends Menu {
         int newQty = ConsoleUtil.readInt("Enter new exact batch quantity (>= 0): ", 0, Integer.MAX_VALUE);
 
         if (!ConsoleUtil
-                .confirm("Are you sure you want to set batch " + rawBatchId.trim() + " quantity to " + newQty + "?")) {
+                .confirm(
+                        "\nAre you sure you want to set batch " + rawBatchId.trim() + " quantity to " + newQty + "?")) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
         }

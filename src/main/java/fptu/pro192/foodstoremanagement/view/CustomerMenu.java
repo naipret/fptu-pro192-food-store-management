@@ -114,7 +114,7 @@ public class CustomerMenu extends Menu {
             return;
         }
 
-        if (!ConsoleUtil.confirm("Are you sure you want to register this customer?")) {
+        if (!ConsoleUtil.confirm("\nAre you sure you want to register this customer?")) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
         }
@@ -145,7 +145,7 @@ public class CustomerMenu extends Menu {
 
         System.out.println("  Current Customer Details:");
         renderCustomerTable(Collections.singletonList(existing));
-        System.out.println("  (Press Enter to keep current value, or 0 to cancel)");
+        System.out.println("\n  (Press Enter to keep current value, or 0 to cancel)");
 
         String newName = ConsoleUtil.readOptionalValidatedText(
                 "Enter new full name [" + existing.getFullName() + "]: ",
@@ -178,7 +178,7 @@ public class CustomerMenu extends Menu {
             return;
         }
 
-        if (!ConsoleUtil.confirm("Are you sure you want to update this customer?")) {
+        if (!ConsoleUtil.confirm("\nAre you sure you want to update this customer?")) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
         }
@@ -210,7 +210,7 @@ public class CustomerMenu extends Menu {
         System.out.println("  Customer to delete:");
         renderCustomerTable(Collections.singletonList(existing));
 
-        if (!ConsoleUtil.confirm("Confirm removing customer " + existing.getId() + "?")) {
+        if (!ConsoleUtil.confirm("\nConfirm removing customer " + existing.getId() + "?")) {
             System.out.println("  [INFO] Deletion cancelled.");
             return;
         }
