@@ -6,6 +6,7 @@ import fptu.pro192.foodstoremanagement.util.ConsoleUtil;
 import fptu.pro192.foodstoremanagement.util.InputValidator;
 import fptu.pro192.foodstoremanagement.util.TableFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -103,6 +104,7 @@ public class ProductMenu extends Menu {
             this.productController.addProduct(product);
             System.out.printf("  [OK] Product %s ('%s') added successfully.%n",
                     product.getId(), product.getName());
+            renderProductTable(Collections.singletonList(product));
         } catch (IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
         }

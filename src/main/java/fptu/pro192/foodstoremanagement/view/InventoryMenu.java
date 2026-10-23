@@ -131,6 +131,7 @@ public class InventoryMenu extends Menu {
                 this.productController.addBatchToProduct(product.getId(), newBatch);
                 System.out.printf("  [OK] Batch %s (%d %s) imported for product %s.%n",
                         newBatch.getBatchId(), quantity, product.getUnit(), product.getId());
+                renderBatchTable(product.getBatches());
                 return;
             } catch (IllegalArgumentException e) {
                 System.out.println("  [ERROR] " + e.getMessage());
@@ -163,6 +164,7 @@ public class InventoryMenu extends Menu {
                     addedQty, product.getUnit(),
                     InputValidator.normalizeBatchId(rawBatchId),
                     product.getAvailableStock());
+            renderBatchTable(product.getBatches());
         } catch (IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
         }
@@ -192,6 +194,7 @@ public class InventoryMenu extends Menu {
             System.out.printf("  [OK] Batch %s quantity set to %d. Available product stock: %d.%n",
                     InputValidator.normalizeBatchId(rawBatchId),
                     newQty, product.getAvailableStock());
+            renderBatchTable(product.getBatches());
         } catch (IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
         }

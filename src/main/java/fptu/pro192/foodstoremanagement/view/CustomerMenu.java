@@ -5,6 +5,7 @@ import fptu.pro192.foodstoremanagement.model.Customer;
 import fptu.pro192.foodstoremanagement.util.ConsoleUtil;
 import fptu.pro192.foodstoremanagement.util.InputValidator;
 import fptu.pro192.foodstoremanagement.util.TableFormatter;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -102,6 +103,7 @@ public class CustomerMenu extends Menu {
             System.out.printf("  [OK] Registered %s customer %s ('%s', Phone: %s).%n",
                     created.getCustomerType(), created.getId(),
                     created.getFullName(), created.getPhone());
+            renderCustomerTable(Collections.singletonList(created));
         } catch (IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
         }
@@ -142,6 +144,7 @@ public class CustomerMenu extends Menu {
                     existing.getId(), newName, newPhone, newAddress, newTier);
             System.out.printf("  [OK] Customer %s updated (%s, Tier: %s).%n",
                     updated.getId(), updated.getFullName(), updated.getCustomerType());
+            renderCustomerTable(Collections.singletonList(updated));
         } catch (IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
         }

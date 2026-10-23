@@ -153,6 +153,7 @@ public class SalesMenu extends Menu {
                             System.out.println("  [OK] Order " + finalized.getOrderId()
                                     + " finalized! Final amount: "
                                     + InputValidator.formatCurrency(finalized.getFinalAmount()));
+                            renderInvoiceTable(finalized);
                             shopping = false;
                         } catch (InsufficientStockException | IllegalArgumentException e) {
                             System.out.println("  [ERROR] " + e.getMessage());
