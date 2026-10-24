@@ -123,6 +123,139 @@ public final class ConsoleUtil {
     }
 
     /**
+     * Prompts the user for a customer full name validated in Title Case,
+     * returning null if 0 is entered to cancel.
+     *
+     * @param prompt the prompt message displayed to the user
+     * @return the normalized customer name, or null if cancelled with 0
+     */
+    public static String readValidatedCustomerName(String prompt) {
+        while (true) {
+            String raw = readCancellableString(prompt);
+            if (raw == null) {
+                return null;
+            }
+            try {
+                return InputValidator.normalizeCustomerName(raw);
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Prompts the user for an optional customer full name, returning defaultValue on Enter.
+     *
+     * @param prompt       the prompt message displayed to the user
+     * @param defaultValue the fallback name returned on Enter
+     * @return the normalized name, defaultValue on Enter, or null if cancelled with 0
+     */
+    public static String readOptionalValidatedCustomerName(String prompt, String defaultValue) {
+        while (true) {
+            String raw = readOptionalString(prompt);
+            if ("0".equals(raw)) {
+                return null;
+            }
+            if (raw.isEmpty()) {
+                return defaultValue;
+            }
+            try {
+                return InputValidator.normalizeCustomerName(raw);
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Prompts the user for a product display name, returning null if 0 is entered to cancel.
+     *
+     * @param prompt the prompt message displayed to the user
+     * @return the normalized product name, or null if cancelled with 0
+     */
+    public static String readValidatedProductName(String prompt) {
+        while (true) {
+            String raw = readCancellableString(prompt);
+            if (raw == null) {
+                return null;
+            }
+            try {
+                return InputValidator.normalizeProductName(raw);
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Prompts the user for an optional product display name, returning defaultValue on Enter.
+     *
+     * @param prompt       the prompt message displayed to the user
+     * @param defaultValue the fallback product name returned on Enter
+     * @return the normalized product name, defaultValue on Enter, or null if cancelled with 0
+     */
+    public static String readOptionalValidatedProductName(String prompt, String defaultValue) {
+        while (true) {
+            String raw = readOptionalString(prompt);
+            if ("0".equals(raw)) {
+                return null;
+            }
+            if (raw.isEmpty()) {
+                return defaultValue;
+            }
+            try {
+                return InputValidator.normalizeProductName(raw);
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Prompts the user for a customer address, returning null if 0 is entered to cancel.
+     *
+     * @param prompt the prompt message displayed to the user
+     * @return the normalized address, or null if cancelled with 0
+     */
+    public static String readValidatedAddress(String prompt) {
+        while (true) {
+            String raw = readCancellableString(prompt);
+            if (raw == null) {
+                return null;
+            }
+            try {
+                return InputValidator.normalizeAddress(raw);
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Prompts the user for an optional customer address, returning defaultValue on Enter.
+     *
+     * @param prompt       the prompt message displayed to the user
+     * @param defaultValue the fallback address returned on Enter
+     * @return the normalized address, defaultValue on Enter, or null if cancelled with 0
+     */
+    public static String readOptionalValidatedAddress(String prompt, String defaultValue) {
+        while (true) {
+            String raw = readOptionalString(prompt);
+            if ("0".equals(raw)) {
+                return null;
+            }
+            if (raw.isEmpty()) {
+                return defaultValue;
+            }
+            try {
+                return InputValidator.normalizeAddress(raw);
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Repeatedly prompts the user until an integer within the inclusive range
      * from min to max is entered.
      *
@@ -376,6 +509,30 @@ public final class ConsoleUtil {
     public static boolean confirm(String prompt) {
         while (true) {
             String raw = readOptionalString(prompt + " [Y/N]: ");
+            if ("Y".equalsIgnoreCase(raw) || "YES".equalsIgnoreCase(raw)) {
+                return true;
+            }
+            if ("N".equalsIgnoreCase(raw) || "NO".equalsIgnoreCase(raw) || "0".equals(raw)) {
+                return false;
+            }
+            System.out.println("  [ERROR] Please enter Y for Yes or N for No (or 0 to cancel).");
+        }
+    }
+
+    /**
+     * Prompts the user for a Yes or No confirmation with an Enter default value.
+     *
+     * @param prompt     the confirmation question displayed to the user
+     * @param defaultYes true if Enter defaults to Yes, false if Enter defaults to No
+     * @return true for Yes, false for No
+     */
+    public static boolean confirmWithDefault(String prompt, boolean defaultYes) {
+        String suffix = defaultYes ? " [Y/n]: " : " [y/N]: ";
+        while (true) {
+            String raw = readOptionalString(prompt + suffix);
+            if (raw.isEmpty()) {
+                return defaultYes;
+            }
             if ("Y".equalsIgnoreCase(raw) || "YES".equalsIgnoreCase(raw)) {
                 return true;
             }

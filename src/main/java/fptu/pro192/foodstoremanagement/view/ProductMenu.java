@@ -11,22 +11,23 @@ import java.util.List;
 
 /**
  * Interactive 80-column console menu for managing the retail product catalog:
- * adding products with standardized Set categories and units, updating catalog
- * metadata, soft-deleting products, viewing catalog listings, and searching
- * by name, category, or ID (BR1, BR3, BR4, BR5, BR6, BR7, BR27, BR31, BR33).
+ * adding products with standardized categories and units, viewing the catalog
+ * with real-time keyword search, updating catalog attributes, and soft-deleting
+ * products (BR1, BR3, BR4, BR5, BR6, BR7, BR27, BR31, BR33).
  */
 public class ProductMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
-            "View All Products",
-            "Search Products",
             "Add New Product",
+            "View All Products",
             "Update Product Information",
             "Remove Product"
     };
 
-    private static final String PRODUCT_TABLE_BORDER = "+--------+------------------------+--------------+--------+------------+-------+";
-    private static final String PRODUCT_TABLE_HEADER = "| ID     | Product Name           | Category     | Unit   | Price      | Stock |";
+    private static final String PRODUCT_TABLE_BORDER =
+            "+--------+------------------------+--------------+--------+------------+-------+";
+    private static final String PRODUCT_TABLE_HEADER =
+            "| ID     | Product Name           | Category     | Unit   | Price      | Stock |";
 
     private final ProductController productController;
 
@@ -48,18 +49,15 @@ public class ProductMenu extends Menu {
     protected void handleChoice(int choice) {
         switch (choice) {
             case 1:
-                handleViewAllProducts();
-                break;
-            case 2:
-                handleSearchProducts();
-                break;
-            case 3:
                 handleAddProduct();
                 break;
-            case 4:
+            case 2:
+                handleViewAllProducts();
+                break;
+            case 3:
                 handleUpdateProduct();
                 break;
-            case 5:
+            case 4:
                 handleDeleteProduct();
                 break;
             default:
@@ -70,120 +68,132 @@ public class ProductMenu extends Menu {
 
     @Override
     protected boolean shouldPauseAfterAction(int choice) {
-        return choice != 2;
-    }
-
-    private void handleViewAllProducts() {
-        List<Product> products = this.productController.getAllProducts();
-        renderProductTable(products);
-    }
-
-    private void handleSearchProducts() {
-        while (true) {
-            String keyword = ConsoleUtil.readOptionalString("Enter search keyword (or 0 to cancel): ");
-            if ("0".equals(keyword)) {
-                break;
-            }
-            List<Product> matches = this.productController.search(keyword);
-            renderProductTable(matches);
-        }
+        return false;
     }
 
     private void handleAddProduct() {
-        String name = ConsoleUtil.readValidatedText("Enter product name (or 0 to cancel): ", "Product name");
+        while (true) {
+            boolean added = promptAndCreateProduct();
+            if (!added) {
+                break;
+            }
+            if (!ConsoleUtil.confirmWithDefault("\nAdd another product?", true)) {
+                break;
+            }
+            System.out.println();
+        }
+    }
+
+    private boolean promptAndCreateProduct() {
+        String name = ConsoleUtil.readValidatedProductName("Enter product name (or 0 to cancel): ");
         if (name == null) {
             System.out.println("  [INFO] Operation cancelled.");
-            return;
+            return false;
         }
-
         String category = promptCategorySelection(null);
         if (category == null) {
             System.out.println("  [INFO] Operation cancelled.");
-            return;
+            return false;
         }
-
         String unit = promptUnitSelection(null);
         if (unit == null) {
             System.out.println("  [INFO] Operation cancelled.");
-            return;
+            return false;
         }
-
         Double price = ConsoleUtil.readPositivePrice("Enter selling price (> 0, or 0 to cancel): ");
         if (price == null) {
             System.out.println("  [INFO] Operation cancelled.");
-            return;
+            return false;
         }
+        return confirmAndPersistProduct(name, category, unit, price);
+    }
 
+    private boolean confirmAndPersistProduct(String name, String category, String unit, double price) {
         if (!ConsoleUtil.confirm("\nAre you sure you want to add this product?")) {
-            System.out.println("  [INFO] Operation cancelled.");
-            return;
+            System.out.println("  [INFO] Product addition cancelled.");
+            return false;
         }
-
         try {
             Product product = this.productController.addProduct(name, category, unit, price);
             System.out.printf("  [OK] Product %s ('%s') added successfully.%n",
                     product.getId(), product.getName());
             renderProductTable(Collections.singletonList(product));
+            return true;
         } catch (IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
+            return false;
+        }
+    }
+
+    private void handleViewAllProducts() {
+        renderProductTable(this.productController.getAllProducts());
+        while (true) {
+            String keyword = ConsoleUtil.readOptionalString(
+                    "\nEnter search keyword (or [Enter] to refresh, 0 to back): ");
+            if ("0".equals(keyword)) {
+                break;
+            }
+            List<Product> matches = keyword.isEmpty()
+                    ? this.productController.getAllProducts()
+                    : this.productController.search(keyword);
+            renderProductTable(matches);
         }
     }
 
     private void handleUpdateProduct() {
-        String rawId = ConsoleUtil.readCancellableString("Enter Product ID to update (or 0 to cancel): ");
-        if (rawId == null) {
-            System.out.println("  [INFO] Operation cancelled.");
-            return;
+        while (true) {
+            String rawId = ConsoleUtil.readCancellableString(
+                    "\nEnter Product ID to update (or 0 to cancel): ");
+            if (rawId == null) {
+                break;
+            }
+            Product existing = this.productController.findById(rawId);
+            if (existing == null) {
+                System.out.println("  [ERROR] Active product not found with ID: " + rawId);
+                continue;
+            }
+            performProductUpdate(existing);
         }
+    }
 
-        Product existing = this.productController.findById(rawId);
-        if (existing == null) {
-            System.out.println("  [ERROR] Active product not found with ID: " + rawId);
-            return;
-        }
-
+    private void performProductUpdate(Product existing) {
         System.out.println("  Current Product Details:");
         renderProductTable(Collections.singletonList(existing));
         System.out.println("\n  (Press Enter to keep current value, or 0 to cancel)");
 
-        String newName = ConsoleUtil.readOptionalValidatedText(
-                "Enter new product name [" + existing.getName() + "]: ",
-                "Product name", existing.getName());
+        String newName = ConsoleUtil.readOptionalValidatedProductName(
+                "Enter new product name [" + existing.getName() + "]: ", existing.getName());
         if (newName == null) {
-            System.out.println("  [INFO] Operation cancelled.");
+            System.out.println("  [INFO] Update cancelled.");
             return;
         }
-
-        System.out.println("  Current Category: " + existing.getCategory());
         String newCategory = promptCategorySelection(existing.getCategory());
         if (newCategory == null) {
-            System.out.println("  [INFO] Operation cancelled.");
+            System.out.println("  [INFO] Update cancelled.");
             return;
         }
-
-        System.out.println("  Current Unit: " + existing.getUnit());
         String newUnit = promptUnitSelection(existing.getUnit());
         if (newUnit == null) {
-            System.out.println("  [INFO] Operation cancelled.");
+            System.out.println("  [INFO] Update cancelled.");
             return;
         }
-
         Double newPrice = ConsoleUtil.readOptionalPositivePrice(
                 "Enter new selling price [" + InputValidator.formatCurrency(existing.getPrice()) + "]: ",
                 existing.getPrice());
         if (newPrice == null) {
-            System.out.println("  [INFO] Operation cancelled.");
+            System.out.println("  [INFO] Update cancelled.");
             return;
         }
+        applyProductUpdate(existing, newName, newCategory, newUnit, newPrice);
+    }
 
+    private void applyProductUpdate(Product existing, String name, String cat, String unit, Double price) {
         if (!ConsoleUtil.confirm("\nAre you sure you want to update this product?")) {
-            System.out.println("  [INFO] Operation cancelled.");
+            System.out.println("  [INFO] Update cancelled.");
             return;
         }
-
         try {
-            this.productController.updateProduct(
-                    existing.getId(), newName, newCategory, newUnit, newPrice);
+            this.productController.updateProduct(existing.getId(), name, cat, unit, price);
             Product updated = this.productController.findById(existing.getId());
             System.out.printf("  [OK] Product %s updated successfully.%n", existing.getId());
             renderProductTable(Collections.singletonList(updated != null ? updated : existing));
@@ -193,30 +203,28 @@ public class ProductMenu extends Menu {
     }
 
     private void handleDeleteProduct() {
-        String rawId = ConsoleUtil.readCancellableString("Enter Product ID to remove (or 0 to cancel): ");
-        if (rawId == null) {
-            System.out.println("  [INFO] Operation cancelled.");
-            return;
-        }
-
-        Product existing = this.productController.findById(rawId);
-        if (existing == null) {
-            System.out.println("  [ERROR] Active product not found with ID: " + rawId);
-            return;
-        }
-
-        System.out.println("  Product to delete:");
-        renderProductTable(Collections.singletonList(existing));
-
-        if (!ConsoleUtil.confirm("\nConfirm removing product " + existing.getId() + "?")) {
-            System.out.println("  [INFO] Removal cancelled.");
-            return;
-        }
-
-        if (this.productController.deleteProduct(existing.getId())) {
-            System.out.printf("  [OK] Product %s has been removed successfully.%n", existing.getId());
-        } else {
-            System.out.println("  [ERROR] Could not remove product.");
+        while (true) {
+            String rawId = ConsoleUtil.readCancellableString(
+                    "\nEnter Product ID to remove (or 0 to cancel): ");
+            if (rawId == null) {
+                break;
+            }
+            Product existing = this.productController.findById(rawId);
+            if (existing == null) {
+                System.out.println("  [ERROR] Active product not found with ID: " + rawId);
+                continue;
+            }
+            System.out.println("  Product to delete:");
+            renderProductTable(Collections.singletonList(existing));
+            if (!ConsoleUtil.confirm("\nConfirm removing product " + existing.getId() + "?")) {
+                System.out.println("  [INFO] Removal cancelled.");
+                continue;
+            }
+            if (this.productController.deleteProduct(existing.getId())) {
+                System.out.printf("  [OK] Product %s has been removed successfully.%n", existing.getId());
+            } else {
+                System.out.println("  [ERROR] Could not remove product.");
+            }
         }
     }
 
@@ -261,15 +269,10 @@ public class ProductMenu extends Menu {
         }
         int customOption = list.size() + 1;
         System.out.printf("    [%2d] Add New Custom Category%n", customOption);
-        Integer selected;
-        if (currentCategory == null) {
-            selected = ConsoleUtil.readInt(
-                    "Select category [1-" + customOption + "] (or 0 to cancel): ", 1, customOption);
-        } else {
-            selected = ConsoleUtil.readIntWithDefault(
-                    "Select new category [1-" + customOption + "]: ",
-                    1, customOption, -1);
-        }
+        Integer selected = (currentCategory == null)
+                ? ConsoleUtil.readInt("Select category [1-" + customOption + "] (or 0 to cancel): ", 1, customOption)
+                : ConsoleUtil.readIntWithDefault("Select new category [1-" + customOption + "]: ",
+                        1, customOption, -1);
         if (selected == null) {
             return null;
         }
@@ -279,6 +282,10 @@ public class ProductMenu extends Menu {
         if (selected <= list.size()) {
             return list.get(selected - 1);
         }
+        return readCustomCategory();
+    }
+
+    private String readCustomCategory() {
         while (true) {
             String custom = ConsoleUtil.readCancellableString(
                     "Enter new single-word category name (letters only, or 0 to cancel): ");
@@ -304,15 +311,11 @@ public class ProductMenu extends Menu {
         }
         int customOption = list.size() + 1;
         System.out.printf("    [%2d] Add New Custom Unit%n", customOption);
-        Integer selected;
-        if (currentUnit == null) {
-            selected = ConsoleUtil.readInt(
-                    "Select measurement unit [1-" + customOption + "] (or 0 to cancel): ", 1, customOption);
-        } else {
-            selected = ConsoleUtil.readIntWithDefault(
-                    "Select new measurement unit [1-" + customOption + "]: ",
-                    1, customOption, -1);
-        }
+        Integer selected = (currentUnit == null)
+                ? ConsoleUtil.readInt("Select measurement unit [1-" + customOption + "] (or 0 to cancel): ",
+                        1, customOption)
+                : ConsoleUtil.readIntWithDefault("Select new measurement unit [1-" + customOption + "]: ",
+                        1, customOption, -1);
         if (selected == null) {
             return null;
         }
@@ -322,6 +325,10 @@ public class ProductMenu extends Menu {
         if (selected <= list.size()) {
             return list.get(selected - 1);
         }
+        return readCustomUnit();
+    }
+
+    private String readCustomUnit() {
         while (true) {
             String custom = ConsoleUtil.readCancellableString(
                     "Enter new single-word unit name (letters only, or 0 to cancel): ");
