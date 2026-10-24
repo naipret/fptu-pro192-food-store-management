@@ -129,7 +129,7 @@ public class CustomerMenu extends Menu {
         renderCustomerTable(this.customerController.getAllActive());
         while (true) {
             String keyword = ConsoleUtil.readOptionalString(
-                    "\nEnter search keyword (or [Enter] to refresh, 0 to back): ");
+                    "\nEnter search keyword (Enter for all, 0 to cancel): ");
             if ("0".equals(keyword)) {
                 break;
             }

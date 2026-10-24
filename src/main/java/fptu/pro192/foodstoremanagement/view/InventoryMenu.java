@@ -24,10 +24,10 @@ public class InventoryMenu extends Menu {
     private static final String[] MENU_OPTIONS = {
             "Import New Batch for Product",
             "Adjust Existing Batch Stock",
-            "View All Batches (Overview & Details)",
-            "Alert: Low-Stock Products",
-            "Alert: Near-Expiry Batches",
-            "Alert: Expired Batches"
+            "View All Batches",
+            "Alert Low-Stock Products",
+            "Alert Near-Expiry Batches",
+            "Alert Expired Batches"
     };
 
     private static final String BATCH_TABLE_BORDER = "+--------+--------+-----------------+------------+------------+-------+--------+";
@@ -111,11 +111,11 @@ public class InventoryMenu extends Menu {
         System.out.printf("  Selected: %s - %s (Current Available: %d %s)%n",
                 product.getId(), product.getName(), product.getAvailableStock(), product.getUnit());
 
-        LocalDate prodDate = ConsoleUtil.readDate("Enter production date (dd/MM/yyyy, or 0 to cancel): ");
+        LocalDate prodDate = ConsoleUtil.readDate("Enter production date [dd/MM/yyyy] (or 0 to cancel): ");
         if (prodDate == null) {
             return false;
         }
-        LocalDate expDate = ConsoleUtil.readDate("Enter expiration date (dd/MM/yyyy, or 0 to cancel): ");
+        LocalDate expDate = ConsoleUtil.readDate("Enter expiration date [dd/MM/yyyy] (or 0 to cancel): ");
         if (expDate == null) {
             return false;
         }
@@ -123,7 +123,7 @@ public class InventoryMenu extends Menu {
             System.out.println("  [ERROR] Production date cannot be after expiration date (BR7).");
             return false;
         }
-        Integer qty = ConsoleUtil.readPositiveInt("Enter batch quantity (> 0, or 0 to cancel): ");
+        Integer qty = ConsoleUtil.readPositiveInt("Enter batch quantity [>0] (or 0 to cancel): ");
         if (qty == null) {
             return false;
         }
@@ -171,7 +171,7 @@ public class InventoryMenu extends Menu {
                 target.getBatchId(), target.getProductId(), parentName, target.getQuantity());
 
         Integer newQty = ConsoleUtil.readPositiveInt(
-                "Enter new exact batch quantity (>= 0, or 0 to set to zero): ", false);
+                "Enter new exact batch quantity [>=0]: ", false);
         if (newQty == null) {
             return;
         }
@@ -207,7 +207,7 @@ public class InventoryMenu extends Menu {
         renderBatchTable(getAllActiveBatches());
         while (true) {
             String input = ConsoleUtil.readOptionalString(
-                    "\nEnter search keyword or Product ID (or [Enter] to refresh, 0 to back): ");
+                    "\nEnter search keyword (Enter for all, 0 to cancel): ");
             if ("0".equals(input)) {
                 break;
             }
@@ -262,8 +262,7 @@ public class InventoryMenu extends Menu {
     private void handleViewLowStockAlert() {
         while (true) {
             Integer threshold = ConsoleUtil.readIntWithDefault(
-                    "\nEnter stock threshold [Enter for default " + Product.DEFAULT_LOW_STOCK_THRESHOLD
-                            + ", 0 to back]: ",
+                    "\nEnter stock threshold [N] (Enter for default, 0 to back): ",
                     1, Integer.MAX_VALUE, Product.DEFAULT_LOW_STOCK_THRESHOLD);
             if (threshold == null) {
                 break;
@@ -297,8 +296,7 @@ public class InventoryMenu extends Menu {
     private void handleViewNearExpiryAlert() {
         while (true) {
             Integer days = ConsoleUtil.readIntWithDefault(
-                    "\nEnter warning window in days [Enter for default " + Product.DEFAULT_NEAR_EXPIRY_DAYS
-                            + ", 0 to back]: ",
+                    "\nEnter warning window in days [N] [Enter for default, 0 to back]: ",
                     1, Integer.MAX_VALUE, Product.DEFAULT_NEAR_EXPIRY_DAYS);
             if (days == null) {
                 break;
@@ -311,7 +309,7 @@ public class InventoryMenu extends Menu {
     private void handleViewExpiredAlert() {
         while (true) {
             Integer windowDays = ConsoleUtil.readIntWithDefault(
-                    "\nEnter look-back window in days [Enter for all expired, 0 to back]: ",
+                    "\nEnter look-back window in days [N] (Enter for all, 0 to back): ",
                     1, Integer.MAX_VALUE, 0);
             if (windowDays == null) {
                 break;

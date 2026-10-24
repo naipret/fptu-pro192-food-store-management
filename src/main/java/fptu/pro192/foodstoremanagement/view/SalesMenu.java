@@ -160,7 +160,7 @@ public class SalesMenu extends Menu {
     private String promptCustomerOrGuest() {
         while (true) {
             String raw = ConsoleUtil.readOptionalString(
-                    "Enter Customer ID (or [Enter] for Guest, 0 to cancel): ");
+                    "Enter Customer ID (Enter for GUEST, 0 to cancel): ");
             if ("0".equals(raw)) {
                 return "CANCEL";
             }
@@ -253,7 +253,7 @@ public class SalesMenu extends Menu {
         renderOrdersSummaryTable(this.orderController.getAllOrders());
         while (true) {
             String input = ConsoleUtil.readOptionalString(
-                    "\nEnter search keyword or Order ID to view invoice (or [Enter] to refresh, 0 to back): ");
+                    "\nEnter search keyword (Enter for all, 0 to cancel): ");
             if ("0".equals(input)) {
                 break;
             }

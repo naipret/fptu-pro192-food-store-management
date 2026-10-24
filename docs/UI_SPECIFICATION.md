@@ -223,10 +223,10 @@ Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 
 4. **Inventory Menu (`InventoryMenu`):**
    - `[1] Import New Batch for Product` (prompts Product ID, production/expiration dates, quantity with continuous loop)
    - `[2] Adjust Existing Batch Stock` (lookup batch across products, set exact non-negative stock with confirmation)
-   - `[3] View All Batches (Overview & Details)` (all active batches table with keyword and Product ID inspection loop)
-   - `[4] Alert: Low-Stock Products` (interactive threshold prompt with default 5)
-   - `[5] Alert: Near-Expiry Batches` (interactive warning window prompt with default 7 days)
-   - `[6] Alert: Expired Batches` (lists expired batches with look-back filter)
+   - `[3] View All Batches` (all active batches table with keyword and Product ID inspection loop)
+   - `[4] Alert Low-Stock Products` (interactive threshold prompt with default 5)
+   - `[5] Alert Near-Expiry Batches` (interactive warning window prompt with default 7 days)
+   - `[6] Alert Expired Batches` (lists expired batches with look-back filter)
    - `[0] Back to Main Menu`
 
 5. **Reports Menu (`ReportMenu`):**

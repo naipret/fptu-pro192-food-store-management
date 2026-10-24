@@ -78,7 +78,7 @@ public class ReportMenu extends Menu {
     public void handleDailyRevenueReport() {
         while (true) {
             LocalDate targetDate = ConsoleUtil.readDateWithDefault(
-                    "\nEnter report date (dd/MM/yyyy, [Enter] for today, 0 to back): ",
+                    "\nEnter report date [dd/MM/yyyy] (Enter for today, 0 to cancel): ",
                     LocalDate.now());
             if (targetDate == null) {
                 break;
@@ -110,7 +110,7 @@ public class ReportMenu extends Menu {
     public void handleMonthlyRevenueReport() {
         while (true) {
             YearMonth ym = ConsoleUtil.readMonthWithDefault(
-                    "\nEnter report month (MM/yyyy, [Enter] for current month, 0 to back): ",
+                    "\nEnter report month [MM/yyyy] (Enter for this month, 0 to back): ",
                     YearMonth.now());
             if (ym == null) {
                 break;
@@ -152,7 +152,7 @@ public class ReportMenu extends Menu {
     }
 
     private boolean generateTopProductsReport() {
-        LocalDate fromDate = promptScopeDate("\nEnter start date (dd/MM/yyyy, [Enter] for all-time, 0 to back): ");
+        LocalDate fromDate = promptScopeDate("\nEnter start date [dd/MM/yyyy] (Enter for all-time, 0 to cancel): ");
         if (fromDate == null) {
             return false;
         }
@@ -161,7 +161,7 @@ public class ReportMenu extends Menu {
             return false;
         }
         Integer limit = ConsoleUtil.readIntWithDefault(
-                "Enter top N limit [Enter for default 5, 0 to back]: ", 1, Integer.MAX_VALUE, 5);
+                "Enter top limit [N] (Enter for default, 0 to cancel): ", 1, Integer.MAX_VALUE, 5);
         if (limit == null) {
             return false;
         }
@@ -216,7 +216,7 @@ public class ReportMenu extends Menu {
     }
 
     private boolean generateTopCustomersReport() {
-        LocalDate fromDate = promptScopeDate("\nEnter start date (dd/MM/yyyy, [Enter] for all-time, 0 to back): ");
+        LocalDate fromDate = promptScopeDate("\nEnter start date [dd/MM/yyyy] (Enter for all-time, 0 to cancel): ");
         if (fromDate == null) {
             return false;
         }
@@ -225,7 +225,7 @@ public class ReportMenu extends Menu {
             return false;
         }
         Integer limit = ConsoleUtil.readIntWithDefault(
-                "Enter top N limit [Enter for default 5, 0 to back]: ", 1, Integer.MAX_VALUE, 5);
+                "Enter top limit [N] (Enter for default, 0 to cancel): ", 1, Integer.MAX_VALUE, 5);
         if (limit == null) {
             return false;
         }
@@ -276,7 +276,7 @@ public class ReportMenu extends Menu {
     private LocalDate promptScopeEndDate(LocalDate fromDate) {
         while (true) {
             LocalDate val = ConsoleUtil.readDateWithDefault(
-                    "Enter end date (dd/MM/yyyy, [Enter] for all-time, 0 to back): ", LocalDate.MAX);
+                    "Enter end date [dd/MM/yyyy] (Enter for all-time, 0 to back): ", LocalDate.MAX);
             if (val == null) {
                 return null;
             }

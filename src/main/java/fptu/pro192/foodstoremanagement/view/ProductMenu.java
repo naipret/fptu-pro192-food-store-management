@@ -98,7 +98,7 @@ public class ProductMenu extends Menu {
             System.out.println("  [INFO] Operation cancelled.");
             return false;
         }
-        Double price = ConsoleUtil.readPositivePrice("Enter selling price (> 0, or 0 to cancel): ");
+        Double price = ConsoleUtil.readPositivePrice("Enter selling price [>0] (or 0 to cancel): ");
         if (price == null) {
             System.out.println("  [INFO] Operation cancelled.");
             return false;
@@ -127,7 +127,7 @@ public class ProductMenu extends Menu {
         renderProductTable(this.productController.getAllProducts());
         while (true) {
             String keyword = ConsoleUtil.readOptionalString(
-                    "\nEnter search keyword (or [Enter] to refresh, 0 to back): ");
+                    "\nEnter search keyword (Enter for all, 0 to cancel): ");
             if ("0".equals(keyword)) {
                 break;
             }
