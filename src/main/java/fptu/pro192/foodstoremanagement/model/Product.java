@@ -214,7 +214,7 @@ public class Product {
      * @throws IllegalArgumentException if name is blank, purely numeric, or unsafe
      */
     public final void setName(String name) {
-        this.name = InputValidator.normalizeText(name, "Product name");
+        this.name = InputValidator.normalizeProductName(name);
     }
 
     /**

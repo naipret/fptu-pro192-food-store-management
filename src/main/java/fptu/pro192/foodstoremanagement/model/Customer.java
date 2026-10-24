@@ -119,7 +119,7 @@ public abstract class Customer {
      * @throws IllegalArgumentException if fullName is blank or invalid
      */
     public final void setFullName(String fullName) {
-        this.fullName = InputValidator.normalizeText(fullName, "Customer full name");
+        this.fullName = InputValidator.normalizeCustomerName(fullName);
     }
 
     /**
@@ -158,7 +158,7 @@ public abstract class Customer {
      * @throws IllegalArgumentException if address is blank or invalid
      */
     public final void setAddress(String address) {
-        this.address = InputValidator.normalizeText(address, "Customer address");
+        this.address = InputValidator.normalizeAddress(address);
     }
 
     /**

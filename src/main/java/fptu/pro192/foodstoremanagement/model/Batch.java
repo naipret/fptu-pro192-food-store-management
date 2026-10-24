@@ -34,8 +34,8 @@ public class Batch {
             LocalDate productionDate, LocalDate expirationDate, int quantity) {
         setBatchId(batchId);
         setProductId(productId);
-        setImportDate(importDate);
         setDates(productionDate, expirationDate);
+        setImportDate(importDate);
         setQuantity(quantity);
     }
 
@@ -144,6 +144,9 @@ public class Batch {
         if (importDate == null) {
             throw new IllegalArgumentException("Import date cannot be null.");
         }
+        if (this.productionDate != null && this.expirationDate != null) {
+            InputValidator.validateBatchDates(this.productionDate, this.expirationDate, importDate);
+        }
         this.importDate = importDate;
     }
 
@@ -175,7 +178,11 @@ public class Batch {
      *                                  after expirationDate
      */
     public final void setDates(LocalDate productionDate, LocalDate expirationDate) {
-        InputValidator.validateDateOrder(productionDate, expirationDate);
+        if (this.importDate != null) {
+            InputValidator.validateBatchDates(productionDate, expirationDate, this.importDate);
+        } else {
+            InputValidator.validateDateOrder(productionDate, expirationDate);
+        }
         this.productionDate = productionDate;
         this.expirationDate = expirationDate;
     }
