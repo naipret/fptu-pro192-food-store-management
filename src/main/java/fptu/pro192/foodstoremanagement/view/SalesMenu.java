@@ -15,31 +15,29 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Console view for Sales and Checkout Management: creating interactive customer
- * or guest shopping carts, validating real-time stock and expiration, executing
- * transactional FEFO checkout, and inspecting historical sales invoices
- * (BR8, BR9, BR10, BR11, BR12, BR13, BR14, BR15, BR16, BR17, BR24, BR26, BR28,
- * BR33, BR34).
+ * Console view for Sales and Checkout Management: interactive shopping cart
+ * dashboard, real-time FEFO stock validation, transactional checkout, and
+ * sales history search with full invoice expansion (BR8, BR9, BR10, BR11,
+ * BR12, BR13, BR14, BR15, BR16, BR17, BR24, BR26, BR28, BR33, BR34).
  */
 public class SalesMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
             "New Sale (Checkout)",
-            "View All Sales Orders",
-            "Search Sales Orders",
-            "View Order Invoice by ID"
+            "View All Sales Orders"
     };
 
-    private static final String INVOICE_BORDER = "+-----+--------+-------------------------+-------+-------------+---------------+";
-    private static final String ORDERS_BORDER = "+----------+----------+------------+-------------+-------------+---------------+";
+    private static final String INVOICE_BORDER =
+            "+-----+--------+-------------------------+-------+-------------+---------------+";
+    private static final String ORDERS_BORDER =
+            "+----------+----------+------------+-------------+-------------+---------------+";
 
     private final OrderController orderController;
     private final ProductController productController;
     private final CustomerController customerController;
 
     /**
-     * Constructs a SalesMenu bound to the shared OrderController,
-     * ProductController, and CustomerController instances.
+     * Constructs a SalesMenu bound to the shared controller collaborators.
      *
      * @param orderController    the shared OrderController
      * @param productController  the shared ProductController
@@ -73,12 +71,6 @@ public class SalesMenu extends Menu {
             case 2:
                 handleViewAllOrders();
                 break;
-            case 3:
-                handleSearchOrders();
-                break;
-            case 4:
-                handleViewOrderById();
-                break;
             default:
                 System.out.println("  [ERROR] Unsupported menu choice: " + choice);
                 break;
@@ -87,7 +79,7 @@ public class SalesMenu extends Menu {
 
     @Override
     protected boolean shouldPauseAfterAction(int choice) {
-        return choice != 3 && choice != 4;
+        return false;
     }
 
     /**
@@ -102,218 +94,194 @@ public class SalesMenu extends Menu {
             System.out.println("  [WARN] No active products in catalog. Cannot create an order.");
             return;
         }
-
         String resolvedCustomerId = promptCustomerOrGuest();
         if ("CANCEL".equals(resolvedCustomerId)) {
-            System.out.println("  [INFO] Order creation cancelled. Returning to menu.");
+            System.out.println("  [INFO] Order creation cancelled.");
             return;
         }
-
         Order draft = this.orderController.createDraftOrder(resolvedCustomerId);
-        displayDraftHeader(draft);
+        executeLiveCartDashboard(draft);
+    }
 
+    private void executeLiveCartDashboard(Order draft) {
         boolean shopping = true;
         while (shopping) {
-            int action = promptCartAction();
+            ConsoleUtil.clearScreen();
+            System.out.println(TableFormatter.repeat('=', TableFormatter.SCREEN_WIDTH));
+            System.out.println(TableFormatter.center(
+                    "FOOD STORE MANAGEMENT SYSTEM > [3] SALES > [1] New Sale", TableFormatter.SCREEN_WIDTH));
+            System.out.println(TableFormatter.repeat('=', TableFormatter.SCREEN_WIDTH));
+            renderInvoiceTable(draft);
+
+            System.out.println("\n  [1] Add Product to Cart");
+            System.out.println("  [2] Confirm & Complete Checkout");
+            System.out.println("  [0] Cancel Draft Order");
+
+            int action = ConsoleUtil.readInt("Select action [0-2]: ", 0, 2);
             if (action == 0) {
-                this.orderController.cancelDraft(draft);
-                System.out.println("  [INFO] Draft order " + draft.getOrderId()
-                        + " cancelled. Inventory was not modified.");
-                shopping = false;
+                if (draft.getItems().isEmpty() || ConsoleUtil.confirm("Discard draft order and return to menu?")) {
+                    this.orderController.cancelDraft(draft);
+                    System.out.println("  [INFO] Draft order cancelled.");
+                    shopping = false;
+                }
             } else if (action == 1) {
                 promptAddItemToCart(draft);
             } else if (action == 2) {
-                ConsoleUtil.clearScreen();
-                renderInvoiceTable(draft);
-            } else if (action == 3) {
                 shopping = !handleCheckout(draft);
             }
         }
-    }
-
-    private void displayDraftHeader(Order draft) {
-        Customer customer = (draft.getCustomerId() == null)
-                ? null
-                : this.customerController.findById(draft.getCustomerId());
-        String customerDisplay = (customer == null)
-                ? "Guest  - Regular"
-                : customer.getId() + " - " + customer.getFullName()
-                        + " (" + customer.getCustomerType() + ")";
-        System.out.println("  [INFO] Order ID: " + draft.getOrderId()
-                + " - " + InputValidator.formatDisplayDate(draft.getOrderDate().toLocalDate()) + "\n         Customer: "
-                + customerDisplay);
-    }
-
-    private int promptCartAction() {
-        System.out.println();
-        System.out.println("  [1] Add Product to Cart");
-        System.out.println("  [2] View Current Cart Summary");
-        System.out.println("  [3] Confirm & Finalize Checkout");
-        System.out.println("  [0] Cancel Draft Order");
-        return ConsoleUtil.readInt("Select cart action [0-3]: ", 0, 3);
     }
 
     private boolean handleCheckout(Order draft) {
         if (draft.getItems().isEmpty()) {
             System.out.println(
                     "  [ERROR] Cart is empty. Add at least one item before checkout or press 0 to cancel.");
+            ConsoleUtil.pressEnterToContinue();
             return false;
         }
-        ConsoleUtil.clearScreen();
-        renderInvoiceTable(draft);
         if (!ConsoleUtil.confirm("Confirm payment and deduct stock via FEFO?")) {
-            System.out.println("  [INFO] Checkout confirmation aborted. Returning to cart.");
+            System.out.println("  [INFO] Checkout cancelled. Returning to cart.");
             return false;
         }
         try {
             Order finalized = this.orderController.finalizeOrder(draft);
+            ConsoleUtil.clearScreen();
             System.out.println("  [OK] Order " + finalized.getOrderId()
-                    + " finalized! Final amount: "
+                    + " finalized successfully! Total paid: "
                     + InputValidator.formatCurrency(finalized.getFinalAmount()));
             renderInvoiceTable(finalized);
+            ConsoleUtil.pressEnterToContinue();
             return true;
         } catch (InsufficientStockException | IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
+            ConsoleUtil.pressEnterToContinue();
             return false;
         }
     }
 
     private String promptCustomerOrGuest() {
         while (true) {
-            String raw = ConsoleUtil.readCancellableString(
-                    "Enter Customer ID (e.g., C00001, 'GUEST', or 0 to cancel): ");
-            if (raw == null) {
+            String raw = ConsoleUtil.readOptionalString(
+                    "Enter Customer ID (or [Enter] for Guest, 0 to cancel): ");
+            if ("0".equals(raw)) {
                 return "CANCEL";
             }
-            if (Order.GUEST_CUSTOMER_ID.equalsIgnoreCase(raw)) {
+            if (raw.isEmpty() || Order.GUEST_CUSTOMER_ID.equalsIgnoreCase(raw)) {
                 return null;
             }
             Customer customer = this.customerController.findById(raw);
             if (customer != null) {
                 return customer.getId();
             }
-            System.out.println("  [ERROR] Active customer not found for ID '" + raw
-                    + "'. Enter a valid Customer ID, 'GUEST', or 0 to cancel.");
+            System.out.println("  [ERROR] Active customer not found with ID: " + raw);
         }
     }
 
     private void promptAddItemToCart(Order draft) {
-        String rawInput = ConsoleUtil.readCancellableString(
-                "Enter Product ID or search keyword (or 0 to cancel): ");
-        if (rawInput == null) {
+        Product product = selectProductForCart();
+        if (product == null) {
             return;
         }
-
-        Product product = this.productController.findById(rawInput);
-        if (product == null) {
-            List<Product> matches = this.productController.search(rawInput);
-            if (matches.isEmpty()) {
-                System.out.println("  [ERROR] No active products match keyword: " + rawInput);
-                return;
-            }
-            System.out.println("  Matching products found:");
-            for (Product p : matches) {
-                System.out.printf("    - %s | %s | %s | Available Stock: %d%n",
-                        p.getId(), p.getName(),
-                        InputValidator.formatCurrency(p.getPrice()),
-                        p.getAvailableStock());
-            }
-            String confirmedId = ConsoleUtil.readCancellableString(
-                    "Enter exact Product ID from list above to add (or 0 to cancel): ");
-            if (confirmedId == null) {
-                return;
-            }
-            product = this.productController.findById(confirmedId);
-            if (product == null) {
-                System.out.println("  [ERROR] Active product not found with ID: " + confirmedId);
-                return;
-            }
-        }
-
         int remainingStock = this.orderController.getRemainingAvailableStock(draft, product.getId());
         if (remainingStock <= 0) {
-            if (product.getTotalStock() > 0 && product.getAvailableStock() == 0) {
-                System.out.println("  [ERROR] Cannot add '" + product.getName()
-                        + "': all batches in stock have expired (BR11).");
-            } else {
-                System.out.println("  [ERROR] Product '" + product.getName()
-                        + "' has 0 remaining sellable stock available.");
-            }
+            displayStockDepletedError(product);
             return;
         }
+        promptQuantityAndAddToCart(draft, product, remainingStock);
+    }
 
+    private Product selectProductForCart() {
+        String rawInput = ConsoleUtil.readCancellableString(
+                "\nEnter Product ID or search keyword (or 0 to cancel): ");
+        if (rawInput == null) {
+            return null;
+        }
+        Product product = this.productController.findById(rawInput);
+        if (product != null) {
+            return product;
+        }
+        List<Product> matches = this.productController.search(rawInput);
+        if (matches.isEmpty()) {
+            System.out.println("  [ERROR] No active products match keyword: " + rawInput);
+            return null;
+        }
+        System.out.println("  Matching products found:");
+        for (Product p : matches) {
+            System.out.printf("    - %s | %-20s | Price: %s | Available: %d%n",
+                    p.getId(), p.getName(),
+                    InputValidator.formatCurrency(p.getPrice()),
+                    p.getAvailableStock());
+        }
+        String confirmedId = ConsoleUtil.readCancellableString(
+                "Enter exact Product ID from list above to add (or 0 to cancel): ");
+        return (confirmedId != null) ? this.productController.findById(confirmedId) : null;
+    }
+
+    private void displayStockDepletedError(Product product) {
+        if (product.getTotalStock() > 0 && product.getAvailableStock() == 0) {
+            System.out.println("  [ERROR] Cannot add '" + product.getName()
+                    + "': all batches in stock have expired (BR11).");
+        } else {
+            System.out.println("  [ERROR] Product '" + product.getName()
+                    + "' has 0 remaining sellable stock available.");
+        }
+        ConsoleUtil.pressEnterToContinue();
+    }
+
+    private void promptQuantityAndAddToCart(Order draft, Product product, int remainingStock) {
         System.out.println("  Selected: " + product.getId() + " - " + product.getName()
                 + " | Price: " + InputValidator.formatCurrency(product.getPrice())
                 + " | Available to add: " + remainingStock + " " + product.getUnit());
 
-        while (true) {
-            Integer qty = ConsoleUtil.readPositiveInt(
-                    "Enter quantity to add (1-" + remainingStock + ", or 0 to cancel): ", remainingStock);
-            if (qty == null) {
-                return;
-            }
-            if (qty > remainingStock) {
-                System.out.printf("  [ERROR] Quantity cannot exceed available stock (%d).%n", remainingStock);
-                continue;
-            }
-            try {
-                this.orderController.addItemToDraft(draft, product.getId(), qty);
-                System.out.println("  [OK] Added " + qty + " x " + product.getName()
-                        + " to cart. Current total: "
-                        + InputValidator.formatCurrency(draft.getFinalAmount()));
-                return;
-            } catch (InsufficientStockException | IllegalArgumentException e) {
-                System.out.println("  [ERROR] " + e.getMessage());
-                return;
-            }
+        Integer qty = ConsoleUtil.readPositiveInt(
+                "Enter quantity to add (1-" + remainingStock + ", or 0 to cancel): ", remainingStock);
+        if (qty == null) {
+            return;
+        }
+        try {
+            this.orderController.addItemToDraft(draft, product.getId(), qty);
+            System.out.println("  [OK] Added " + qty + " x " + product.getName() + " to cart.");
+        } catch (InsufficientStockException | IllegalArgumentException e) {
+            System.out.println("  [ERROR] " + e.getMessage());
+            ConsoleUtil.pressEnterToContinue();
         }
     }
 
     /**
-     * Displays a summary table of all completed historical sales orders (BR23).
+     * Displays a summary table of all completed historical sales orders and
+     * supports interactive live search and detailed invoice lookup (BR23, BR33).
      */
     public void handleViewAllOrders() {
-        List<Order> orders = this.orderController.getAllOrders();
-        renderOrdersSummaryTable(orders);
-    }
-
-    /**
-     * Prompts for search criteria and displays matching sales orders repeatedly
-     * until 0 is entered.
-     */
-    public void handleSearchOrders() {
+        renderOrdersSummaryTable(this.orderController.getAllOrders());
         while (true) {
-            String keyword = ConsoleUtil.readOptionalString("Enter search keyword (or 0 to cancel): ");
-            if ("0".equals(keyword)) {
+            String input = ConsoleUtil.readOptionalString(
+                    "\nEnter search keyword or Order ID to view invoice (or [Enter] to refresh, 0 to back): ");
+            if ("0".equals(input)) {
                 break;
             }
-            List<Order> matching = this.orderController.searchOrders(keyword);
+            if (input.isEmpty()) {
+                renderOrdersSummaryTable(this.orderController.getAllOrders());
+                continue;
+            }
+            inspectOrderOrSearch(input);
+        }
+    }
+
+    private void inspectOrderOrSearch(String input) {
+        String possibleOrderId = InputValidator.tryNormalizeOrderId(input);
+        Order directMatch = (possibleOrderId != null)
+                ? this.orderController.findById(possibleOrderId)
+                : null;
+        if (directMatch != null) {
+            renderInvoiceTable(directMatch);
+        } else {
+            List<Order> matching = this.orderController.searchOrders(input);
             renderOrdersSummaryTable(matching);
         }
     }
 
     /**
-     * Prompts for an Order ID and renders its detailed invoice table repeatedly
-     * until 0 is entered (BR33).
-     */
-    public void handleViewOrderById() {
-        while (true) {
-            String rawOrderId = ConsoleUtil.readCancellableString(
-                    "Enter Order ID (e.g., O00001, or 0 to cancel): ");
-            if (rawOrderId == null) {
-                break;
-            }
-            Order order = this.orderController.findById(rawOrderId);
-            if (order == null) {
-                System.out.println("  [ERROR] Order not found with ID: " + rawOrderId);
-                continue;
-            }
-            renderInvoiceTable(order);
-        }
-    }
-
-    /**
-     * Renders the 78-column Sales Cart and Invoice Table for an Order.
+     * Renders the 80-column Sales Cart and Invoice Table for an Order.
      *
      * @param order the draft or finalized Order to display
      */
@@ -334,7 +302,7 @@ public class SalesMenu extends Menu {
         System.out.printf("| Order ID: %s - %-57s |%n",
                 order.getOrderId(),
                 InputValidator.formatDisplayDate(order.getOrderDate().toLocalDate()));
-        System.out.printf("| Customer: %-65s  |%n", TableFormatter.fit(customerText, 56));
+        System.out.printf("| Customer: %-66s |%n", TableFormatter.fit(customerText, 66));
         System.out.println(INVOICE_BORDER);
         System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
                 TableFormatter.fit("No.", 3),
@@ -345,25 +313,7 @@ public class SalesMenu extends Menu {
                 TableFormatter.fitRight("Subtotal", 13));
         System.out.println(INVOICE_BORDER);
 
-        List<OrderDetail> items = order.getItems();
-        if (items.isEmpty()) {
-            System.out.printf("| %s |%n", TableFormatter.center("(Cart is empty)", 76));
-        } else {
-            for (int i = 0; i < items.size(); i++) {
-                OrderDetail item = items.get(i);
-                Product p = this.productController.findByIdIncludeDeleted(item.getProductId());
-                String productName = (p != null) ? p.getName() : "Unknown (" + item.getProductId() + ")";
-                String unitPriceStr = String.format(Locale.US, "%,.0f", item.getUnitPrice());
-                String subTotalStr = String.format(Locale.US, "%,.0f", item.getSubTotal());
-                System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
-                        TableFormatter.fitRight(String.valueOf(i + 1), 3),
-                        TableFormatter.fit(item.getProductId(), 6),
-                        TableFormatter.fit(productName, 23),
-                        TableFormatter.fitRight(String.valueOf(item.getQuantity()), 5),
-                        TableFormatter.fitRight(unitPriceStr, 11),
-                        TableFormatter.fitRight(subTotalStr, 13));
-            }
-        }
+        renderInvoiceItems(order.getItems());
         System.out.println(INVOICE_BORDER);
         System.out.printf("| Gross Total  | %61s |%n",
                 InputValidator.formatCurrency(order.getTotalAmount()));
@@ -372,6 +322,27 @@ public class SalesMenu extends Menu {
         System.out.printf("| Final Total  | %61s |%n",
                 InputValidator.formatCurrency(order.getFinalAmount()));
         System.out.println(INVOICE_BORDER);
+    }
+
+    private void renderInvoiceItems(List<OrderDetail> items) {
+        if (items.isEmpty()) {
+            System.out.printf("| %s |%n", TableFormatter.center("(Cart is empty)", 76));
+            return;
+        }
+        for (int i = 0; i < items.size(); i++) {
+            OrderDetail item = items.get(i);
+            Product p = this.productController.findByIdIncludeDeleted(item.getProductId());
+            String productName = (p != null) ? p.getName() : "Unknown (" + item.getProductId() + ")";
+            String unitPriceStr = String.format(Locale.US, "%,.0f", item.getUnitPrice());
+            String subTotalStr = String.format(Locale.US, "%,.0f", item.getSubTotal());
+            System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
+                    TableFormatter.fitRight(String.valueOf(i + 1), 3),
+                    TableFormatter.fit(item.getProductId(), 6),
+                    TableFormatter.fit(productName, 23),
+                    TableFormatter.fitRight(String.valueOf(item.getQuantity()), 5),
+                    TableFormatter.fitRight(unitPriceStr, 11),
+                    TableFormatter.fitRight(subTotalStr, 13));
+        }
     }
 
     /**
@@ -386,8 +357,8 @@ public class SalesMenu extends Menu {
         }
         System.out.println(ORDERS_BORDER);
         System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
-                TableFormatter.fit("OrdID", 8),
-                TableFormatter.fit("CustID", 8),
+                TableFormatter.fit("Order ID", 8),
+                TableFormatter.fit("Cust ID", 8),
                 TableFormatter.fit("Date", 10),
                 TableFormatter.fitRight("Gross", 11),
                 TableFormatter.fitRight("Discount", 11),
