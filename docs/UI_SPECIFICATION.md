@@ -11,7 +11,7 @@ This document defines the terminal layout constraints, localization policy, navi
 | Maximum Line Width | Strictly `80` characters per line (`TableFormatter.SCREEN_WIDTH = 80`) |
 | Border Character Set | Basic 7-bit ASCII characters only (`+`, `-`, `=`, `\|`, `*`). Box-drawing Unicode characters are prohibited to prevent garbled output in the NetBeans 13 Output window and Windows `cmd.exe`. |
 | Interface Language | Full English across all menu titles, prompts, table headers, status messages, categories, and units |
-| Proper Name Support | Full Unicode letter support (`\p{L}`) for user-entered product names, customer names, and addresses |
+| Character Set Guarantee | Pure 100% 7-bit ASCII text across all prompts, tables, seeded CSVs, customer names, product names, and addresses. Immune to console code page mismatches (CP437, UTF-8, Windows CMD, NetBeans, PowerShell, macOS, Linux). |
 | Date Format | `dd/MM/yyyy` for all console prompts and table columns (converted to ISO `yyyy-MM-dd` only when reading/writing CSV files) |
 | Currency and Number Format | `Locale.US` comma-separated integers amounts (`8,000`, `1,250,000`) and plain integers (`int`) for stock and cart quantities |
 
@@ -202,49 +202,44 @@ Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 
 ### 5.1. Streamlined Menu Hierarchies
 
 1. **Products Menu (`ProductMenu`):**
-   - `[1] View All Products` (lists all active food products and their available inventory)
-   - `[2] Search Products` (universal multi-field query across ID, Name, Category, and Unit)
-   - `[3] Add New Product` (prompts for name, category, unit, and price)
-   - `[4] Update Product` (allows updating name, category, unit, price with Enter to keep current)
-   - `[5] Remove Product` (soft-deletes product after confirmation)
+   - `[1] Add New Product` (prompts name, category, unit, price with continuous loop)
+   - `[2] View All Products` (table listing with live keyword search and Enter refresh loop)
+   - `[3] Update Product Information` (lookup by ID, Enter to keep current values, continuous loop)
+   - `[4] Remove Product` (lookup by ID, soft-deletes after confirmation, continuous loop)
    - `[0] Back to Main Menu`
 
 2. **Customers Menu (`CustomerMenu`):**
-   - `[1] View All Customers` (lists all registered customers and their tiers)
-   - `[2] Search Customers` (universal multi-field query across ID, Full Name, Phone, and Address)
-   - `[3] Register New Customer` (prompts for full name, phone, address, and loyalty tier)
-   - `[4] Update Customer Information` (allows updating name, phone, address, tier with Enter to keep current)
-   - `[5] Remove Customer` (soft-deletes customer after confirmation)
+   - `[1] Register New Customer` (prompts full name in Title Case, phone, address, tier with continuous loop)
+   - `[2] View All Customers` (directory table with live keyword search across all fields and Enter refresh loop)
+   - `[3] Update Customer Information` (lookup by ID, Enter to keep current values, continuous loop)
+   - `[4] Remove Customer` (lookup by ID, soft-deletes after confirmation, continuous loop)
    - `[0] Back to Main Menu`
 
 3. **Sales Menu (`SalesMenu`):**
-   - `[1] New Sale (Checkout)` (prompts for customer ID or Guest; interactive cart with FEFO stock deduction)
-   - `[2] View All Sales Orders` (lists all completed sales orders in 80-column summary format)
-   - `[3] Search Sales Orders` (universal query across Order ID, Customer ID, and Date patterns)
-   - `[4] View Order Invoice by ID` (displays itemized 80-column invoice breakdown)
+   - `[1] New Sale (Checkout)` (prompts Customer ID or Enter for Guest; Live Dashboard displaying Cart Table at top, Add to Cart, Complete Checkout, Cancel)
+   - `[2] View All Sales Orders` (summary table with smart Order ID auto-expansion into full invoice details, keyword search, Enter refresh loop)
    - `[0] Back to Main Menu`
 
 4. **Inventory Menu (`InventoryMenu`):**
-   - `[1] Import New Batch for Product`
-   - `[2] Replenish Existing Batch Quantity (+Stock)`
-   - `[3] Adjust Existing Batch Quantity (Set Exact Stock)`
-   - `[4] View All Batches of a Product`
-   - `[5] View Low-Stock Products Alert`
-   - `[6] View Near-Expiry Batches Alert`
-   - `[7] View Expired Batches Report`
+   - `[1] Import New Batch for Product` (prompts Product ID, production/expiration dates, quantity with continuous loop)
+   - `[2] Adjust Existing Batch Stock` (lookup batch across products, set exact non-negative stock with confirmation)
+   - `[3] View All Batches (Overview & Details)` (all active batches table with keyword and Product ID inspection loop)
+   - `[4] Alert: Low-Stock Products` (interactive threshold prompt with default 5)
+   - `[5] Alert: Near-Expiry Batches` (interactive warning window prompt with default 7 days)
+   - `[6] Alert: Expired Batches` (lists expired batches with look-back filter)
    - `[0] Back to Main Menu`
 
 5. **Reports Menu (`ReportMenu`):**
-   - `[1] Daily Revenue Report (by Date)`
-   - `[2] Monthly Sales & Revenue Report (by Month/Year)`
-   - `[3] Best-Selling Products Ranking` (supports optional From Date and To Date period filtering per BR21)
-   - `[4] Customer Spending Summary Ranking` (supports optional From Date and To Date period filtering per BR22)
+   - `[1] Daily Sales & Revenue Report` (prompts date with Enter defaulting to today)
+   - `[2] Monthly Sales & Revenue Report` (prompts month/year with Enter defaulting to current month)
+   - `[3] Top-Selling Products Ranking` (supports optional period filtering and top N limit with default 5)
+   - `[4] Top Customers by Spending` (supports optional period filtering and top N limit with default 5)
    - `[0] Back to Main Menu`
 
 ### 5.2. Universal Multi-Field Search Specification
 
 To provide maximum usability for grocery store clerks:
 
-- **Product Search:** Case-insensitive substring matching against Product ID, Product Name, Category, or Measurement Unit. Supports shorthand ID normalization (e.g., `P1` or `1` matches `P00001`). Prompts loop continuously until `0` is entered to cancel to the menu.
-- **Customer Search:** Case-insensitive substring matching against Customer ID, Full Name, Phone Number, or Residential Address (enabling lookups by city or street such as `Quảng Ngãi` or `Lê Lợi`). Supports shorthand ID normalization (e.g., `C1` or `1` matches `C00001`). Prompts loop continuously until `0` is entered to cancel to the menu.
-- **Order Search:** Substring matching against Order ID, Customer ID, or Order Date representations (e.g. `2026`, `10/2026`, `19/10/2026`). Supports shorthand ID normalization for both Order ID (`O1` -> `O00001`) and Customer ID (`C1` -> `C00001`). Prompts loop continuously until `0` is entered to cancel to the menu.
+- **Product Search:** Case-insensitive substring matching against Product ID, Product Name, Category, or Measurement Unit. Supports shorthand ID normalization (e.g., `P1` or `1` matches `P00001`). Prompts loop continuously until `0` is entered to return to the menu.
+- **Customer Search:** Case-insensitive substring matching against Customer ID, Full Name, Phone Number, or Residential Address (e.g., `HCM` or `Le Loi`). Supports shorthand ID normalization (e.g., `C1` or `1` matches `C00001`). Prompts loop continuously until `0` is entered to return to the menu.
+- **Order Search:** Substring matching against Order ID, Customer ID, Customer Name, or Order Date representations (e.g. `2026`, `10/2026`, `19/10/2026`). Smart Order ID detection automatically expands and displays the full itemized invoice table when shorthand or canonical Order ID is provided (`4`, `O4`, or `O00004`). Prompts loop continuously until `0` is entered to return to the menu.

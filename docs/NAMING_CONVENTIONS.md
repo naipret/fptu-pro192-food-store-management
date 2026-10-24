@@ -44,8 +44,8 @@ Method names must begin with a verb or prefix that accurately reflects whether t
 | `find*` | Single-entity lookup returning an entity or `null` if not found | `findById(String)`, `findByIdIncludeDeleted(String)`, `findByPhone(String)` |
 | `search*` | Multi-entity query returning a `List<T>` (empty list if no matches) | `searchByName(String)`, `searchByCategory(String)`, `searchByExpirationDate(LocalDate)` |
 | `calculate*` | Mathematical computation of discounts or financial totals | `calculateDiscount(double)`, `calculateTotals(Customer)` |
-| `validate*` | Stateless invariant check throwing `IllegalArgumentException` on failure | `validatePositivePrice(double)`, `validatePositiveQuantity(int)`, `validateDateOrder(LocalDate, LocalDate)` |
-| `normalize*` | Trims, formats, validates, and returns a canonical string | `normalizeId(String, char)`, `normalizePhone(String)`, `normalizeText(String, String)` |
+| `validate*` | Stateless invariant check throwing `IllegalArgumentException` on failure | `validatePositivePrice(double)`, `validatePositiveQuantity(int)`, `validateDateOrder(LocalDate, LocalDate)`, `validateBatchDates(LocalDate, LocalDate, LocalDate)` |
+| `normalize*` | Trims, formats, validates, and returns a canonical string | `normalizeId(String, char)`, `normalizePhone(String)`, `normalizeCustomerName(String)`, `normalizeProductName(String)`, `normalizeAddress(String)` |
 | `load*` / `save*` | Reads or writes persistent CSV snapshots | `loadFromCsv()`, `saveToCsv()` |
 
 ---

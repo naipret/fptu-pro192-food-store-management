@@ -14,7 +14,7 @@ This document defines the domain invariants, validation constraints, inventory a
 | `BR4` | Non-Empty Product Measurement Unit | Product unit must not be empty or blank. |
 | `BR5` | Positive Selling Price | Product unit selling price must be strictly greater than zero (`price > 0`). |
 | `BR6` | Non-Negative Stock Quantity | Product stock quantity cannot be negative (`stock >= 0`). |
-| `BR7` | Valid Production and Expiration Dates | Production date cannot be after the expiration date (`!productionDate.isAfter(expirationDate)`). |
+| `BR7` | Valid Production and Expiration Dates | Production date cannot be after expiration date (`!productionDate.isAfter(expirationDate)`), production date cannot be after import date (`!productionDate.isAfter(importDate)`), and import date cannot be after expiration date (`!importDate.isAfter(expirationDate)`). |
 | `BR8` | Product Existence Before Sale | A product must exist in active inventory before it can be added to a sales transaction. |
 | `BR9` | Positive Sale Quantity | The quantity sold in an order item must be strictly greater than zero (`quantity > 0`). |
 | `BR10` | Available Stock Quantity Limit | The quantity sold cannot exceed the available non-expired stock of the product. |
@@ -46,6 +46,6 @@ This document defines the domain invariants, validation constraints, inventory a
 | `BR29` | Finalized Transaction Immutability | Once a sales transaction is completed and persisted to CSV storage, its line items, captured unit prices, discount calculations, and timestamps are immutable and cannot be modified or deleted. |
 | `BR30` | Cross-Entity Referential Integrity | Every inventory batch must reference a valid Product ID. Every completed order detail must reference an existing Order ID and Product ID. |
 | `BR31` | Set-Based Category and Unit Registry | Product categories and measurement units are managed dynamically in `Set<String>` collections (`LinkedHashSet`), populated with standardized grocery defaults and extensible when new items are added. |
-| `BR32` | CSV Formula Injection Prevention | Text fields entered by users (names, addresses) must not begin with formula execution characters (`=`, `+`, `-`, `@`) to protect CSV exports from spreadsheet execution vulnerabilities. |
+| `BR32` | 7-Bit ASCII Normalization and CSV Formula Injection Prevention | All text data adheres to strict 7-bit ASCII constraints to guarantee uniform 80-column console rendering across all terminal environments. Customer names are title-cased (`Nguyen Van An`) rejecting numbers and symbols; product names preserve initial capitalization and acronym casing (`ST25 Fragrant Rice 5kg`); addresses standardize delimiters and preserve street numbers. Formula execution triggers (`=`, `+`, `-`, `@`) at the beginning of fields are strictly rejected. |
 | `BR33` | Canonical 6-Character Identifier Standard | All entity identifiers follow a 6-character uppercase standard (`P00001` - `P99999`, `B00001` - `B99999`, `C00001` - `C99999`, `O00001` - `O99999`). Shorthand inputs automatically zero-pad to canonical format. |
 | `BR34` | Point-in-Time Unit Price Snapshotting | Each order line item records an immutable historical snapshot of the product's selling price at the precise moment it is added to the shopping cart, shielding historical invoices from future catalog price changes. |
