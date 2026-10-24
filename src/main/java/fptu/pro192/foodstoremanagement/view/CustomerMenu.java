@@ -11,20 +11,19 @@ import java.util.List;
 /**
  * Interactive 80-column console menu for managing store customers and loyalty
  * tiers: registering Regular and VIP customers, viewing customers with
- * real-time
- * keyword search, updating customer profiles, and soft-deleting customer
- * records
- * (BR2, BR15, BR16, BR25, BR27, BR33).
+ * real-time keyword search, updating customer profiles, and soft-deleting
+ * customer records (BR2, BR15, BR16, BR25, BR27, BR33).
  */
 public class CustomerMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
             "Register New Customer",
             "View All Customers",
-            "Update Customer Information",
+            "Update Customer",
             "Remove Customer"
     };
 
+    private static final String DIVIDER = TableFormatter.repeat('-', TableFormatter.SCREEN_WIDTH);
     private static final String CUSTOMER_TABLE_BORDER = "+--------+---------------------+------------+------------------------+---------+";
     private static final String CUSTOMER_TABLE_HEADER = "| ID     | Full Name           | Phone      | Address                | Tier    |";
 
@@ -72,45 +71,39 @@ public class CustomerMenu extends Menu {
 
     private void handleRegisterCustomer() {
         while (true) {
-            boolean registered = promptAndRegisterCustomer();
-            if (!registered) {
+            String fullName = ConsoleUtil.readValidatedCustomerName("Enter customer full name (or 0 to cancel): ");
+            if (fullName == null) {
                 break;
             }
-            if (!ConsoleUtil.confirmWithDefault("\nRegister another customer?", true)) {
-                break;
-            }
-            System.out.println();
+            executeRegisterCustomer(fullName);
+            System.out.println(DIVIDER);
         }
     }
 
-    private boolean promptAndRegisterCustomer() {
-        String fullName = ConsoleUtil.readValidatedCustomerName("Enter customer full name (or 0 to cancel): ");
-        if (fullName == null) {
-            System.out.println("  [INFO] Operation cancelled.");
-            return false;
-        }
+    private void executeRegisterCustomer(String fullName) {
         String phone = promptUniquePhone(null);
         if (phone == null) {
             System.out.println("  [INFO] Operation cancelled.");
-            return false;
+            return;
         }
         String address = ConsoleUtil.readValidatedAddress("Enter customer address (or 0 to cancel): ");
         if (address == null) {
             System.out.println("  [INFO] Operation cancelled.");
-            return false;
+            return;
         }
         String tier = promptTierSelection(null);
         if (tier == null) {
             System.out.println("  [INFO] Operation cancelled.");
-            return false;
+            return;
         }
-        return confirmAndPersistCustomer(fullName, phone, address, tier);
+        System.out.println();
+        confirmAndPersistCustomer(fullName, phone, address, tier);
     }
 
-    private boolean confirmAndPersistCustomer(String fullName, String phone, String address, String tier) {
-        if (!ConsoleUtil.confirm("\nAre you sure you want to register this customer?")) {
+    private void confirmAndPersistCustomer(String fullName, String phone, String address, String tier) {
+        if (!ConsoleUtil.confirm("Are you sure you want to register this customer?")) {
             System.out.println("  [INFO] Operation cancelled.");
-            return false;
+            return;
         }
         try {
             Customer created = this.customerController.registerCustomer(fullName, phone, address, tier);
@@ -118,18 +111,16 @@ public class CustomerMenu extends Menu {
                     created.getCustomerType(), created.getId(),
                     created.getFullName(), created.getPhone());
             renderCustomerTable(Collections.singletonList(created));
-            return true;
         } catch (IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
-            return false;
         }
     }
 
     private void handleViewAllCustomers() {
         renderCustomerTable(this.customerController.getAllActive());
         while (true) {
-            String keyword = ConsoleUtil.readOptionalString(
-                    "\nEnter search keyword (Enter for all, 0 to cancel): ");
+            System.out.println(DIVIDER);
+            String keyword = ConsoleUtil.readOptionalString("Enter search keyword (or 0 to cancel): ");
             if ("0".equals(keyword)) {
                 break;
             }
@@ -143,23 +134,25 @@ public class CustomerMenu extends Menu {
     private void handleUpdateCustomer() {
         while (true) {
             String rawId = ConsoleUtil.readCancellableString(
-                    "\nEnter Customer ID to update (or 0 to cancel): ");
+                    "Enter Customer ID to update (or 0 to cancel): ");
             if (rawId == null) {
                 break;
             }
             Customer existing = this.customerController.findById(rawId);
             if (existing == null) {
                 System.out.println("  [ERROR] Active customer not found with ID: " + rawId);
+                System.out.println(DIVIDER);
                 continue;
             }
             performCustomerUpdate(existing);
+            System.out.println(DIVIDER);
         }
     }
 
     private void performCustomerUpdate(Customer existing) {
-        System.out.println("  Current Customer Details:");
         renderCustomerTable(Collections.singletonList(existing));
-        System.out.println("\n  (Press Enter to keep current value, or 0 to cancel)");
+        System.out.println();
+        System.out.println("  (Press Enter to keep current value, or 0 to cancel)");
 
         String newName = ConsoleUtil.readOptionalValidatedCustomerName(
                 "Enter new full name [" + existing.getFullName() + "]: ", existing.getFullName());
@@ -185,11 +178,12 @@ public class CustomerMenu extends Menu {
             System.out.println("  [INFO] Update cancelled.");
             return;
         }
+        System.out.println();
         applyCustomerUpdate(existing, newName, newPhone, newAddress, newTier);
     }
 
     private void applyCustomerUpdate(Customer existing, String name, String phone, String address, String tier) {
-        if (!ConsoleUtil.confirm("\nAre you sure you want to update this customer?")) {
+        if (!ConsoleUtil.confirm("Are you sure you want to update this customer?")) {
             System.out.println("  [INFO] Operation cancelled.");
             return;
         }
@@ -207,19 +201,21 @@ public class CustomerMenu extends Menu {
     private void handleDeleteCustomer() {
         while (true) {
             String rawId = ConsoleUtil.readCancellableString(
-                    "\nEnter Customer ID to remove (or 0 to cancel): ");
+                    "Enter Customer ID to remove (or 0 to cancel): ");
             if (rawId == null) {
                 break;
             }
             Customer existing = this.customerController.findById(rawId);
             if (existing == null) {
                 System.out.println("  [ERROR] Active customer not found with ID: " + rawId);
+                System.out.println(DIVIDER);
                 continue;
             }
-            System.out.println("  Customer to delete:");
             renderCustomerTable(Collections.singletonList(existing));
-            if (!ConsoleUtil.confirm("\nConfirm removing customer " + existing.getId() + "?")) {
-                System.out.println("  [INFO] Deletion cancelled.");
+            System.out.println();
+            if (!ConsoleUtil.confirm("Confirm removing customer " + existing.getId() + "?")) {
+                System.out.println("  [INFO] Removal cancelled.");
+                System.out.println(DIVIDER);
                 continue;
             }
             try {
@@ -228,6 +224,7 @@ public class CustomerMenu extends Menu {
             } catch (IllegalArgumentException e) {
                 System.out.println("  [ERROR] " + e.getMessage());
             }
+            System.out.println(DIVIDER);
         }
     }
 
