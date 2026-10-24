@@ -56,16 +56,46 @@ public final class InputValidator {
 
     private static final Pattern PHONE_REGEX = Pattern.compile("^0[35789]\\d{8}$");
 
-    private static final Pattern UNICODE_LETTER_CHECK = Pattern.compile(".*\\p{L}.*");
+    private static final Pattern ASCII_LETTER_CHECK = Pattern.compile(".*[a-zA-Z].*");
+
+    private static final Pattern CUSTOMER_NAME_REGEX = Pattern
+            .compile("^[a-zA-Z\\s'-]+$");
+
+    private static final Pattern PRODUCT_NAME_REGEX = Pattern
+            .compile("^[a-zA-Z0-9\\s.,'\"()/\\-&]+$");
+
+    private static final Pattern ADDRESS_REGEX = Pattern
+            .compile("^[a-zA-Z0-9\\s.,'\"()/\\-&#]+$");
 
     private static final Pattern SAFE_TEXT_REGEX = Pattern
-            .compile("^[\\p{L}\\p{M}\\p{N}\\s.,'\"()/\\-&]+$");
+            .compile("^[a-zA-Z0-9\\s.,'\"()/\\-&]+$");
 
     private static final Pattern SINGLE_WORD_TOKEN_REGEX = Pattern
-            .compile("^[\\p{L}\\p{N}\\-]+$");
+            .compile("^[a-zA-Z0-9\\-]+$");
 
     private InputValidator() {
         throw new AssertionError("InputValidator cannot be instantiated.");
+    }
+
+    private static String toTitleCaseWord(String word) {
+        if (word == null || word.isEmpty()) {
+            return "";
+        }
+        if (word.contains("-")) {
+            String[] parts = word.split("-", -1);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < parts.length; i++) {
+                if (i > 0) {
+                    sb.append('-');
+                }
+                sb.append(toTitleCaseWord(parts[i]));
+            }
+            return sb.toString();
+        }
+        if (word.length() == 1) {
+            return word.toUpperCase(Locale.ROOT);
+        }
+        return Character.toUpperCase(word.charAt(0)) + word.substring(1).toLowerCase(Locale.ROOT);
     }
 
     /**
@@ -280,8 +310,7 @@ public final class InputValidator {
     /**
      * Validates and normalizes a human-readable text field such as a product name,
      * customer full name, or address (BR3, BR32). Enforces that the text is
-     * non-empty,
-     * contains at least one Unicode letter (\p{L}), does not start with a CSV
+     * non-empty, contains at least one ASCII letter, does not start with a CSV
      * formula trigger ('=', '+', '-', '@'), and contains only safe characters.
      *
      * @param raw       the raw text string
@@ -301,13 +330,113 @@ public final class InputValidator {
             throw new IllegalArgumentException(
                     label + " cannot start with '" + firstChar + "' to prevent CSV formula injection.");
         }
-        if (!UNICODE_LETTER_CHECK.matcher(clean).matches()) {
+        if (!ASCII_LETTER_CHECK.matcher(clean).matches()) {
             throw new IllegalArgumentException(label + " must contain at least one letter.");
         }
         if (!SAFE_TEXT_REGEX.matcher(clean).matches()) {
             throw new IllegalArgumentException(label + " contains unsupported special characters.");
         }
         return clean;
+    }
+
+    /**
+     * Validates and normalizes a customer full name into Title Case format (BR2, BR32).
+     * Enforces ASCII letters, hyphens, and apostrophes only. Rejects numbers and special
+     * symbols. Converts all words to title case regardless of original casing.
+     *
+     * @param raw the raw customer name input
+     * @return the normalized title-cased customer full name
+     * @throws IllegalArgumentException if input is blank or violates name format rules
+     */
+    public static String normalizeCustomerName(String raw) {
+        if (raw == null || raw.trim().isEmpty()) {
+            throw new IllegalArgumentException("Customer name cannot be empty.");
+        }
+        String clean = raw.trim().replaceAll("\\s+", " ");
+        char firstChar = clean.charAt(0);
+        if (firstChar == '=' || firstChar == '+' || firstChar == '-' || firstChar == '@') {
+            throw new IllegalArgumentException(
+                    "Customer name cannot start with '" + firstChar + "' to prevent CSV formula injection.");
+        }
+        if (!ASCII_LETTER_CHECK.matcher(clean).matches()) {
+            throw new IllegalArgumentException("Customer name must contain at least one ASCII letter.");
+        }
+        if (!CUSTOMER_NAME_REGEX.matcher(clean).matches()) {
+            throw new IllegalArgumentException(
+                    "Customer name contains invalid characters. Only ASCII letters, spaces, hyphens, and apostrophes are allowed.");
+        }
+        String[] words = clean.split(" ");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < words.length; i++) {
+            if (i > 0) {
+                sb.append(' ');
+            }
+            sb.append(toTitleCaseWord(words[i]));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Validates and normalizes a product name (BR3, BR32).
+     * Enforces ASCII characters and at least one ASCII letter. Capitalizes the
+     * initial character while preserving the user's casing for subsequent tokens
+     * such as model numbers, sizes, and acronyms.
+     *
+     * @param raw the raw product name input
+     * @return the normalized product name
+     * @throws IllegalArgumentException if input is blank or violates product name rules
+     */
+    public static String normalizeProductName(String raw) {
+        if (raw == null || raw.trim().isEmpty()) {
+            throw new IllegalArgumentException("Product name cannot be empty.");
+        }
+        String clean = raw.trim().replaceAll("\\s+", " ");
+        char firstChar = clean.charAt(0);
+        if (firstChar == '=' || firstChar == '+' || firstChar == '-' || firstChar == '@') {
+            throw new IllegalArgumentException(
+                    "Product name cannot start with '" + firstChar + "' to prevent CSV formula injection.");
+        }
+        if (!ASCII_LETTER_CHECK.matcher(clean).matches()) {
+            throw new IllegalArgumentException("Product name must contain at least one ASCII letter.");
+        }
+        if (!PRODUCT_NAME_REGEX.matcher(clean).matches()) {
+            throw new IllegalArgumentException("Product name contains unsupported characters.");
+        }
+        return Character.toUpperCase(clean.charAt(0)) + clean.substring(1);
+    }
+
+    /**
+     * Validates and normalizes a customer physical address (BR2, BR32).
+     * Replaces semicolons with commas, collapses redundant commas and whitespace,
+     * checks for formula injection, and capitalizes the leading character while
+     * preserving street numbers, alley slashes, and common abbreviations.
+     *
+     * @param raw the raw address input
+     * @return the normalized address
+     * @throws IllegalArgumentException if input is blank or violates address rules
+     */
+    public static String normalizeAddress(String raw) {
+        if (raw == null || raw.trim().isEmpty()) {
+            throw new IllegalArgumentException("Address cannot be empty.");
+        }
+        String clean = raw.trim().replace(';', ',').replaceAll("\\s+", " ");
+        clean = clean.replaceAll("\\s*,\\s*", ", ");
+        clean = clean.replaceAll("(,\\s*)+", ", ").trim();
+        if (clean.endsWith(",")) {
+            clean = clean.substring(0, clean.length() - 1).trim();
+        }
+        char firstChar = clean.charAt(0);
+        if (firstChar == '=' || firstChar == '+' || firstChar == '-' || firstChar == '@') {
+            throw new IllegalArgumentException(
+                    "Address cannot start with '" + firstChar + "' to prevent CSV formula injection.");
+        }
+        if (!ASCII_LETTER_CHECK.matcher(clean).matches()) {
+            throw new IllegalArgumentException("Address must contain at least one ASCII letter.");
+        }
+        if (!ADDRESS_REGEX.matcher(clean).matches()) {
+            throw new IllegalArgumentException("Address contains unsupported characters.");
+        }
+        return Character.toUpperCase(clean.charAt(0)) + clean.substring(1);
     }
 
     /**
@@ -327,7 +456,7 @@ public final class InputValidator {
             throw new IllegalArgumentException(label + " cannot be empty.");
         }
         String clean = raw.trim();
-        if (!UNICODE_LETTER_CHECK.matcher(clean).matches()
+        if (!ASCII_LETTER_CHECK.matcher(clean).matches()
                 || !SINGLE_WORD_TOKEN_REGEX.matcher(clean).matches()) {
             throw new IllegalArgumentException(
                     label + " must be a single word containing only letters or hyphens (no spaces or slashes).");
@@ -335,7 +464,7 @@ public final class InputValidator {
         if (clean.length() == 1) {
             return clean.toUpperCase(Locale.ROOT);
         }
-        return Character.toUpperCase(clean.charAt(0)) + clean.substring(1);
+        return Character.toUpperCase(clean.charAt(0)) + clean.substring(1).toLowerCase(Locale.ROOT);
     }
 
     /**
@@ -509,6 +638,33 @@ public final class InputValidator {
         if (productionDate.isAfter(expirationDate)) {
             throw new IllegalArgumentException(
                     "Production date (" + formatDisplayDate(productionDate)
+                            + ") cannot be after expiration date (" + formatDisplayDate(expirationDate) + ").");
+        }
+    }
+
+    /**
+     * Validates that batch dates adhere to business consistency rules (BR7):
+     * production date must be on or before expiration date, on or before import date,
+     * and import date must be on or before expiration date.
+     *
+     * @param productionDate the batch production date
+     * @param expirationDate the batch expiration date
+     * @param importDate     the batch import date
+     * @throws IllegalArgumentException if any date is null or chronologically invalid
+     */
+    public static void validateBatchDates(LocalDate productionDate, LocalDate expirationDate, LocalDate importDate) {
+        validateDateOrder(productionDate, expirationDate);
+        if (importDate == null) {
+            throw new IllegalArgumentException("Import date cannot be null.");
+        }
+        if (productionDate.isAfter(importDate)) {
+            throw new IllegalArgumentException(
+                    "Production date (" + formatDisplayDate(productionDate)
+                            + ") cannot be after import date (" + formatDisplayDate(importDate) + ").");
+        }
+        if (importDate.isAfter(expirationDate)) {
+            throw new IllegalArgumentException(
+                    "Import date (" + formatDisplayDate(importDate)
                             + ") cannot be after expiration date (" + formatDisplayDate(expirationDate) + ").");
         }
     }
