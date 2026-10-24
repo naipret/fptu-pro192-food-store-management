@@ -81,6 +81,7 @@ public class ProductModuleTest {
         ProductController controller = new ProductController(productsCsv, batchesCsv);
         assertTrue(controller.getCategories().contains("Grains"), "Default Set contains Grains (BR5)");
         assertTrue(controller.getUnits().contains("Bag"), "Default Set contains Bag (BR5)");
+        assertTrue(!controller.getUnits().contains("Kg"), "Default Set does not contain Kg");
 
         String customCat = controller.registerCategory("Organic");
         assertEquals("Organic", customCat, "Registered custom single-word category");

@@ -34,7 +34,7 @@ public final class InputValidator {
     public static final Set<String> DEFAULT_UNITS = Collections.unmodifiableSet(
             new LinkedHashSet<>(Arrays.asList(
                     "Pack", "Box", "Bottle", "Can", "Bag", "Tray",
-                    "Kg", "Gram", "Jar", "Carton")));
+                    "Gram", "Jar", "Carton")));
 
     /**
      * Standard console date display and input pattern (dd/MM/yyyy).
