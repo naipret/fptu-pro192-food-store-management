@@ -27,10 +27,8 @@ public class SalesMenu extends Menu {
             "View All Sales Orders"
     };
 
-    private static final String INVOICE_BORDER =
-            "+-----+--------+-------------------------+-------+-------------+---------------+";
-    private static final String ORDERS_BORDER =
-            "+----------+----------+------------+-------------+-------------+---------------+";
+    private static final String INVOICE_BORDER = "+-----+--------+-------------------------+-------+-------------+---------------+";
+    private static final String ORDERS_BORDER = "+----------+----------+------------+-------------+-------------+---------------+";
 
     private final OrderController orderController;
     private final ProductController productController;

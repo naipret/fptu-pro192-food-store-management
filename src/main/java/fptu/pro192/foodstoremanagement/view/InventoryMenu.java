@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Interactive 80-column console menu for warehouse inventory and batch lifecycle
+ * Interactive 80-column console menu for warehouse inventory and batch
+ * lifecycle
  * management: importing batches, adjusting stock, inspecting batch listings,
  * and monitoring low-stock, near-expiry, and expired inventory (BR6, BR7, BR11,
  * BR19, BR20, BR24, BR26, BR30, BR33).
@@ -29,15 +30,11 @@ public class InventoryMenu extends Menu {
             "Alert: Expired Batches"
     };
 
-    private static final String BATCH_TABLE_BORDER =
-            "+--------+--------+-----------------+------------+------------+-------+--------+";
-    private static final String BATCH_TABLE_HEADER =
-            "| Batch  | ProdID | Product Name    | Prod Date  | Exp Date   |   Qty | Status |";
+    private static final String BATCH_TABLE_BORDER = "+--------+--------+-----------------+------------+------------+-------+--------+";
+    private static final String BATCH_TABLE_HEADER = "| Batch  | ProdID | Product Name    | Prod Date  | Exp Date   |   Qty | Status |";
 
-    private static final String LOW_STOCK_BORDER =
-            "+--------+-------------------------+--------------+--------+--------+----------+";
-    private static final String LOW_STOCK_HEADER =
-            "| ID     | Product Name            | Category     | Unit   |  Avail |    Total |";
+    private static final String LOW_STOCK_BORDER = "+--------+-------------------------+--------------+--------+--------+----------+";
+    private static final String LOW_STOCK_HEADER = "| ID     | Product Name            | Category     | Unit   |  Avail |    Total |";
 
     private final ProductController productController;
 

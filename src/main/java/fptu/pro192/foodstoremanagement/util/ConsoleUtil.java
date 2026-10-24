@@ -144,11 +144,13 @@ public final class ConsoleUtil {
     }
 
     /**
-     * Prompts the user for an optional customer full name, returning defaultValue on Enter.
+     * Prompts the user for an optional customer full name, returning defaultValue
+     * on Enter.
      *
      * @param prompt       the prompt message displayed to the user
      * @param defaultValue the fallback name returned on Enter
-     * @return the normalized name, defaultValue on Enter, or null if cancelled with 0
+     * @return the normalized name, defaultValue on Enter, or null if cancelled with
+     *         0
      */
     public static String readOptionalValidatedCustomerName(String prompt, String defaultValue) {
         while (true) {
@@ -168,7 +170,8 @@ public final class ConsoleUtil {
     }
 
     /**
-     * Prompts the user for a product display name, returning null if 0 is entered to cancel.
+     * Prompts the user for a product display name, returning null if 0 is entered
+     * to cancel.
      *
      * @param prompt the prompt message displayed to the user
      * @return the normalized product name, or null if cancelled with 0
@@ -188,11 +191,13 @@ public final class ConsoleUtil {
     }
 
     /**
-     * Prompts the user for an optional product display name, returning defaultValue on Enter.
+     * Prompts the user for an optional product display name, returning defaultValue
+     * on Enter.
      *
      * @param prompt       the prompt message displayed to the user
      * @param defaultValue the fallback product name returned on Enter
-     * @return the normalized product name, defaultValue on Enter, or null if cancelled with 0
+     * @return the normalized product name, defaultValue on Enter, or null if
+     *         cancelled with 0
      */
     public static String readOptionalValidatedProductName(String prompt, String defaultValue) {
         while (true) {
@@ -212,7 +217,8 @@ public final class ConsoleUtil {
     }
 
     /**
-     * Prompts the user for a customer address, returning null if 0 is entered to cancel.
+     * Prompts the user for a customer address, returning null if 0 is entered to
+     * cancel.
      *
      * @param prompt the prompt message displayed to the user
      * @return the normalized address, or null if cancelled with 0
@@ -232,11 +238,13 @@ public final class ConsoleUtil {
     }
 
     /**
-     * Prompts the user for an optional customer address, returning defaultValue on Enter.
+     * Prompts the user for an optional customer address, returning defaultValue on
+     * Enter.
      *
      * @param prompt       the prompt message displayed to the user
      * @param defaultValue the fallback address returned on Enter
-     * @return the normalized address, defaultValue on Enter, or null if cancelled with 0
+     * @return the normalized address, defaultValue on Enter, or null if cancelled
+     *         with 0
      */
     public static String readOptionalValidatedAddress(String prompt, String defaultValue) {
         while (true) {
@@ -330,7 +338,8 @@ public final class ConsoleUtil {
     }
 
     /**
-     * Prompts the user for a strictly positive integer, returning null if 0 is entered to cancel.
+     * Prompts the user for a strictly positive integer, returning null if 0 is
+     * entered to cancel.
      *
      * @param prompt            the prompt message displayed to the user
      * @param allowZeroToCancel true if entering 0 cancels the operation
@@ -523,7 +532,8 @@ public final class ConsoleUtil {
      * Prompts the user for a Yes or No confirmation with an Enter default value.
      *
      * @param prompt     the confirmation question displayed to the user
-     * @param defaultYes true if Enter defaults to Yes, false if Enter defaults to No
+     * @param defaultYes true if Enter defaults to Yes, false if Enter defaults to
+     *                   No
      * @return true for Yes, false for No
      */
     public static boolean confirmWithDefault(String prompt, boolean defaultYes) {

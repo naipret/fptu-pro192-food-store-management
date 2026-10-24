@@ -10,8 +10,10 @@ import java.util.List;
 
 /**
  * Interactive 80-column console menu for managing store customers and loyalty
- * tiers: registering Regular and VIP customers, viewing customers with real-time
- * keyword search, updating customer profiles, and soft-deleting customer records
+ * tiers: registering Regular and VIP customers, viewing customers with
+ * real-time
+ * keyword search, updating customer profiles, and soft-deleting customer
+ * records
  * (BR2, BR15, BR16, BR25, BR27, BR33).
  */
 public class CustomerMenu extends Menu {
@@ -23,10 +25,8 @@ public class CustomerMenu extends Menu {
             "Remove Customer"
     };
 
-    private static final String CUSTOMER_TABLE_BORDER =
-            "+--------+---------------------+------------+------------------------+---------+";
-    private static final String CUSTOMER_TABLE_HEADER =
-            "| ID     | Full Name           | Phone      | Address                | Tier    |";
+    private static final String CUSTOMER_TABLE_BORDER = "+--------+---------------------+------------+------------------------+---------+";
+    private static final String CUSTOMER_TABLE_HEADER = "| ID     | Full Name           | Phone      | Address                | Tier    |";
 
     private final CustomerController customerController;
 

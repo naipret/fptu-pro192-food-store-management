@@ -340,13 +340,16 @@ public final class InputValidator {
     }
 
     /**
-     * Validates and normalizes a customer full name into Title Case format (BR2, BR32).
-     * Enforces ASCII letters, hyphens, and apostrophes only. Rejects numbers and special
+     * Validates and normalizes a customer full name into Title Case format (BR2,
+     * BR32).
+     * Enforces ASCII letters, hyphens, and apostrophes only. Rejects numbers and
+     * special
      * symbols. Converts all words to title case regardless of original casing.
      *
      * @param raw the raw customer name input
      * @return the normalized title-cased customer full name
-     * @throws IllegalArgumentException if input is blank or violates name format rules
+     * @throws IllegalArgumentException if input is blank or violates name format
+     *                                  rules
      */
     public static String normalizeCustomerName(String raw) {
         if (raw == null || raw.trim().isEmpty()) {
@@ -384,7 +387,8 @@ public final class InputValidator {
      *
      * @param raw the raw product name input
      * @return the normalized product name
-     * @throws IllegalArgumentException if input is blank or violates product name rules
+     * @throws IllegalArgumentException if input is blank or violates product name
+     *                                  rules
      */
     public static String normalizeProductName(String raw) {
         if (raw == null || raw.trim().isEmpty()) {
@@ -644,13 +648,15 @@ public final class InputValidator {
 
     /**
      * Validates that batch dates adhere to business consistency rules (BR7):
-     * production date must be on or before expiration date, on or before import date,
+     * production date must be on or before expiration date, on or before import
+     * date,
      * and import date must be on or before expiration date.
      *
      * @param productionDate the batch production date
      * @param expirationDate the batch expiration date
      * @param importDate     the batch import date
-     * @throws IllegalArgumentException if any date is null or chronologically invalid
+     * @throws IllegalArgumentException if any date is null or chronologically
+     *                                  invalid
      */
     public static void validateBatchDates(LocalDate productionDate, LocalDate expirationDate, LocalDate importDate) {
         validateDateOrder(productionDate, expirationDate);

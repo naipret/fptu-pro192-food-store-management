@@ -24,10 +24,8 @@ public class ProductMenu extends Menu {
             "Remove Product"
     };
 
-    private static final String PRODUCT_TABLE_BORDER =
-            "+--------+------------------------+--------------+--------+------------+-------+";
-    private static final String PRODUCT_TABLE_HEADER =
-            "| ID     | Product Name           | Category     | Unit   | Price      | Stock |";
+    private static final String PRODUCT_TABLE_BORDER = "+--------+------------------------+--------------+--------+------------+-------+";
+    private static final String PRODUCT_TABLE_HEADER = "| ID     | Product Name           | Category     | Unit   | Price      | Stock |";
 
     private final ProductController productController;
 

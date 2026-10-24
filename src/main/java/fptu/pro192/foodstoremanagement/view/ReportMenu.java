@@ -26,10 +26,8 @@ public class ReportMenu extends Menu {
             "Top Customers by Spending"
     };
 
-    private static final String TOP_PRODUCTS_BORDER =
-            "+------+--------+-------------------------+------------+-------+---------------+";
-    private static final String CUSTOMER_SPEND_BORDER =
-            "+------+--------+------------------------+---------+---------+-----------------+";
+    private static final String TOP_PRODUCTS_BORDER = "+------+--------+-------------------------+------------+-------+---------------+";
+    private static final String CUSTOMER_SPEND_BORDER = "+------+--------+------------------------+---------+---------+-----------------+";
 
     private final ReportController reportController;
 
@@ -231,8 +229,8 @@ public class ReportMenu extends Menu {
         if (limit == null) {
             return false;
         }
-        List<CustomerSpendingSummary> summaries =
-                this.reportController.getHighestSpendingCustomers(fromDate, toDate, limit);
+        List<CustomerSpendingSummary> summaries = this.reportController.getHighestSpendingCustomers(fromDate, toDate,
+                limit);
         renderTopCustomersTable(summaries, fromDate, toDate);
         return true;
     }
