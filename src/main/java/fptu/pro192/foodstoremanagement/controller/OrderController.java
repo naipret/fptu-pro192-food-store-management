@@ -460,6 +460,9 @@ public class OrderController {
         for (Order order : this.orders) {
             boolean matchOrderId = order.getOrderId().toLowerCase(Locale.ROOT).contains(lower)
                     || (normalizedOrderId != null && order.getOrderId().equalsIgnoreCase(normalizedOrderId));
+            Customer cust = (order.getCustomerId() == null) ? null
+                    : this.customerController.findByIdIncludeDeleted(order.getCustomerId());
+            boolean matchCustName = cust != null && cust.getFullName().toLowerCase(Locale.ROOT).contains(lower);
             boolean matchCustomerId = (order.getCustomerId() != null
                     && (order.getCustomerId().toLowerCase(Locale.ROOT).contains(lower)
                             || (normalizedCustomerId != null
@@ -468,7 +471,7 @@ public class OrderController {
             String dateDisplay = InputValidator.formatDisplayDate(order.getOrderDate().toLocalDate());
             String dateIso = order.getOrderDate().toLocalDate().toString();
             boolean matchDate = dateDisplay.contains(lower) || dateIso.contains(lower);
-            if (matchOrderId || matchCustomerId || matchDate) {
+            if (matchOrderId || matchCustomerId || matchCustName || matchDate) {
                 result.add(order);
             }
         }

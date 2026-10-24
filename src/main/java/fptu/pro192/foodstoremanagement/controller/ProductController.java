@@ -116,7 +116,7 @@ public class ProductController {
             }
             try {
                 String id = InputValidator.validateProductId(row[0]);
-                String name = InputValidator.normalizeText(row[1], "Product name");
+                String name = InputValidator.normalizeProductName(row[1]);
                 String category = registerCategory(row[2]);
                 String unit = registerUnit(row[3]);
                 double price = Double.parseDouble(row[4].trim());
@@ -413,7 +413,7 @@ public class ProductController {
      */
     public Product addProduct(String name, String category, String unit, double price) {
         String id = generateNextProductId();
-        String validatedName = InputValidator.normalizeText(name, "Product name");
+        String validatedName = InputValidator.normalizeProductName(name);
         String registeredCat = registerCategory(category);
         String registeredUnit = registerUnit(unit);
         double validatedPrice = InputValidator.validatePositivePrice(price);
@@ -445,7 +445,7 @@ public class ProductController {
             throw new IllegalArgumentException("Active product not found with ID: " + id);
         }
         String validatedName = (newName != null && !newName.trim().isEmpty())
-                ? InputValidator.normalizeText(newName, "Product name")
+                ? InputValidator.normalizeProductName(newName)
                 : product.getName();
         String validatedCategory = (newCategory != null && !newCategory.trim().isEmpty())
                 ? registerCategory(newCategory)

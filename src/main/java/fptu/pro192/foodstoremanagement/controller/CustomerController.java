@@ -79,9 +79,9 @@ public class CustomerController {
             }
             try {
                 String id = InputValidator.validateCustomerId(row[0]);
-                String fullName = InputValidator.normalizeText(row[1], "Customer full name");
+                String fullName = InputValidator.normalizeCustomerName(row[1]);
                 String phone = InputValidator.normalizePhone(row[2]);
-                String address = InputValidator.normalizeText(row[3], "Customer address");
+                String address = InputValidator.normalizeAddress(row[3]);
                 String type = row[4].trim();
                 boolean isDeleted = Boolean.parseBoolean(row[5].trim());
 
@@ -215,7 +215,7 @@ public class CustomerController {
         }
 
         String updatedName = (newName != null && !newName.trim().isEmpty())
-                ? InputValidator.normalizeText(newName, "Customer full name")
+                ? InputValidator.normalizeCustomerName(newName)
                 : existing.getFullName();
 
         String updatedPhone = existing.getPhone();
@@ -230,7 +230,7 @@ public class CustomerController {
         }
 
         String updatedAddress = (newAddress != null && !newAddress.trim().isEmpty())
-                ? InputValidator.normalizeText(newAddress, "Customer address")
+                ? InputValidator.normalizeAddress(newAddress)
                 : existing.getAddress();
 
         String updatedType = (newType != null && !newType.trim().isEmpty())
