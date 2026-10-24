@@ -1,6 +1,3 @@
-# scripts/seed.ps1
-# Generates dynamic, valid demo CSV datasets in data/ with dates relative to today.
-
 $ErrorActionPreference = "Stop"
 
 $dataDir = Join-Path $PSScriptRoot "..\data"
@@ -12,7 +9,6 @@ $today = Get-Date
 $fmt = "yyyy-MM-dd"
 $fmtTime = "yyyy-MM-ddTHH:mm:ss"
 
-# Relative dates for shelf-life demonstration
 $dProdPast30 = $today.AddDays(-30).ToString($fmt)
 $dProdPast15 = $today.AddDays(-15).ToString($fmt)
 $dProdPast5  = $today.AddDays(-5).ToString($fmt)
@@ -26,14 +22,13 @@ $dImportPast1  = $today.AddDays(-1).ToString($fmt)
 $dExpActiveLong  = $today.AddDays(180).ToString($fmt)
 $dExpActiveMed   = $today.AddDays(60).ToString($fmt)
 $dExpActiveShort = $today.AddDays(14).ToString($fmt)
-$dExpNear        = $today.AddDays(3).ToString($fmt)   # Triggers BR20 near-expiry alert (<= 7 days)
-$dExpExpired     = $today.AddDays(-4).ToString($fmt)  # Triggers BR11 expired batch alert
+$dExpNear        = $today.AddDays(3).ToString($fmt)
+$dExpExpired     = $today.AddDays(-4).ToString($fmt)
 
 $dOrderToday     = $today.ToString($fmtTime)
 $dOrderYesterday = $today.AddDays(-1).ToString($fmtTime)
 $dOrderLastMonth = $today.AddDays(-20).ToString($fmtTime)
 
-# 1. products.csv
 $productsCsv = @"
 id,name,category,unit,price,isDeleted
 P00001,ST25 Fragrant Rice 5kg,Grains,Bag,165000.0,false
@@ -52,7 +47,6 @@ P00013,Discontinued Imported Butter,Dairy,Box,95000.0,true
 "@
 Set-Content -Path (Join-Path $dataDir "products.csv") -Value $productsCsv -Encoding UTF8
 
-# 2. batches.csv
 $batchesCsv = @"
 batchId,productId,importDate,productionDate,expirationDate,quantity
 B00001,P00001,$dImportPast20,$dProdPast30,$dExpActiveLong,15
@@ -75,7 +69,6 @@ B00017,P00012,$dImportPast1,$dProdPast2,$dExpNear,3
 "@
 Set-Content -Path (Join-Path $dataDir "batches.csv") -Value $batchesCsv -Encoding UTF8
 
-# 3. customers.csv
 $customersCsv = @"
 id,fullName,phone,address,customerType,isDeleted
 C00001,Nguyễn Văn An,0901234567,"12 Lê Lợi, Ben Nghe Ward, District 1, Ho Chi Minh City",VIP,false
@@ -88,7 +81,6 @@ C00007,Hoàng Gia Huy,0932998877,"30 Lý Tự Trọng, District 1, Ho Chi Minh C
 "@
 Set-Content -Path (Join-Path $dataDir "customers.csv") -Value $customersCsv -Encoding UTF8
 
-# 4. orders.csv
 $ordersCsv = @"
 orderId,customerId,orderDate,totalAmount,discount,finalAmount
 O00001,C00001,$dOrderLastMonth,378000.0,37800.0,340200.0
@@ -100,7 +92,6 @@ O00006,C00005,$dOrderToday,194000.0,19400.0,174600.0
 "@
 Set-Content -Path (Join-Path $dataDir "orders.csv") -Value $ordersCsv -Encoding UTF8
 
-# 5. order_details.csv
 $orderDetailsCsv = @"
 orderId,productId,quantity,unitPrice
 O00001,P00001,2,165000.0

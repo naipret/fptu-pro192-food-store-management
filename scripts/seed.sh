@@ -1,7 +1,3 @@
-#!/usr/bin/env bash
-# scripts/seed.sh
-# Generates dynamic, valid demo CSV datasets in data/ with dates relative to today.
-
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -9,18 +5,15 @@ DATA_DIR="$SCRIPT_DIR/../data"
 
 mkdir -p "$DATA_DIR"
 
-# Compute dates portably (supporting GNU date and BSD date)
 calc_date() {
     local days=$1
     if date -v+1d >/dev/null 2>&1; then
-        # BSD date (macOS)
         if [ "$days" -ge 0 ]; then
             date -v+"${days}"d "+%Y-%m-%d"
         else
             date -v"${days}"d "+%Y-%m-%d"
         fi
     else
-        # GNU date (Linux)
         date -d "$days days" "+%Y-%m-%d"
     fi
 }
@@ -28,14 +21,12 @@ calc_date() {
 calc_datetime() {
     local days=$1
     if date -v+1d >/dev/null 2>&1; then
-        # BSD date (macOS)
         if [ "$days" -ge 0 ]; then
             date -v+"${days}"d "+%Y-%m-%dT%H:%M:%S"
         else
             date -v"${days}"d "+%Y-%m-%dT%H:%M:%S"
         fi
     else
-        # GNU date (Linux)
         date -d "$days days" "+%Y-%m-%dT%H:%M:%S"
     fi
 }
