@@ -11,6 +11,7 @@ import fptu.pro192.foodstoremanagement.model.Product;
 import fptu.pro192.foodstoremanagement.util.ConsoleUtil;
 import fptu.pro192.foodstoremanagement.util.InputValidator;
 import fptu.pro192.foodstoremanagement.util.TableFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -23,10 +24,11 @@ import java.util.Locale;
 public class SalesMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
-            "New Sale (Checkout)",
+            "New Sale",
             "View All Sales Orders"
     };
 
+    private static final String DIVIDER = TableFormatter.repeat('-', TableFormatter.SCREEN_WIDTH);
     private static final String INVOICE_BORDER = "+-----+--------+-------------------------+-------+-------------+---------------+";
     private static final String ORDERS_BORDER = "+----------+----------+------------+-------------+-------------+---------------+";
 
@@ -83,8 +85,7 @@ public class SalesMenu extends Menu {
     /**
      * Interactive workflow for assembling a draft shopping cart, adding items
      * with real-time stock and expiration checks, and completing or cancelling
-     * the transaction (BR8, BR9, BR10, BR11, BR12, BR13, BR14, BR15, BR16, BR17,
-     * BR24, BR26, BR28, BR34).
+     * the transaction.
      */
     public void handleCreateOrderFlow() {
         List<Product> activeProducts = this.productController.getAllProducts();
@@ -107,15 +108,15 @@ public class SalesMenu extends Menu {
             ConsoleUtil.clearScreen();
             System.out.println(TableFormatter.repeat('=', TableFormatter.SCREEN_WIDTH));
             System.out.println(TableFormatter.center(
-                    "FOOD STORE MANAGEMENT SYSTEM > [3] SALES > [1] New Sale", TableFormatter.SCREEN_WIDTH));
+                    "FOOD STORE MANAGEMENT SYSTEM > [3] SALES > [1] New Sale",
+                    TableFormatter.SCREEN_WIDTH));
             System.out.println(TableFormatter.repeat('=', TableFormatter.SCREEN_WIDTH));
             renderInvoiceTable(draft);
 
             System.out.println("\n  [1] Add Product to Cart");
-            System.out.println("  [2] Confirm & Complete Checkout");
-            System.out.println("  [0] Cancel Draft Order");
+            System.out.println("  [2] Confirm & Finalize Checkout");
 
-            int action = ConsoleUtil.readInt("Select action [0-2]: ", 0, 2);
+            int action = ConsoleUtil.readInt("\nSelect cart action [1-2] (or 0 to cancel): ", 0, 2);
             if (action == 0) {
                 if (draft.getItems().isEmpty() || ConsoleUtil.confirm("Discard draft order and return to menu?")) {
                     this.orderController.cancelDraft(draft);
@@ -132,8 +133,7 @@ public class SalesMenu extends Menu {
 
     private boolean handleCheckout(Order draft) {
         if (draft.getItems().isEmpty()) {
-            System.out.println(
-                    "  [ERROR] Cart is empty. Add at least one item before checkout or press 0 to cancel.");
+            System.out.println("  [ERROR] Cart is empty. Add at least one item before checkout or press 0 to cancel.");
             ConsoleUtil.pressEnterToContinue();
             return false;
         }
@@ -143,10 +143,9 @@ public class SalesMenu extends Menu {
         }
         try {
             Order finalized = this.orderController.finalizeOrder(draft);
-            ConsoleUtil.clearScreen();
-            System.out.println("  [OK] Order " + finalized.getOrderId()
-                    + " finalized successfully! Total paid: "
-                    + InputValidator.formatCurrency(finalized.getFinalAmount()));
+            System.out.printf("  [OK] Order %s finalized! Total paid: %s%n",
+                    finalized.getOrderId(),
+                    InputValidator.formatCurrency(finalized.getFinalAmount()));
             renderInvoiceTable(finalized);
             ConsoleUtil.pressEnterToContinue();
             return true;
@@ -160,7 +159,7 @@ public class SalesMenu extends Menu {
     private String promptCustomerOrGuest() {
         while (true) {
             String raw = ConsoleUtil.readOptionalString(
-                    "Enter Customer ID (Enter for GUEST, 0 to cancel): ");
+                    "Enter Customer ID (e.g., C00001, 'GUEST', or 0 to cancel): ");
             if ("0".equals(raw)) {
                 return "CANCEL";
             }
@@ -176,43 +175,80 @@ public class SalesMenu extends Menu {
     }
 
     private void promptAddItemToCart(Order draft) {
-        Product product = selectProductForCart();
-        if (product == null) {
+        Product selected = selectProductForCart();
+        if (selected == null) {
             return;
         }
-        int remainingStock = this.orderController.getRemainingAvailableStock(draft, product.getId());
+        int remainingStock = this.orderController.getRemainingAvailableStock(draft, selected.getId());
         if (remainingStock <= 0) {
-            displayStockDepletedError(product);
+            displayStockDepletedError(selected);
             return;
         }
-        promptQuantityAndAddToCart(draft, product, remainingStock);
+        ProductMenu.renderProductTable(Collections.singletonList(selected));
+        System.out.println();
+        Integer qty = ConsoleUtil.readPositiveInt(
+                "Enter quantity to add (1-" + remainingStock + ", or 0 to cancel): ", remainingStock);
+        if (qty == null) {
+            return;
+        }
+        try {
+            this.orderController.addItemToDraft(draft, selected.getId(), qty);
+            System.out.printf("  [OK] Added %d x %s to cart.%n%n", qty, selected.getName());
+            ConsoleUtil.pressEnterToContinue();
+        } catch (InsufficientStockException | IllegalArgumentException e) {
+            System.out.println("  [ERROR] " + e.getMessage());
+            ConsoleUtil.pressEnterToContinue();
+        }
     }
 
     private Product selectProductForCart() {
-        String rawInput = ConsoleUtil.readCancellableString(
-                "\nEnter Product ID or search keyword (or 0 to cancel): ");
-        if (rawInput == null) {
+        String input = ConsoleUtil.readOptionalString(
+                "\nEnter Product ID or search keyword (Enter for all, 0 to cancel): ");
+        if ("0".equals(input)) {
             return null;
         }
-        Product product = this.productController.findById(rawInput);
-        if (product != null) {
-            return product;
+        if (input.isEmpty()) {
+            ProductMenu.renderProductTable(this.productController.getAllProducts());
+            return promptExactProductIdToAdd();
         }
-        List<Product> matches = this.productController.search(rawInput);
+        return resolveProductByIdOrKeyword(input);
+    }
+
+    private Product resolveProductByIdOrKeyword(String input) {
+        String possibleId = InputValidator.tryNormalizeProductId(input);
+        Product direct = (possibleId != null) ? this.productController.findById(possibleId) : null;
+        if (direct == null) {
+            direct = this.productController.findById(input);
+        }
+        if (direct != null) {
+            return direct;
+        }
+        List<Product> matches = this.productController.search(input);
         if (matches.isEmpty()) {
-            System.out.println("  [ERROR] No active products match keyword: " + rawInput);
+            System.out.println("  [ERROR] No active products match keyword: " + input);
+            ConsoleUtil.pressEnterToContinue();
             return null;
         }
-        System.out.println("  Matching products found:");
-        for (Product p : matches) {
-            System.out.printf("    - %s | %-20s | Price: %s | Available: %d%n",
-                    p.getId(), p.getName(),
-                    InputValidator.formatCurrency(p.getPrice()),
-                    p.getAvailableStock());
+        if (matches.size() == 1) {
+            return matches.get(0);
         }
-        String confirmedId = ConsoleUtil.readCancellableString(
-                "Enter exact Product ID from list above to add (or 0 to cancel): ");
-        return (confirmedId != null) ? this.productController.findById(confirmedId) : null;
+        ProductMenu.renderProductTable(matches);
+        return promptExactProductIdToAdd();
+    }
+
+    private Product promptExactProductIdToAdd() {
+        while (true) {
+            String raw = ConsoleUtil.readCancellableString(
+                    "Enter Product ID to add (or 0 to cancel): ");
+            if (raw == null) {
+                return null;
+            }
+            Product found = this.productController.findById(raw);
+            if (found != null) {
+                return found;
+            }
+            System.out.println("  [ERROR] Active product not found with ID: " + raw);
+        }
     }
 
     private void displayStockDepletedError(Product product) {
@@ -226,25 +262,6 @@ public class SalesMenu extends Menu {
         ConsoleUtil.pressEnterToContinue();
     }
 
-    private void promptQuantityAndAddToCart(Order draft, Product product, int remainingStock) {
-        System.out.println("  Selected: " + product.getId() + " - " + product.getName()
-                + " | Price: " + InputValidator.formatCurrency(product.getPrice())
-                + " | Available to add: " + remainingStock + " " + product.getUnit());
-
-        Integer qty = ConsoleUtil.readPositiveInt(
-                "Enter quantity to add (1-" + remainingStock + ", or 0 to cancel): ", remainingStock);
-        if (qty == null) {
-            return;
-        }
-        try {
-            this.orderController.addItemToDraft(draft, product.getId(), qty);
-            System.out.println("  [OK] Added " + qty + " x " + product.getName() + " to cart.");
-        } catch (InsufficientStockException | IllegalArgumentException e) {
-            System.out.println("  [ERROR] " + e.getMessage());
-            ConsoleUtil.pressEnterToContinue();
-        }
-    }
-
     /**
      * Displays a summary table of all completed historical sales orders and
      * supports interactive live search and detailed invoice lookup (BR23, BR33).
@@ -252,8 +269,8 @@ public class SalesMenu extends Menu {
     public void handleViewAllOrders() {
         renderOrdersSummaryTable(this.orderController.getAllOrders());
         while (true) {
-            String input = ConsoleUtil.readOptionalString(
-                    "\nEnter search keyword (Enter for all, 0 to cancel): ");
+            System.out.println(DIVIDER);
+            String input = ConsoleUtil.readOptionalString("Enter search keyword (or 0 to cancel): ");
             if ("0".equals(input)) {
                 break;
             }
@@ -272,6 +289,7 @@ public class SalesMenu extends Menu {
                 : null;
         if (directMatch != null) {
             renderInvoiceTable(directMatch);
+            System.out.println("  Total orders displayed: 1");
         } else {
             List<Order> matching = this.orderController.searchOrders(input);
             renderOrdersSummaryTable(matching);
@@ -288,6 +306,12 @@ public class SalesMenu extends Menu {
             System.out.println("  [INFO] No order selected.");
             return;
         }
+        renderInvoiceHeader(order);
+        renderInvoiceItems(order.getItems());
+        renderInvoiceFooter(order);
+    }
+
+    private void renderInvoiceHeader(Order order) {
         Customer customer = (order.getCustomerId() == null)
                 ? null
                 : this.customerController.findByIdIncludeDeleted(order.getCustomerId());
@@ -310,8 +334,9 @@ public class SalesMenu extends Menu {
                 TableFormatter.fitRight("Unit Price", 11),
                 TableFormatter.fitRight("Subtotal", 13));
         System.out.println(INVOICE_BORDER);
+    }
 
-        renderInvoiceItems(order.getItems());
+    private void renderInvoiceFooter(Order order) {
         System.out.println(INVOICE_BORDER);
         System.out.printf("| Gross Total  | %61s |%n",
                 InputValidator.formatCurrency(order.getTotalAmount()));
@@ -355,8 +380,8 @@ public class SalesMenu extends Menu {
         }
         System.out.println(ORDERS_BORDER);
         System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
-                TableFormatter.fit("Order ID", 8),
-                TableFormatter.fit("Cust ID", 8),
+                TableFormatter.fit("OrdID", 8),
+                TableFormatter.fit("CustID", 8),
                 TableFormatter.fit("Date", 10),
                 TableFormatter.fitRight("Gross", 11),
                 TableFormatter.fitRight("Discount", 11),
