@@ -62,23 +62,42 @@ public class CoreInfrastructureTest {
 
     private static void testTextAndTokenValidation() {
         assertEquals("ST25 Fragrant Rice 5kg",
-                InputValidator.normalizeText("  ST25   Fragrant Rice 5kg ", "Product name"),
-                "Normalized English product name");
-        assertEquals("Nguyễn Văn An",
-                InputValidator.normalizeText("Nguyễn Văn An", "Full name"),
-                "Unicode Vietnamese name");
+                InputValidator.normalizeProductName("  ST25   Fragrant Rice 5kg "),
+                "Normalized product name");
+        assertEquals("ABC Bread",
+                InputValidator.normalizeProductName("aBC Bread"),
+                "Normalized product name initial cap");
+        assertEquals("Nguyen Van An",
+                InputValidator.normalizeCustomerName("nguyen  van   an"),
+                "Title-cased customer name from lowercase");
+        assertEquals("Tran Cao Thanh",
+                InputValidator.normalizeCustomerName("TraN Cao tHANH"),
+                "Title-cased customer name from mixed case");
+        assertEquals("Mary-Jane",
+                InputValidator.normalizeCustomerName("mary-jane"),
+                "Hyphenated customer name");
+        assertEquals("12 Le Loi, Ben Nghe, Q1, HCM",
+                InputValidator.normalizeAddress("12 Le Loi; Ben Nghe,, Q1, HCM"),
+                "Normalized address with semicolon and double commas");
 
         assertThrows(new Runnable() {
             @Override
             public void run() {
-                InputValidator.normalizeText("=CMD|' /C calc'!A0", "Product name");
+                InputValidator.normalizeCustomerName("Nguyen Van 123");
+            }
+        }, "Customer name with numbers must be rejected");
+
+        assertThrows(new Runnable() {
+            @Override
+            public void run() {
+                InputValidator.normalizeProductName("=CMD|' /C calc'!A0");
             }
         }, "CSV formula injection starting with '=' must be rejected");
 
         assertThrows(new Runnable() {
             @Override
             public void run() {
-                InputValidator.normalizeText("123456", "Product name");
+                InputValidator.normalizeProductName("123456");
             }
         }, "Purely numeric name without letters must be rejected");
 
@@ -118,6 +137,21 @@ public class CoreInfrastructureTest {
         YearMonth ym = InputValidator.parseDisplayMonth("10/2026");
         assertEquals(YearMonth.of(2026, 10), ym, "Parsed MM/yyyy month");
 
+        LocalDate today = LocalDate.now();
+        InputValidator.validateBatchDates(today.minusDays(10), today.plusDays(30), today);
+        assertThrows(new Runnable() {
+            @Override
+            public void run() {
+                InputValidator.validateBatchDates(today.plusDays(1), today.plusDays(30), today);
+            }
+        }, "Production date after import date must be rejected");
+        assertThrows(new Runnable() {
+            @Override
+            public void run() {
+                InputValidator.validateBatchDates(today.minusDays(10), today.minusDays(1), today);
+            }
+        }, "Import date after expiration date must be rejected");
+
         assertEquals(165000.0, InputValidator.validatePositivePrice(165000.0), "Valid positive price");
         assertEquals(10, InputValidator.validatePositiveQuantity(10, "Qty"), "Valid positive int qty");
         assertEquals("165,000", InputValidator.formatCurrency(165000.0), "Formatted currency");
@@ -143,8 +177,8 @@ public class CoreInfrastructureTest {
 
         List<String[]> rows = new ArrayList<>();
         rows.add(new String[] { "id", "name", "address" });
-        rows.add(new String[] { "C00001", "Trần Thị Bình", "123 Lê Lợi, District 1, HCMC" });
-        rows.add(new String[] { "C00002", "Nguyễn Văn An", "Quote \"Test\" Inside" });
+        rows.add(new String[] { "C00001", "Tran Thi Binh", "123 Le Loi, District 1, HCM" });
+        rows.add(new String[] { "C00002", "Nguyen Van An", "Quote \"Test\" Inside" });
 
         CsvUtil.writeAtomic(csvFile, rows);
         assertTrue(Files.exists(csvFile), "CSV file must exist after atomic write");
@@ -152,8 +186,8 @@ public class CoreInfrastructureTest {
         List<String[]> loaded = CsvUtil.readCsv(csvFile);
         assertEquals(3, loaded.size(), "Loaded row count including header");
         assertEquals("id", loaded.get(0)[0], "Header column 0");
-        assertEquals("123 Lê Lợi, District 1, HCMC", loaded.get(1)[2], "Quoted comma field round-trip");
-        assertEquals("Nguyễn Văn An", loaded.get(2)[1], "Unicode field round-trip");
+        assertEquals("123 Le Loi, District 1, HCM", loaded.get(1)[2], "Quoted comma field round-trip");
+        assertEquals("Nguyen Van An", loaded.get(2)[1], "Ascii field round-trip");
         assertEquals("Quote \"Test\" Inside", loaded.get(2)[2], "Escaped double quotes round-trip");
 
         Files.deleteIfExists(csvFile);

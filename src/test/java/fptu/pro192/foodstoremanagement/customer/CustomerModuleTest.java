@@ -31,8 +31,8 @@ public class CustomerModuleTest {
     }
 
     private static void testPolymorphicDiscountAndInvariants() {
-        Customer regular = new RegularCustomer("C00001", "Nguyễn Văn An", "0901234567", "12 Lê Lợi, District 1", false);
-        Customer vip = new VIPCustomer("C00002", "Trần Thị Bình", "0912345678", "45 Nguyễn Huệ, District 1", false);
+        Customer regular = new RegularCustomer("C00001", "Nguyen Van An", "0901234567", "12 Le Loi, District 1", false);
+        Customer vip = new VIPCustomer("C00002", "Tran Thi Binh", "0912345678", "45 Nguyen Hue, District 1", false);
 
         assertEquals("Regular", regular.getCustomerType(), "RegularCustomer tier label");
         assertEquals("VIP", vip.getCustomerType(), "VIPCustomer tier label");
@@ -49,7 +49,7 @@ public class CustomerModuleTest {
         assertThrows(new Runnable() {
             @Override
             public void run() {
-                new VIPCustomer("C00004", "Lê Hoàng", "0123456789", "District 5", false);
+                new VIPCustomer("C00004", "Le Hoang", "0123456789", "District 5", false);
             }
         }, "Invalid phone number must be rejected (BR25)");
     }
@@ -59,18 +59,23 @@ public class CustomerModuleTest {
         Path customersCsv = tempDir.resolve("customers.csv");
 
         CustomerController controller = new CustomerController(customersCsv);
-        Customer c1 = controller.registerCustomer("Phạm Minh Tuấn", "0901112222", "10 Hai Bà Trưng, District 1",
+        Customer c1 = controller.registerCustomer("Pham Minh Tuan", "0901112222", "10 Hai Ba Trung, District 1",
                 "Regular");
-        Customer c2 = controller.registerCustomer("Võ Thị Mai", "0913334444", "88 Đồng Khởi, District 1", "VIP");
+        Customer c2 = controller.registerCustomer("Vo Thi Mai", "0913334444", "88 Dong Khoi, District 1", "VIP");
         assertEquals("C00001", c1.getId(), "Generated customer ID C00001");
         assertEquals("C00002", c2.getId(), "Generated customer ID C00002");
+
+        Customer c3 = controller.registerCustomer("nguyen  van   ba", "0988776655",
+                "123 Le Loi; District 1,, HCM", "Regular");
+        assertEquals("Nguyen Van Ba", c3.getFullName(), "Normalized Title Case customer name");
+        assertEquals("123 Le Loi, District 1, HCM", c3.getAddress(), "Normalized customer address");
 
         List<String> lines = Files.readAllLines(customersCsv);
         assertEquals("id,fullName,phone,address,customerType,isDeleted",
                 lines.get(0), "customers.csv header at line 0");
 
         CustomerController reloaded = new CustomerController(customersCsv);
-        assertEquals(2, reloaded.getAllActive().size(), "Reloaded customer count");
+        assertEquals(3, reloaded.getAllActive().size(), "Reloaded customer count");
         Customer loadedVip = reloaded.findById("C2");
         assertTrue(loadedVip instanceof VIPCustomer, "Reloaded C00002 instantiated as VIPCustomer");
         assertEquals(15000.0, loadedVip.calculateDiscount(150000.0), "Reloaded VIP discount calculation");

@@ -71,7 +71,7 @@ public class OrderModuleTest {
         Product milk = pc.addProduct("Vinamilk Fresh Milk 1L", "Dairy", "Carton", 40000.0);
         pc.importBatch(milk.getId(), today, today.minusDays(5), today.plusDays(30), 10);
         pc.importBatch(milk.getId(), today, today.minusDays(10), today.plusDays(5), 4);
-        Customer vip = cc.registerCustomer("Trần Thị Bình", "0912345678", "45 Nguyễn Huệ", "VIP");
+        Customer vip = cc.registerCustomer("Tran Thi Binh", "0912345678", "45 Nguyen Hue", "VIP");
 
         Order draft = oc.createDraftOrder(vip.getId());
         oc.addItemToDraft(draft, milk.getId(), 6);

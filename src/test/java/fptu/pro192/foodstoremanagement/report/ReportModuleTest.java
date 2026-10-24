@@ -57,8 +57,8 @@ public class ReportModuleTest {
         Product p2 = pc.addProduct("Hao Hao Instant Noodles", "Noodles", "Pack", 5000.0);
         pc.importBatch(p2.getId(), today, today.minusDays(5), today.plusDays(4), 10);
 
-        Customer c1 = cc.registerCustomer("Nguyễn Văn An", "0901234567", "12 Lê Lợi", "Regular");
-        Customer c2 = cc.registerCustomer("Trần Thị Bình", "0912345678", "45 Nguyễn Huệ", "VIP");
+        Customer c1 = cc.registerCustomer("Nguyen Van An", "0901234567", "12 Le Loi", "Regular");
+        Customer c2 = cc.registerCustomer("Tran Thi Binh", "0912345678", "45 Nguyen Hue", "VIP");
 
         Order order1 = oc.createDraftOrder(c2.getId());
         oc.addItemToDraft(order1, p1.getId(), 2);
