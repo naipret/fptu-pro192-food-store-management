@@ -1,10 +1,10 @@
 # Software Design Principles Specification
 
-This document explains how the four Object-Oriented Programming (`OOP`) pillars, the five `SOLID` principles, and foundational software engineering principles (`SoC`, `DRY`, `KISS`, `YAGNI`) are applied across the Food Store Management System.
+This document explains how the four `OOP` pillars, the five `SOLID` principles, and foundational software engineering principles (`SoC`, `DRY`, `KISS`, `YAGNI`) are applied across the Food Store Management System.
 
 ---
 
-## 1. The Four Pillars of Object-Oriented Programming
+## 1. The Four Pillars of OOP
 
 ### 1.1. Encapsulation
 
@@ -97,16 +97,3 @@ Implementations favor clear, readable Java 8 code over complex machinery:
 ### 3.4. You Aren't Gonna Need It (YAGNI)
 
 Speculative abstractions and unused domain classes are excluded from the codebase. Industrial cold-storage attributes (temperature and humidity ranges), separate single-method factory classes (`ProductFactory`, `CustomerFactory`), and unused wrapper records (`Transaction.java`) are omitted so every line of code directly serves a requirement in the retail food store specification.
-
----
-
-## 4. Principle-to-Component Mapping
-
-| Principle | Primary Classes | Architectural Benefit |
-| :--- | :--- | :--- |
-| Encapsulation | `Product`, `Batch`, `Customer`, `Order`, `OrderDetail` | Protects domain invariants and prevents external mutation of internal lists |
-| Inheritance & Polymorphism | `Customer`, `RegularCustomer`, `VIPCustomer`, `Menu` | Enables polymorphic VIP discount calculation and uniform menu rendering |
-| Composition over Inheritance | `Product` + `Batch`, `Order` + `OrderDetail` | Models `1-to-N` inventory batches and order line items without class explosion |
-| Single Responsibility (`SRP`) | `CsvUtil`, `InputValidator`, `TableFormatter`, `*Controller`, `*Menu` | Isolates CSV I/O, field validation, terminal formatting, business logic, and UI |
-| Open/Closed (`OCP`) | `Customer`, `Menu`, `ProductController` (`Set<String>`) | Supports new customer tiers, menu screens, and product categories without modifying core logic |
-| Dependency Inversion (`DIP`) | `Main`, `OrderController`, `ReportController` | Ensures single-source in-memory state via explicit constructor injection |

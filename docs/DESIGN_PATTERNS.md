@@ -4,7 +4,7 @@ This document describes the five software design patterns implemented in the Foo
 
 ---
 
-## 1. Static Factory (Simple Factory) Pattern
+## 1. Factory Pattern
 
 ### 1.1. Context and Problem
 
@@ -35,7 +35,7 @@ Placing the factory method directly on `Customer` (following the standard Java c
 
 ---
 
-## 2. Atomic CSV Persistence Pattern
+## 2. Atomic Persistence Pattern
 
 ### 2.1. Context and Problem
 
@@ -80,7 +80,7 @@ public final class ScannerManager {
 
 ---
 
-## 4. Strategy Pattern (via Subclass Polymorphism)
+## 4. Strategy Pattern
 
 ### 4.1. Context and Problem
 
@@ -97,7 +97,7 @@ During checkout, `Order.calculateTotals(Customer customer)` delegates discount c
 
 ---
 
-## 5. Template Method Pattern
+## 5. Template Pattern
 
 ### 5.1. Context and Problem
 

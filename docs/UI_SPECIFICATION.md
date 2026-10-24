@@ -11,7 +11,7 @@ This document defines the terminal layout constraints, localization policy, navi
 | Maximum Line Width | Strictly `80` characters per line (`TableFormatter.SCREEN_WIDTH = 80`) |
 | Border Character Set | Basic 7-bit ASCII characters only (`+`, `-`, `=`, `\|`, `*`). Box-drawing Unicode characters are prohibited to prevent garbled output in the NetBeans 13 Output window and Windows `cmd.exe`. |
 | Interface Language | Full English across all menu titles, prompts, table headers, status messages, categories, and units |
-| Character Set Guarantee | Pure 100% 7-bit ASCII text across all prompts, tables, seeded CSVs, customer names, product names, and addresses. Immune to console code page mismatches (CP437, UTF-8, Windows CMD, NetBeans, PowerShell, macOS, Linux). |
+| Character Set Guarantee | Pure 100% 7-bit ASCII text across all prompts, tables, seeded CSVs, customer names, product names, and addresses. |
 | Date Format | `dd/MM/yyyy` for all console prompts and table columns (converted to ISO `yyyy-MM-dd` only when reading/writing CSV files) |
 | Currency and Number Format | `Locale.US` comma-separated integers amounts (`8,000`, `1,250,000`) and plain integers (`int`) for stock and cart quantities |
 
@@ -201,26 +201,26 @@ Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 
 
 ### 5.1. Streamlined Menu Hierarchies
 
-1. **Products Menu (`ProductMenu`):**
+1. Products Menu (`ProductMenu`):
    - `[1] Add New Product` (prompts name, category, unit, price with continuous loop)
    - `[2] View All Products` (table listing with live keyword search and Enter refresh loop)
    - `[3] Update Product` (lookup by ID, Enter to keep current values, continuous loop)
    - `[4] Remove Product` (lookup by ID, soft-deletes after confirmation, continuous loop)
    - `[0] Back to Main Menu`
 
-2. **Customers Menu (`CustomerMenu`):**
+2. Customers Menu (`CustomerMenu`):
    - `[1] Register New Customer` (prompts full name in Title Case, phone, address, tier with continuous loop)
    - `[2] View All Customers` (directory table with live keyword search across all fields and Enter refresh loop)
    - `[3] Update Customer` (lookup by ID, Enter to keep current values, continuous loop)
    - `[4] Remove Customer` (lookup by ID, soft-deletes after confirmation, continuous loop)
    - `[0] Back to Main Menu`
 
-3. **Sales Menu (`SalesMenu`):**
+3. Sales Menu (`SalesMenu`):
    - `[1] New Sale` (prompts Customer ID or Enter for Guest; Live Dashboard displaying Cart Table at top, Add to Cart with live product table inspection, Complete Checkout, Cancel)
    - `[2] View All Sales Orders` (summary table with smart Order ID auto-expansion into full invoice details, keyword search, Enter refresh loop)
    - `[0] Back to Main Menu`
 
-4. **Inventory Menu (`InventoryMenu`):**
+4. Inventory Menu (`InventoryMenu`):
    - `[1] Import New Batch for Product` (prompts Product ID, production/expiration dates, quantity with continuous loop)
    - `[2] Adjust Existing Batch Quantity` (lookup batch across products, set exact non-negative stock with confirmation)
    - `[3] View All Batches of a Product` (all active batches table with keyword and Product ID inspection loop)
@@ -229,7 +229,7 @@ Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 
    - `[6] Alert Expired Batches` (lists expired batches with look-back filter)
    - `[0] Back to Main Menu`
 
-5. **Reports Menu (`ReportMenu`):**
+5. Reports Menu (`ReportMenu`):
    - `[1] Daily Revenue Report` (prompts date with Enter defaulting to today)
    - `[2] Monthly Revenue Report` (prompts month/year with Enter defaulting to current month)
    - `[3] Best-Selling Products Ranking` (supports optional period filtering and top N limit with default all-products)
@@ -240,17 +240,17 @@ Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 
 
 All interactive console submenu actions follow a unified, continuous loop design pattern:
 
-1. **Zero Leading Blank Lines:** Under breadcrumb header banners, initial input prompts render directly on line 1 without leading `\n` characters.
-2. **80-Column Loop Dividers:** Sequential iterations are separated by an 80-character horizontal line (`--------------------------------------------------------------------------------`).
-3. **Continuous Iteration without Redundant Prompts:** Operations loop continuously without asking confirmation to repeat (e.g. no "Add another...?").
-4. **Resilient Cancellation:** Cancelling intermediate inputs or entering `N` at confirmation displays `[INFO] Operation cancelled.`, emits the 80-column divider, and immediately continues to the next iteration.
-5. **Universal Exit via `0`:** Entering `0` at the primary prompt breaks out of the loop and returns to the parent menu.
-6. **Breadcrumb Banner Preservation:** Successful sales checkout preserves the breadcrumb banner intact without wiping the screen.
+1. Under breadcrumb header banners, initial input prompts render directly on line 1 without leading `\n` characters.
+2. Sequential iterations are separated by an 80-character horizontal line (`--------------------------------------------------------------------------------`).
+3. Operations loop continuously without asking confirmation to repeat (e.g. no "Add another...?").
+4. Cancelling intermediate inputs or entering `N` at confirmation displays `[INFO] Operation cancelled.`, emits the 80-column divider, and immediately continues to the next iteration.
+5. Entering `0` at the primary prompt breaks out of the loop and returns to the parent menu.
+6. Successful sales checkout preserves the breadcrumb banner intact without wiping the screen.
 
 ### 5.3. Universal Multi-Field Search Specification
 
 To provide maximum usability for grocery store clerks:
 
-- **Product Search:** Case-insensitive substring matching against Product ID, Product Name, Category, or Measurement Unit. Supports shorthand ID normalization (e.g., `P1` or `1` matches `P00001`). Prompts loop continuously until `0` is entered to return to the menu.
-- **Customer Search:** Case-insensitive substring matching against Customer ID, Full Name, Phone Number, or Residential Address (e.g., `HCM` or `Le Loi`). Supports shorthand ID normalization (e.g., `C1` or `1` matches `C00001`). Prompts loop continuously until `0` is entered to return to the menu.
-- **Order Search:** Substring matching against Order ID, Customer ID, Customer Name, or Order Date representations (e.g. `2026`, `10/2026`, `19/10/2026`). Smart Order ID detection automatically expands and displays the full itemized invoice table when shorthand or canonical Order ID is provided (`4`, `O4`, or `O00004`). Prompts loop continuously until `0` is entered to return to the menu.
+- Case-insensitive substring matching against Product ID, Product Name, Category, or Measurement Unit. Supports shorthand ID normalization (e.g., `P1` or `1` matches `P00001`). Prompts loop continuously until `0` is entered to return to the menu.
+- Case-insensitive substring matching against Customer ID, Full Name, Phone Number, or Residential Address (e.g., `HCM` or `Le Loi`). Supports shorthand ID normalization (e.g., `C1` or `1` matches `C00001`). Prompts loop continuously until `0` is entered to return to the menu.
+- Substring matching against Order ID, Customer ID, Customer Name, or Order Date representations (e.g. `2026`, `10/2026`, `19/10/2026`). Smart Order ID detection automatically expands and displays the full itemized invoice table when shorthand or canonical Order ID is provided (`4`, `O4`, or `O00004`). Prompts loop continuously until `0` is entered to return to the menu.
