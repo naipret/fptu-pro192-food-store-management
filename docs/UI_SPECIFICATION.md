@@ -204,39 +204,50 @@ Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 
 1. **Products Menu (`ProductMenu`):**
    - `[1] Add New Product` (prompts name, category, unit, price with continuous loop)
    - `[2] View All Products` (table listing with live keyword search and Enter refresh loop)
-   - `[3] Update Product Information` (lookup by ID, Enter to keep current values, continuous loop)
+   - `[3] Update Product` (lookup by ID, Enter to keep current values, continuous loop)
    - `[4] Remove Product` (lookup by ID, soft-deletes after confirmation, continuous loop)
    - `[0] Back to Main Menu`
 
 2. **Customers Menu (`CustomerMenu`):**
    - `[1] Register New Customer` (prompts full name in Title Case, phone, address, tier with continuous loop)
    - `[2] View All Customers` (directory table with live keyword search across all fields and Enter refresh loop)
-   - `[3] Update Customer Information` (lookup by ID, Enter to keep current values, continuous loop)
+   - `[3] Update Customer` (lookup by ID, Enter to keep current values, continuous loop)
    - `[4] Remove Customer` (lookup by ID, soft-deletes after confirmation, continuous loop)
    - `[0] Back to Main Menu`
 
 3. **Sales Menu (`SalesMenu`):**
-   - `[1] New Sale (Checkout)` (prompts Customer ID or Enter for Guest; Live Dashboard displaying Cart Table at top, Add to Cart, Complete Checkout, Cancel)
+   - `[1] New Sale` (prompts Customer ID or Enter for Guest; Live Dashboard displaying Cart Table at top, Add to Cart with live product table inspection, Complete Checkout, Cancel)
    - `[2] View All Sales Orders` (summary table with smart Order ID auto-expansion into full invoice details, keyword search, Enter refresh loop)
    - `[0] Back to Main Menu`
 
 4. **Inventory Menu (`InventoryMenu`):**
    - `[1] Import New Batch for Product` (prompts Product ID, production/expiration dates, quantity with continuous loop)
-   - `[2] Adjust Existing Batch Stock` (lookup batch across products, set exact non-negative stock with confirmation)
-   - `[3] View All Batches` (all active batches table with keyword and Product ID inspection loop)
+   - `[2] Adjust Existing Batch Quantity` (lookup batch across products, set exact non-negative stock with confirmation)
+   - `[3] View All Batches of a Product` (all active batches table with keyword and Product ID inspection loop)
    - `[4] Alert Low-Stock Products` (interactive threshold prompt with default 5)
    - `[5] Alert Near-Expiry Batches` (interactive warning window prompt with default 7 days)
    - `[6] Alert Expired Batches` (lists expired batches with look-back filter)
    - `[0] Back to Main Menu`
 
 5. **Reports Menu (`ReportMenu`):**
-   - `[1] Daily Sales & Revenue Report` (prompts date with Enter defaulting to today)
-   - `[2] Monthly Sales & Revenue Report` (prompts month/year with Enter defaulting to current month)
-   - `[3] Top-Selling Products Ranking` (supports optional period filtering and top N limit with default 5)
-   - `[4] Top Customers by Spending` (supports optional period filtering and top N limit with default 5)
+   - `[1] Daily Revenue Report` (prompts date with Enter defaulting to today)
+   - `[2] Monthly Revenue Report` (prompts month/year with Enter defaulting to current month)
+   - `[3] Best-Selling Products Ranking` (supports optional period filtering and top N limit with default all-products)
+   - `[4] Best-Spending Customers Ranking` (supports optional period filtering and top N limit with default all-customers)
    - `[0] Back to Main Menu`
 
-### 5.2. Universal Multi-Field Search Specification
+### 5.2. Continuous Action Loops and Divider Standard
+
+All interactive console submenu actions follow a unified, continuous loop design pattern:
+
+1. **Zero Leading Blank Lines:** Under breadcrumb header banners, initial input prompts render directly on line 1 without leading `\n` characters.
+2. **80-Column Loop Dividers:** Sequential iterations are separated by an 80-character horizontal line (`--------------------------------------------------------------------------------`).
+3. **Continuous Iteration without Redundant Prompts:** Operations loop continuously without asking confirmation to repeat (e.g. no "Add another...?").
+4. **Resilient Cancellation:** Cancelling intermediate inputs or entering `N` at confirmation displays `[INFO] Operation cancelled.`, emits the 80-column divider, and immediately continues to the next iteration.
+5. **Universal Exit via `0`:** Entering `0` at the primary prompt breaks out of the loop and returns to the parent menu.
+6. **Breadcrumb Banner Preservation:** Successful sales checkout preserves the breadcrumb banner intact without wiping the screen.
+
+### 5.3. Universal Multi-Field Search Specification
 
 To provide maximum usability for grocery store clerks:
 
