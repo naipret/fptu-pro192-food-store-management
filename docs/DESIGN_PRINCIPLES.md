@@ -24,14 +24,14 @@ Conversely, retail products are modeled as a single concrete `Product` class com
 Runtime polymorphism eliminates conditional type-checking (`instanceof` or `switch` statements on customer tier strings) during checkout and menu navigation:
 
 1. When `Order.calculateTotals(Customer customer)` computes an order's discount, it invokes `customer.calculateDiscount(this.totalAmount)`. At runtime, the JVM dispatches the call to `RegularCustomer.calculateDiscount` (`0.0`) or `VIPCustomer.calculateDiscount` (`amount * 0.10`) based on the concrete instance.
-2. When `Menu.display()` executes user selections, it invokes `handleChoice(choice)` and `shouldPauseAfterAction()`, dispatching automatically to the active concrete menu screen.
+2. When `Menu.display()` executes user selections, it invokes `handleChoice(choice)`, dispatching automatically to the active concrete menu screen.
 
 ### 1.4. Abstraction
 
 Abstract classes expose high-level contracts while hiding implementation details from callers:
 
 1. `OrderController` interacts solely with the abstract `Customer` reference when calculating discounts and persisting orders, remaining unaware of how specific loyalty tiers compute their discount rates.
-2. `CsvUtil` abstracts the low-level mechanics of UTF-8 byte streams, RFC 4180 quote escaping, and temporary `.tmp` file replacement behind two methods: `CsvUtil.readCsv(Path)` and `CsvUtil.writeAtomic(Path, List<String[]>)`.
+2. `CsvUtil` abstracts the low-level mechanics of UTF-8 byte streams, RFC 4180 quote escaping, and temporary `.tmp` file replacement behind two methods: `CsvUtil.readCsv(Path)` and `CsvUtil.writeToFile(Path, List<String[]>)`.
 
 ---
 

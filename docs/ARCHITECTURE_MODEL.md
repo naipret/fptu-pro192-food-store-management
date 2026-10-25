@@ -165,9 +165,7 @@ classDiagram
         +updateProduct(String id, String name, String category, String unit, double price) void
         +deleteProduct(String id) boolean
         +importBatch(String productId, LocalDate productionDate, LocalDate expirationDate, int quantity) Batch
-        +importBatch(String productId, LocalDate importDate, LocalDate productionDate, LocalDate expirationDate, int quantity) Batch
-        +replenishBatch(String productId, String batchId, int addedQuantity) Batch
-        +adjustBatch(String productId, String batchId, int exactQuantity) Batch
+        +adjustBatchQuantity(String productId, String batchId, int newQuantity) void
         +deductStockFEFO(String productId, int requestedQuantity) void
         +findById(String id) Product
         +findByIdIncludeDeleted(String id) Product
@@ -224,10 +222,9 @@ classDiagram
         #String[] options
         +display() void
         #handleChoice(int choice)* void
-        #shouldPauseAfterAction() boolean
-        #shouldPauseAfterAction(int choice) boolean
         #shouldShowBreadcrumb() boolean
         +printBreadcrumbHeader(String breadcrumb) void
+        +printDivider() void
     }
 
     Product "1" *-- "0..*" Batch : contains
@@ -259,7 +256,7 @@ The project utilizes all three primary Java Collections interfaces (`List`, `Set
 
 ## 4. CSV Data Storage Schemas
 
-All persistent data is stored in UTF-8 encoded CSV files inside the `data/` directory. Every CSV file writes a fixed header row at line 0 during save operations and skips that header row during load operations. All writes are performed atomically via `CsvUtil.writeAtomic` using a temporary sibling file (`.tmp`) and `Files.move` with `ATOMIC_MOVE` and `REPLACE_EXISTING`.
+All persistent data is stored in UTF-8 encoded CSV files inside the `data/` directory. Every CSV file writes a fixed header row at line 0 during save operations and skips that header row during load operations. All writes are performed safely via `CsvUtil.writeToFile` using a temporary sibling file (`.tmp`) and `Files.move` with `ATOMIC_MOVE` and `REPLACE_EXISTING`.
 
 ### 4.1. `data/products.csv`
 

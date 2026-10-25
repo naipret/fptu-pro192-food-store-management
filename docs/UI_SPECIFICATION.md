@@ -47,9 +47,16 @@ All entity identifiers (`P00001` for products, `C00001` for customers, `B00001` 
 1. **Pre- and Post-Modification ASCII Tables:** In all update and adjustment flows (`1.4`, `1.5`, `2.4`, `2.5`, `4.2`, `4.3`), the system displays the current entity state in a formatted 80-column ASCII table before editing, and displays the refreshed table immediately after the change is persisted.
 2. **Explicit Confirmation (`ConsoleUtil.confirm`):** All create, update, adjust, remove, and checkout actions require an explicit `[Y/N]` confirmation step (`Are you sure ...? [Y/N]:`) before persisting changes.
 
-### 2.5. Continuous Search and Detail Inspection Loops
+### 2.5. Standardized Continuous Loop UX (`while (true)`) and Clean Iteration Separation
 
-Search screens (`1.2`, `2.2`, `3.3`) and detail viewers (`3.4` view invoice by ID, `4.4` view batches of product) loop continuously until `0` is entered to exit. They disable the redundant post-action pause prompt (`shouldPauseAfterAction(choice) == false`) for fluid, seamless user experience.
+All feature screens and search inspectors loop continuously in a standardized `while (true)` execution model:
+
+1. **Continuous Looping:** After completing or cancelling an operation, the feature remains active for the next record without forcing the user to re-select the menu option or answer awkward "Do you want to continue?" prompts.
+2. **Iteration Divider with Preceding Empty Line:** Each completed or cancelled operation iteration is cleanly demarcated by an empty line followed by an 80-character horizontal line (`--------------------------------------------------------------------------------`) via `Menu.printDivider()`.
+3. **Streamlined Exit and Cancel Behavior:**
+   - Entering `0` at the primary prompt immediately breaks out of the loop (`break`) and returns to the menu frame.
+   - Entering `0` at any secondary prompt, or entering `N` / `0` at a confirmation dialog, cancels that single transaction (`[INFO] Operation cancelled.`), prints the iteration divider, and immediately continues the loop (`continue`).
+4. **Zero Annoying Pauses:** The redundant `pressEnterToContinue()` mechanism has been eliminated across all menus for a fluid, professional terminal experience.
 
 ### 2.6. Screen Clearing and Breadcrumb Navigation
 
@@ -240,12 +247,12 @@ Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 
 
 All interactive console submenu actions follow a unified, continuous loop design pattern:
 
-1. Under breadcrumb header banners, initial input prompts render directly on line 1 without leading `\n` characters.
-2. Sequential iterations are separated by an 80-character horizontal line (`--------------------------------------------------------------------------------`).
-3. Operations loop continuously without asking confirmation to repeat (e.g. no "Add another...?").
-4. Cancelling intermediate inputs or entering `N` at confirmation displays `[INFO] Operation cancelled.`, emits the 80-column divider, and immediately continues to the next iteration.
-5. Entering `0` at the primary prompt breaks out of the loop and returns to the parent menu.
-6. Successful sales checkout preserves the breadcrumb banner intact without wiping the screen.
+1. Under breadcrumb header banners, initial input prompts render cleanly.
+2. Sequential iterations are separated by an empty line followed by an 80-character horizontal line (`--------------------------------------------------------------------------------`) via `Menu.printDivider()`.
+3. Operations loop continuously without asking confirmation to repeat.
+4. Cancelling intermediate inputs or entering `N` at confirmation displays `[INFO] Operation cancelled.`, emits the divider with preceding empty line, and immediately continues to the next iteration.
+5. Entering `0` at the primary prompt breaks out of the loop and returns to the parent menu immediately.
+6. The legacy `pressEnterToContinue()` prompt is completely removed from all workflows.
 
 ### 5.3. Universal Multi-Field Search Specification
 

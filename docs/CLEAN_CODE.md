@@ -47,9 +47,8 @@ Controllers and menus must receive their shared collaborators explicitly through
 ## 4. Exception Handling Discipline
 
 1. Throw specific, informative exceptions when a contract or business rule is violated:
-   - Use `IllegalArgumentException` for invalid field formats, negative prices/quantities, chronological date errors (`BR7`), duplicate identifiers (`BR1`, `BR2`, `BR6`), or duplicate phone numbers (`BR25`).
-   - Use `IllegalStateException` when an operation is invoked in an invalid lifecycle state, such as finalizing an empty order (`BR8`) or encounters corrupted CSV records.
-   - Use the checked domain exception `InsufficientStockException` when requested order quantities exceed available non-expired stock (`BR10`, `BR24`).
+   - Use `IllegalArgumentException` for invalid field formats, negative prices/quantities, chronological date errors (`BR7`), duplicate identifiers (`BR1`, `BR2`, `BR6`), duplicate phone numbers (`BR25`), or insufficient non-expired stock (`BR10`, `BR24`).
+   - Use `IllegalStateException` when an operation is invoked in an invalid lifecycle state, such as finalizing an empty order (`BR8`) or encountering corrupted CSV records.
 2. Never use empty `catch (Exception e) {}` blocks that swallow errors silently.
 3. Controllers propagate exceptions upward to the `view` tier, where menu classes catch them and print clear `[ERROR] <message>` notifications to the user.
 
@@ -81,8 +80,8 @@ Every method in `model`, `controller`, or `util` that enforces one or more rules
  *
  * @param productId the unique identifier of the product to deduct stock from
  * @param requestedQuantity the positive integer quantity to deduct
- * @throws IllegalArgumentException if the product does not exist or quantity is not positive
- * @throws InsufficientStockException if available non-expired stock is less than requestedQuantity
+ * @throws IllegalArgumentException if the product does not exist, quantity is not positive,
+ *                                  or available non-expired stock is less than requestedQuantity
  */
-public void deductStockFEFO(String productId, int requestedQuantity) throws InsufficientStockException {
+public void deductStockFEFO(String productId, int requestedQuantity) {
 ```

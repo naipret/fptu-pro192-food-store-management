@@ -10,8 +10,7 @@ This document defines the naming rules for packages, classes, methods, variables
 | :--- | :--- | :--- | :--- |
 | Package | `lowercase` | Concatenated domain words without underscores | `fptu.pro192.foodstoremanagement.controller` |
 | Class / Abstract Class | `PascalCase` | Singular noun or noun phrase | `Product`, `Batch`, `Customer`, `Menu`, `CsvUtil` |
-| Exception Class | `PascalCase` | Noun phrase ending with `Exception` | `InsufficientStockException` |
-| Method | `camelCase` | Imperative verb or verb phrase | `deductStockFEFO`, `calculateDiscount`, `writeAtomic` |
+| Method | `camelCase` | Imperative verb or verb phrase | `deductStockFEFO`, `calculateDiscount`, `writeToFile` |
 | Local Variable / Field / Parameter | `camelCase` | Descriptive noun or noun phrase | `productId`, `expirationDate`, `availableStock` |
 | Constant (`static final`) | `UPPER_SNAKE_CASE` | Uppercase words separated by underscores | `SCREEN_WIDTH`, `DISCOUNT_RATE`, `DEFAULT_LOW_STOCK_THRESHOLD` |
 
@@ -26,7 +25,7 @@ Every class outside the `model` package uses a suffix that identifies its archit
 | Package | Required Suffix | Responsibility | Examples |
 | :--- | :--- | :--- | :--- |
 | `model` | None (Domain Noun) | Represents a domain entity or value record | `Product`, `Batch`, `Customer`, `RegularCustomer`, `VIPCustomer`, `Order`, `OrderDetail` |
-| `controller` | `*Controller` or `*Exception` | Coordinates business rules, collection queries, and CSV persistence | `ProductController`, `CustomerController`, `OrderController`, `ReportController`, `InsufficientStockException` |
+| `controller` | `*Controller` | Coordinates business rules, collection queries, and CSV persistence | `ProductController`, `CustomerController`, `OrderController`, `ReportController` |
 | `view` | `*Menu` | Renders an 80-column interactive console menu screen | `Menu`, `MainMenu`, `ProductMenu`, `InventoryMenu`, `CustomerMenu`, `SalesMenu`, `ReportMenu` |
 | `util` | `*Util`, `*Validator`, `*Formatter`, or `*Manager` | Provides stateless helper routines or singleton stream management | `CsvUtil`, `InputValidator`, `ConsoleUtil`, `TableFormatter`, `ScannerManager` |
 
@@ -38,7 +37,7 @@ Method names must begin with a verb or prefix that accurately reflects whether t
 
 | Prefix | Contract and Return Type | Project Examples |
 | :--- | :--- | :--- |
-| `is*`, `has*`, `should*` | Side-effect-free predicate returning `boolean` | `isExpired()`, `isNearExpiry(int)`, `isLowStock(int)`, `isDeleted()`, `shouldPauseAfterAction()` |
+| `is*`, `has*`, `should*` | Side-effect-free predicate returning `boolean` | `isExpired()`, `isNearExpiry(int)`, `isLowStock(int)`, `isDeleted()`, `shouldShowBreadcrumb()` |
 | `get*` | Accessor or computed query returning a value or unmodifiable collection | `getAvailableStock()`, `getTotalStock()`, `getSubTotal()`, `getBatches()`, `getCategories()` |
 | `set*` | Validated field mutator returning `void` | `setName(String)`, `setPrice(double)`, `setQuantity(int)`, `setDeleted(boolean)` |
 | `find*` | Single-entity lookup returning an entity or `null` if not found | `findById(String)`, `findByIdIncludeDeleted(String)`, `findByPhone(String)` |
