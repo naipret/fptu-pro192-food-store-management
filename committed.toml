@@ -1,0 +1,26 @@
+style = "conventional"
+
+subject_length = 72
+subject_capitalized = false
+subject_not_punctuated = true
+imperative_subject = true
+
+line_length = 72
+hard_line_length = 100
+no_fixup = true
+no_wip = true
+ignore_author_re = "^(dependabot\\[bot\\]|github-actions\\[bot\\]|renovate\\[bot\\]).*$"
+
+allowed_types = [
+    "feat",
+    "fix",
+    "docs",
+    "style",
+    "refactor",
+    "perf",
+    "test",
+    "build",
+    "ci",
+    "chore",
+    "revert"
+]
