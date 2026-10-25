@@ -1,6 +1,5 @@
 package fptu.pro192.foodstoremanagement.util;
 
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
@@ -13,7 +12,7 @@ public final class ScannerManager {
 
     private static final ScannerManager INSTANCE = new ScannerManager();
 
-    private Scanner scanner;
+    private final Scanner scanner;
 
     private ScannerManager() {
         this.scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
@@ -36,18 +35,4 @@ public final class ScannerManager {
     public Scanner getScanner() {
         return this.scanner;
     }
-
-    /**
-     * Rebinds the underlying Scanner to a specified InputStream.
-     * Used by automated integration tests to simulate console input.
-     *
-     * @param inputStream the non-null InputStream to read from
-     */
-    public void setInputStream(InputStream inputStream) {
-        if (inputStream == null) {
-            throw new IllegalArgumentException("Input stream cannot be null.");
-        }
-        this.scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name());
-    }
-
 }
