@@ -151,7 +151,7 @@ public class SalesMenu extends Menu {
     private String promptCustomerOrGuest() {
         while (true) {
             String raw = ConsoleUtil.readOptionalString(
-                    "Enter Customer ID (e.g., C00001, Enter for GUEST, 0 to cancel): ");
+                    "Enter Customer ID (Enter for GUEST, 0 to cancel): ");
             if ("0".equals(raw)) {
                 return "CANCEL";
             }
