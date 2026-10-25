@@ -63,14 +63,13 @@ public final class CsvUtil {
     }
 
     /**
-     * Atomically writes all rows (including the header row at index 0) to the
-     * target Path by writing to a sibling .tmp file first and moving it into
-     * place using ATOMIC_MOVE and REPLACE_EXISTING.
+     * Safely writes all rows (including the header row at index 0) to the
+     * target Path by writing to a temporary .tmp file first and replacing the target.
      *
      * @param targetPath the destination CSV file Path
      * @param rows       the complete list of rows to write
      */
-    public static void writeAtomic(Path targetPath, List<String[]> rows) {
+    public static void writeToFile(Path targetPath, List<String[]> rows) {
         if (targetPath == null) {
             throw new IllegalArgumentException("Target CSV path cannot be null.");
         }
@@ -112,8 +111,18 @@ public final class CsvUtil {
                 Files.deleteIfExists(tempPath);
             } catch (IOException ignored) {
             }
-            throw new RuntimeException("Failed to write CSV file atomically: " + targetPath, e);
+            throw new RuntimeException("Failed to write CSV file: " + targetPath, e);
         }
+    }
+
+    /**
+     * Legacy alias for writeToFile.
+     *
+     * @param targetPath the destination CSV file Path
+     * @param rows       the complete list of rows to write
+     */
+    public static void writeAtomic(Path targetPath, List<String[]> rows) {
+        writeToFile(targetPath, rows);
     }
 
     /**
