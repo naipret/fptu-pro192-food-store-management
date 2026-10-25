@@ -56,7 +56,8 @@ public final class InputValidator {
     }
 
     /**
-     * Validates and normalizes an entity identifier to canonical format (e.g., P00001).
+     * Validates and normalizes an entity identifier to canonical format (e.g.,
+     * P00001).
      * Accepts shorthand such as "1" or "P1" and pads to 5 digits.
      *
      * @param raw            the raw ID string
@@ -102,21 +103,53 @@ public final class InputValidator {
         return normalizeId(raw, expectedPrefix);
     }
 
-    public static String validateProductId(String raw) { return normalizeId(raw, 'P'); }
-    public static String normalizeProductId(String raw) { return normalizeId(raw, 'P'); }
-    public static String tryNormalizeProductId(String raw) { return tryNormalizeId(raw, 'P'); }
+    public static String validateProductId(String raw) {
+        return normalizeId(raw, 'P');
+    }
 
-    public static String validateBatchId(String raw) { return normalizeId(raw, 'B'); }
-    public static String normalizeBatchId(String raw) { return normalizeId(raw, 'B'); }
-    public static String tryNormalizeBatchId(String raw) { return tryNormalizeId(raw, 'B'); }
+    public static String normalizeProductId(String raw) {
+        return normalizeId(raw, 'P');
+    }
 
-    public static String validateCustomerId(String raw) { return normalizeId(raw, 'C'); }
-    public static String normalizeCustomerId(String raw) { return normalizeId(raw, 'C'); }
-    public static String tryNormalizeCustomerId(String raw) { return tryNormalizeId(raw, 'C'); }
+    public static String tryNormalizeProductId(String raw) {
+        return tryNormalizeId(raw, 'P');
+    }
 
-    public static String validateOrderId(String raw) { return normalizeId(raw, 'O'); }
-    public static String normalizeOrderId(String raw) { return normalizeId(raw, 'O'); }
-    public static String tryNormalizeOrderId(String raw) { return tryNormalizeId(raw, 'O'); }
+    public static String validateBatchId(String raw) {
+        return normalizeId(raw, 'B');
+    }
+
+    public static String normalizeBatchId(String raw) {
+        return normalizeId(raw, 'B');
+    }
+
+    public static String tryNormalizeBatchId(String raw) {
+        return tryNormalizeId(raw, 'B');
+    }
+
+    public static String validateCustomerId(String raw) {
+        return normalizeId(raw, 'C');
+    }
+
+    public static String normalizeCustomerId(String raw) {
+        return normalizeId(raw, 'C');
+    }
+
+    public static String tryNormalizeCustomerId(String raw) {
+        return tryNormalizeId(raw, 'C');
+    }
+
+    public static String validateOrderId(String raw) {
+        return normalizeId(raw, 'O');
+    }
+
+    public static String normalizeOrderId(String raw) {
+        return normalizeId(raw, 'O');
+    }
+
+    public static String tryNormalizeOrderId(String raw) {
+        return tryNormalizeId(raw, 'O');
+    }
 
     /**
      * Validates and normalizes general text.
@@ -148,7 +181,8 @@ public final class InputValidator {
         String[] words = clean.split(" ");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < words.length; i++) {
-            if (i > 0) sb.append(' ');
+            if (i > 0)
+                sb.append(' ');
             String word = words[i];
             if (word.length() == 1) {
                 sb.append(word.toUpperCase(Locale.ROOT));
@@ -224,7 +258,8 @@ public final class InputValidator {
             cleaned = "0" + cleaned.substring(2);
         }
         if (!PHONE_REGEX.matcher(cleaned).matches()) {
-            throw new IllegalArgumentException("Invalid phone number: '" + raw + "'. Expected 10 digits starting with 03, 05, 07, 08, or 09.");
+            throw new IllegalArgumentException(
+                    "Invalid phone number: '" + raw + "'. Expected 10 digits starting with 03, 05, 07, 08, or 09.");
         }
         return cleaned;
     }
@@ -301,7 +336,8 @@ public final class InputValidator {
         try {
             return LocalDate.parse(raw.trim(), DATE_FORMATTER);
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Invalid " + label.toLowerCase(Locale.ROOT) + " '" + raw + "'. Please use dd/MM/yyyy format.");
+            throw new IllegalArgumentException(
+                    "Invalid " + label.toLowerCase(Locale.ROOT) + " '" + raw + "'. Please use dd/MM/yyyy format.");
         }
     }
 
@@ -355,7 +391,8 @@ public final class InputValidator {
     }
 
     /**
-     * Validates consistent batch dates: productionDate <= importDate <= expirationDate.
+     * Validates consistent batch dates: productionDate <= importDate <=
+     * expirationDate.
      *
      * @param productionDate the production date
      * @param expirationDate the expiration date

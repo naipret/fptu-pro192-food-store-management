@@ -59,7 +59,8 @@ public final class ConsoleUtil {
      *
      * @param prompt       the prompt message
      * @param defaultValue the fallback value on Enter
-     * @return the string entered, defaultValue on Enter, or null if cancelled with 0
+     * @return the string entered, defaultValue on Enter, or null if cancelled with
+     *         0
      */
     public static String readString(String prompt, String defaultValue) {
         while (true) {
@@ -180,7 +181,8 @@ public final class ConsoleUtil {
     }
 
     /**
-     * Prompts for a positive double greater than min, returning null if 0 is entered.
+     * Prompts for a positive double greater than min, returning null if 0 is
+     * entered.
      *
      * @param prompt the prompt message
      * @param min    minimum exclusive lower bound

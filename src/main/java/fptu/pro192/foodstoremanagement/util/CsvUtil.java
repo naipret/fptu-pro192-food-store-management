@@ -64,7 +64,8 @@ public final class CsvUtil {
 
     /**
      * Safely writes all rows (including the header row at index 0) to the
-     * target Path by writing to a temporary .tmp file first and replacing the target.
+     * target Path by writing to a temporary .tmp file first and replacing the
+     * target.
      *
      * @param targetPath the destination CSV file Path
      * @param rows       the complete list of rows to write
