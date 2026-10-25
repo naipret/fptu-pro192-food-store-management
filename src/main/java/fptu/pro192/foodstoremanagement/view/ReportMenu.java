@@ -73,7 +73,7 @@ public class ReportMenu extends Menu {
     public void handleDailyRevenueReport() {
         while (true) {
             LocalDate targetDate = ConsoleUtil.readDate(
-                    "Enter report date (dd/MM/yyyy, Enter for today, 0 to cancel): ",
+                    "Enter report date [dd/MM/yyyy] (Enter for today, 0 to cancel): ",
                     LocalDate.now());
             if (targetDate == null) {
                 break;
@@ -104,7 +104,7 @@ public class ReportMenu extends Menu {
     public void handleMonthlyRevenueReport() {
         while (true) {
             YearMonth ym = ConsoleUtil.readMonthWithDefault(
-                    "Enter report month (MM/yyyy, Enter for this month, 0 to cancel): ",
+                    "Enter report month [MM/yyyy] (Enter for this month, 0 to cancel): ",
                     YearMonth.now());
             if (ym == null) {
                 break;
@@ -134,7 +134,7 @@ public class ReportMenu extends Menu {
     public void handleBestSellingProductsReport() {
         while (true) {
             LocalDate fromDate = promptScopeDate(
-                    "Enter from date (dd/MM/yyyy, Enter for all-time, 0 to cancel): ");
+                    "Enter from date [dd/MM/yyyy] (Enter for all-time, 0 to cancel): ");
             if (fromDate == null) {
                 break;
             }
@@ -193,7 +193,7 @@ public class ReportMenu extends Menu {
     public void handleCustomerSpendingReport() {
         while (true) {
             LocalDate fromDate = promptScopeDate(
-                    "Enter from date (dd/MM/yyyy, Enter for all-time, 0 to cancel): ");
+                    "Enter from date [dd/MM/yyyy] (Enter for all-time, 0 to cancel): ");
             if (fromDate == null) {
                 break;
             }
@@ -258,7 +258,7 @@ public class ReportMenu extends Menu {
     private LocalDate promptScopeEndDate(LocalDate fromDate) {
         while (true) {
             LocalDate val = ConsoleUtil.readDate(
-                    "Enter to date (dd/MM/yyyy, Enter for all-time, 0 to cancel): ", LocalDate.MAX);
+                    "Enter to date [dd/MM/yyyy] (Enter for all-time, 0 to cancel): ", LocalDate.MAX);
             if (val == null) {
                 return null;
             }

@@ -97,7 +97,7 @@ public class InventoryMenu extends Menu {
             System.out.println();
 
             LocalDate prodDate = ConsoleUtil.readDate(
-                    "Enter production date (dd/MM/yyyy, Enter for today, 0 to cancel): ",
+                    "Enter production date [dd/MM/yyyy] (Enter for today, 0 to cancel): ",
                     LocalDate.now());
             if (prodDate == null) {
                 System.out.println("  [INFO] Batch import cancelled.");
