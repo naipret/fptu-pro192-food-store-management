@@ -159,7 +159,7 @@ public class CustomerMenu extends Menu {
             System.out.println();
 
             String rawName = ConsoleUtil.readString(
-                    "Enter new full name [" + existing.getFullName() + "] (Enter to keep, 0 to cancel): ",
+                    "Enter new full name [" + existing.getFullName() + "]: ",
                     existing.getFullName());
             if (rawName == null) {
                 System.out.println("  [INFO] Operation cancelled.");

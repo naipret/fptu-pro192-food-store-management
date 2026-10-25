@@ -192,8 +192,10 @@ public class SalesMenu extends Menu {
     }
 
     private Product selectProductForCart() {
+        System.out.println();
+        System.out.println("  (Enter for all, 0 to cancel)");
         String input = ConsoleUtil.readOptionalString(
-                "\nEnter Product ID or search keyword (Enter for all, 0 to cancel): ");
+                "Enter Product ID or search keyword: ");
         if ("0".equals(input)) {
             return null;
         }
