@@ -25,15 +25,15 @@ Every menu rendered via `Menu.display()` lists numbered options starting from `[
 
 1. In `MainMenu`, selecting `[0]` exits the application cleanly.
 2. In submenus (`ProductMenu`, `InventoryMenu`, `CustomerMenu`, `SalesMenu`, `ReportMenu`), selecting `[0]` returns immediately to `MainMenu`.
-3. **Universal Cancellation with `0`:** Across all input fields in all menus (entity addition, update, batch replenishment, inventory adjustment, date prompts, search queries), entering `0` immediately cancels the ongoing operation and safely returns to the menu without modifying any data.
+3. Across all input fields in all menus (entity addition, update, batch replenishment, inventory adjustment, date prompts, search queries), entering `0` immediately cancels the ongoing operation and safely returns to the menu without modifying any data.
 
 ### 2.2. Default Values and Enter-to-Keep Convention
 
-1. **Update Workflows (`1.4`, `2.4`):** When modifying existing records, pressing `[Enter]` without typing any input retains the current value for that field. Current category and customer tier are displayed on a dedicated line above choice options supporting `Enter to keep, or 0 to cancel`.
-2. **Report Date/Period Defaults (`5.1`, `5.2`):**
+1. When modifying existing records, pressing `[Enter]` without typing any input retains the current value for that field. Current category and customer tier are displayed on a dedicated line above choice options supporting `Enter to keep, or 0 to cancel`.
+2. Report Date/Period Defaults (`5.1`, `5.2`):
    - In Daily Revenue (`5.1`), pressing `[Enter]` defaults to today's date (`dd/MM/yyyy`).
    - In Monthly Revenue (`5.2`), user inputs `MM/yyyy` directly (no separate month/year prompts), with `[Enter]` defaulting to the current month.
-3. **Report & Alert Threshold Defaults:**
+3. Report & Alert Threshold Defaults:
    - In Low Stock (`4.5`), pressing `[Enter]` defaults to threshold `5`.
    - In Near-Expiry (`4.6`), pressing `[Enter]` defaults to window `7` days.
    - In Expired Batches (`4.7`) and Rankings (`5.3`, `5.4`), pressing `[Enter]` skips date filters to include all records.
@@ -44,26 +44,26 @@ All entity identifiers (`P00001` for products, `C00001` for customers, `B00001` 
 
 ### 2.4. Dual Table Verification and [Y/N] Confirmation
 
-1. **Pre- and Post-Modification ASCII Tables:** In all update and adjustment flows (`1.4`, `1.5`, `2.4`, `2.5`, `4.2`, `4.3`), the system displays the current entity state in a formatted 80-column ASCII table before editing, and displays the refreshed table immediately after the change is persisted.
-2. **Explicit Confirmation (`ConsoleUtil.confirm`):** All create, update, adjust, remove, and checkout actions require an explicit `[Y/N]` confirmation step (`Are you sure ...? [Y/N]:`) before persisting changes.
+1. In all update and adjustment flows (`1.4`, `1.5`, `2.4`, `2.5`, `4.2`, `4.3`), the system displays the current entity state in a formatted 80-column ASCII table before editing, and displays the refreshed table immediately after the change is persisted.
+2. All create, update, adjust, remove, and checkout actions require an explicit `[Y/N]` confirmation step (`Are you sure ...? [Y/N]:`) before persisting changes.
 
 ### 2.5. Standardized Continuous Loop UX (`while (true)`) and Clean Iteration Separation
 
 All feature screens and search inspectors loop continuously in a standardized `while (true)` execution model:
 
-1. **Continuous Looping:** After completing or cancelling an operation, the feature remains active for the next record without forcing the user to re-select the menu option or answer awkward "Do you want to continue?" prompts.
-2. **Iteration Divider with Preceding Empty Line:** Each completed or cancelled operation iteration is cleanly demarcated by an empty line followed by an 80-character horizontal line (`--------------------------------------------------------------------------------`) via `Menu.printDivider()`.
-3. **Streamlined Exit and Cancel Behavior:**
+1. After completing or cancelling an operation, the feature remains active for the next record without forcing the user to re-select the menu option or answer awkward "Do you want to continue?" prompts.
+2. Each completed or cancelled operation iteration is cleanly demarcated by an empty line followed by an 80-character horizontal line (`--------------------------------------------------------------------------------`) via `Menu.printDivider()`.
+3. Streamlined Exit and Cancel Behavior:
    - Entering `0` at the primary prompt immediately breaks out of the loop (`break`) and returns to the menu frame.
    - Entering `0` at any secondary prompt, or entering `N` / `0` at a confirmation dialog, cancels that single transaction (`[INFO] Operation cancelled.`), prints the iteration divider, and immediately continues the loop (`continue`).
-4. **Zero Annoying Pauses:** The redundant `pressEnterToContinue()` mechanism has been eliminated across all menus for a fluid, professional terminal experience.
+4. The redundant `pressEnterToContinue()` mechanism has been eliminated across all menus for a fluid, professional terminal experience.
 
 ### 2.6. Screen Clearing and Breadcrumb Navigation
 
 To maintain a clean and focused user experience during terminal interaction:
 
-1. **Terminal Screen Reset (`ConsoleUtil.clearScreen()`):** Before rendering any menu frame and after completing major workflow actions, the terminal viewport is cleared using ANSI escape sequence `\033[H\033[2J` supplemented by a 25-blank-lines fallback to support legacy Windows `cmd.exe` and IDE console windows without ANSI support.
-2. **Centered Breadcrumb Headers (`Menu.printBreadcrumbHeader(String)`):** Every dispatched submenu action renders an 80-column centered breadcrumb banner at the top of the screen before executing the selected handler. The banner follows the format `MAIN MENU > [<MenuIndex>] <MENU_NAME> > [<ChoiceIndex>] <Action Name>` (for example, `MAIN MENU > [1] PRODUCTS > [3] Add New Product`) and is centered horizontally using `TableFormatter.center(...)` without redundant prefix tags like `LOCATION:`.
+1. Before rendering any menu frame and after completing major workflow actions, the terminal viewport is cleared using ANSI escape sequence `\033[H\033[2J` supplemented by a 25-blank-lines fallback to support legacy Windows `cmd.exe` and IDE console windows without ANSI support.
+2. Every dispatched submenu action renders an 80-column centered breadcrumb banner at the top of the screen before executing the selected handler. The banner follows the format `MAIN MENU > [<MenuIndex>] <MENU_NAME> > [<ChoiceIndex>] <Action Name>` (for example, `MAIN MENU > [1] PRODUCTS > [3] Add New Product`) and is centered horizontally using `TableFormatter.center(...)` without redundant prefix tags like `LOCATION:`.
 
 ### 2.7. Standardized Status Prefixes
 
@@ -94,7 +94,7 @@ To prevent long product names, customer names, or addresses from wrapping past c
 
 Every ASCII table is constructed so the sum of its column content widths plus border separators (`|` and `|`) never exceeds `80` columns.
 
-### 4.1. Standard Menu Frames (`80` Columns)
+### 4.1. Standard Menu Frames
 
 #### Root Main Menu
 
@@ -128,7 +128,7 @@ Enter your choice [0-5]:
 Enter your choice [0-5]:
 ```
 
-### 4.2. Product Catalog Table (`80` Columns)
+### 4.2. Product Catalog Table
 
 Formula: `1 + (8) + 1 + (24) + 1 + (14) + 1 + (8) + 1 + (12) + 1 + (7) + 1 = 80` columns.
 
@@ -150,7 +150,7 @@ Formula: `1 + (8) + 1 + (24) + 1 + (14) + 1 + (8) + 1 + (12) + 1 + (7) + 1 = 80`
 +--------+------------------------+--------------+--------+------------+-------+
 ```
 
-### 4.3. Batch and Expiry Table (`80` Columns)
+### 4.3. Batch and Expiry Table
 
 Formula: `1 + (8) + 1 + (8) + 1 + (18) + 1 + (12) + 1 + (12) + 1 + (7) + 1 + (8) + 1 = 80` columns.
 
@@ -164,7 +164,7 @@ Formula: `1 + (8) + 1 + (8) + 1 + (18) + 1 + (12) + 1 + (12) + 1 + (7) + 1 + (8)
 | `Qty` | `5` | `7` | Remaining batch quantity |
 | `Status` | `6` (`ACTIVE`/`NEAR`/`EXPRD`) | `8` | Shelf-life status |
 
-### 4.4. Dedicated Product Batches Detail Table (`80` Columns)
+### 4.4. Dedicated Product Batches Detail Table
 
 Formula: `1 + (8) + 1 + (12) + 1 + (12) + 1 + (12) + 1 + (10) + 1 + (19) + 1 = 80` columns.
 
@@ -194,7 +194,7 @@ Formula: `1 + (8) + 1 + (12) + 1 + (12) + 1 + (12) + 1 + (10) + 1 + (19) + 1 = 8
 | `Status` | `8` (`ACTIVE`/`NEAR`/`EXPRD`/`EMPTY`) | `10` | Shelf-life status |
 | `Qty` | `17` | `19` | Batch remaining stock (right-aligned) |
 
-### 4.5. Customer Directory Table (`80` Columns)
+### 4.5. Customer Directory Table
 
 Formula: `1 + (8) + 1 + (21) + 1 + (12) + 1 + (24) + 1 + (9) + 1 = 80` columns.
 
@@ -206,7 +206,7 @@ Formula: `1 + (8) + 1 + (21) + 1 + (12) + 1 + (24) + 1 + (9) + 1 = 80` columns.
 | `Address` | `22` | `24` | Residential address |
 | `Tier` | `7` (`Regular`/`VIP`) | `9` | Loyalty tier (untruncated) |
 
-### 4.6. Sales Cart and Invoice Table (`80` Columns)
+### 4.6. Sales Cart and Invoice Table
 
 Formula: `1 + (5) + 1 + (8) + 1 + (25) + 1 + (7) + 1 + (13) + 1 + (15) + 1 = 80` columns.
 
@@ -219,7 +219,7 @@ Formula: `1 + (5) + 1 + (8) + 1 + (25) + 1 + (7) + 1 + (13) + 1 + (15) + 1 = 80`
 | `Unit Price` | `11` | `13` | Snapshot selling price |
 | `Subtotal` | `13` | `15` | Line-item subtotal (`Qty * Unit Price`) |
 
-### 4.7. Sales Summary Table (`80` Columns)
+### 4.7. Sales Summary Table
 
 Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 80` columns.
 
