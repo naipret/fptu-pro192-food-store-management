@@ -93,7 +93,7 @@ public class ProductMenu extends Menu {
                 continue;
             }
 
-            Double price = ConsoleUtil.readDouble("Enter selling price (> 0, or 0 to cancel): ", 0.0);
+            Double price = ConsoleUtil.readDouble("Enter selling price [>0] (or 0 to cancel): ", 0.0);
             if (price == null) {
                 System.out.println("  [INFO] Operation cancelled.");
                 printDivider();
@@ -109,8 +109,7 @@ public class ProductMenu extends Menu {
 
             try {
                 Product product = this.productController.addProduct(name, category, unit, price);
-                System.out.printf("  [OK] Product %s ('%s') added successfully.%n",
-                        product.getId(), product.getName());
+                System.out.printf("  [OK] Product %s added successfully.%n", product.getId());
                 renderProductTable(Collections.singletonList(product));
             } catch (IllegalArgumentException e) {
                 System.out.println("  [ERROR] " + e.getMessage());
@@ -150,9 +149,9 @@ public class ProductMenu extends Menu {
             renderProductTable(Collections.singletonList(existing));
             System.out.println();
 
+            System.out.println("  (Enter to keep, 0 to cancel)");
             String rawName = ConsoleUtil.readString(
-                    "Enter new product name [" + existing.getName() + "] (Enter to keep, 0 to cancel): ",
-                    existing.getName());
+                    "Enter new product name [" + existing.getName() + "]: ", existing.getName());
             if (rawName == null) {
                 System.out.println("  [INFO] Operation cancelled.");
                 printDivider();
@@ -182,8 +181,7 @@ public class ProductMenu extends Menu {
             }
 
             Double newPrice = ConsoleUtil.readDouble(
-                    "Enter new selling price [" + InputValidator.formatCurrency(existing.getPrice())
-                            + "] (Enter to keep, 0 to cancel): ",
+                    "Enter new selling price [" + InputValidator.formatCurrency(existing.getPrice()) + "]: ",
                     0.0, existing.getPrice());
             if (newPrice == null) {
                 System.out.println("  [INFO] Operation cancelled.");
@@ -281,7 +279,7 @@ public class ProductMenu extends Menu {
         System.out.printf("    [%2d] Add New Custom Category%n", customOption);
         Integer selected = (currentCategory == null)
                 ? ConsoleUtil.readInt("Select category [1-" + customOption + "] (or 0 to cancel): ", 1, customOption)
-                : ConsoleUtil.readInt("Select new category [1-" + customOption + "] (Enter to keep, 0 to cancel): ",
+                : ConsoleUtil.readInt("Select new category [1-" + customOption + "]: ",
                         1, customOption, -1);
         if (selected == null) {
             return null;
@@ -324,7 +322,8 @@ public class ProductMenu extends Menu {
         Integer selected = (currentUnit == null)
                 ? ConsoleUtil.readInt("Select measurement unit [1-" + customOption + "] (or 0 to cancel): ",
                         1, customOption)
-                : ConsoleUtil.readInt("Select new measurement unit [1-" + customOption + "] (Enter to keep, 0 to cancel): ",
+                : ConsoleUtil.readInt(
+                        "Select new measurement unit [1-" + customOption + "]: ",
                         1, customOption, -1);
         if (selected == null) {
             return null;

@@ -118,7 +118,7 @@ public class InventoryMenu extends Menu {
                 continue;
             }
 
-            Integer qty = ConsoleUtil.readPositiveInt("Enter batch quantity (> 0, or 0 to cancel): ");
+            Integer qty = ConsoleUtil.readPositiveInt("Enter batch quantity [>0] (or 0 to cancel): ");
             if (qty == null) {
                 System.out.println("  [INFO] Batch import cancelled.");
                 printDivider();

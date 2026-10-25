@@ -116,9 +116,7 @@ public class CustomerMenu extends Menu {
 
             try {
                 Customer created = this.customerController.registerCustomer(fullName, phone, address, tier);
-                System.out.printf("  [OK] Registered %s customer %s ('%s', Phone: %s).%n",
-                        created.getCustomerType(), created.getId(),
-                        created.getFullName(), created.getPhone());
+                System.out.printf("  [OK] Registered %s customer %s.%n", created.getCustomerType(), created.getId());
                 renderCustomerTable(Collections.singletonList(created));
             } catch (IllegalArgumentException e) {
                 System.out.println("  [ERROR] " + e.getMessage());
@@ -158,6 +156,7 @@ public class CustomerMenu extends Menu {
             renderCustomerTable(Collections.singletonList(existing));
             System.out.println();
 
+            System.out.println("  (Enter to keep, 0 to cancel)");
             String rawName = ConsoleUtil.readString(
                     "Enter new full name [" + existing.getFullName() + "]: ",
                     existing.getFullName());
@@ -176,7 +175,7 @@ public class CustomerMenu extends Menu {
             }
 
             String newPhone = promptOptionalPhone(
-                    "Enter new phone [" + existing.getPhone() + "] (Enter to keep, 0 to cancel): ",
+                    "Enter new phone [" + existing.getPhone() + "]: ",
                     existing.getId(), existing.getPhone());
             if (newPhone == null) {
                 System.out.println("  [INFO] Operation cancelled.");
@@ -185,7 +184,7 @@ public class CustomerMenu extends Menu {
             }
 
             String rawAddress = ConsoleUtil.readString(
-                    "Enter new address [" + existing.getAddress() + "] (Enter to keep, 0 to cancel): ",
+                    "Enter new address [" + existing.getAddress() + "]: ",
                     existing.getAddress());
             if (rawAddress == null) {
                 System.out.println("  [INFO] Operation cancelled.");
@@ -335,7 +334,7 @@ public class CustomerMenu extends Menu {
         System.out.println("    [2] VIP     (10% Discount)");
         Integer choice = (currentTier == null)
                 ? ConsoleUtil.readInt("Enter tier choice [1-2] (or 0 to cancel): ", 1, 2)
-                : ConsoleUtil.readInt("Enter new tier choice [1-2] (Enter to keep, 0 to cancel): ", 1, 2, -1);
+                : ConsoleUtil.readInt("Enter new tier choice [1-2]: ", 1, 2, -1);
         if (choice == null) {
             return null;
         }
