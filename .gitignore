@@ -1,16 +1,8 @@
-# Compiled class files
 *.class
-
-# Log files
 *.log
-
-# BlueJ files
 *.ctxt
-
-# Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package files
 *.jar
 *.war
 *.nar
@@ -18,15 +10,14 @@
 *.zip
 *.tar.gz
 *.rar
+*.class
 
-# Virtual machine crash logs
 hs_err_pid*
 replay_pid*
 
-# NetBeans IDE outputs and private caches
-**/nbproject/private/
-**/nbproject/Makefile-*.mk
-**/nbproject/Package-*.bash
+/build.xml
+/manifest.mf
+/nbproject/
 build/
 nbbuild/
 dist/
@@ -34,7 +25,6 @@ nbdist/
 .nb-gradle/
 _site/
 
-# Visual Studio Code
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -44,15 +34,12 @@ _site/
 !*.code-workspace
 *.vsix
 
-# IntelliJ IDEA
 .idea/
 src/main/main.iml
 src/test/test.iml
 
-# Application runtime temporary files
 data/
 
-# Operating system temporary and metadata files
 .DS_Store
 .DS_Store?
 ._*
