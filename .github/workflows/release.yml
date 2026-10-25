@@ -1,0 +1,82 @@
+name: Build and Publish Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: true
+
+jobs:
+  release:
+    name: Build & Package Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "8"
+
+      - name: Install Apache Ant
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ant
+
+      - name: Restore NetBeans project configuration
+        run: cp -r .github/netbeans/* .
+
+      - name: Compile and Package Core Application JAR
+        run: ant clean compile jar
+
+      - name: Prepare Release Archive
+        run: |
+          mkdir -p release-pkg/dist
+          mkdir -p release-pkg/data
+          touch release-pkg/data/.gitkeep
+
+          # Copy NetBeans project structure to package root
+          cp -r .github/netbeans/* release-pkg/
+
+          # Copy core sources, scripts, and documentation
+          cp -r src release-pkg/
+          cp -r scripts release-pkg/
+          cp README.md release-pkg/
+          cp CONTRIBUTING.md release-pkg/ 2>/dev/null || true
+          cp LICENSE release-pkg/ 2>/dev/null || true
+
+          # Copy pre-compiled distribution JAR
+          cp dist/fptu-pro192-food-store-management.jar release-pkg/dist/
+
+          # Package single release zip
+          cd release-pkg
+          zip -r ../fptu-pro192-food-store-management.zip .
+          cd ..
+
+      - name: Publish Rolling Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Food Store Management System (Continuous Build)
+          body: |
+            Automated continuous release generated from commit `${{ github.sha }}` on branch `main`.
+
+            ### Package Contents (`fptu-pro192-food-store-management.zip`):
+            - **NetBeans IDE Ready:** Open directly in NetBeans (`nbproject/`, `build.xml`).
+            - **Pre-compiled Executable:** Ready-to-run JAR located in `dist/`.
+            - **Complete Source Code:** Full Java source files in `src/`.
+            - **Dynamic Date Seeding:** Includes `scripts/seed.ps1` and `scripts/seed.sh` to generate fresh sample data for today.
+            - **Data Folder:** Empty `data/` directory ready for runtime persistence.
+          files: fptu-pro192-food-store-management.zip
+          draft: false
+          prerelease: false
+          make_latest: true

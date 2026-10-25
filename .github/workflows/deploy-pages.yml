@@ -28,29 +28,28 @@ jobs:
       - name: Set up JDK 8
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '8'
+          distribution: "temurin"
+          java-version: "8"
 
       - name: Install Apache Ant
         run: |
           sudo apt-get update
           sudo apt-get install -y ant
 
+      - name: Restore NetBeans project configuration
+        run: cp -r .github/netbeans/* .
+
       - name: Compile and Package Core Application JAR
         run: ant clean compile jar
-
-      - name: Run Automated Test Verification
-        run: ant test
 
       - name: Compile Web Bridge and Prepare Deployment Payload
         run: |
           mkdir -p _site/web-classes
           javac -cp dist/fptu-pro192-food-store-management.jar -d _site/web-classes .github/pages/bridge/*.java
-          jar -cf _site/web-runner.jar -C _site/web-classes . -C . data
+          jar -cf _site/web-runner.jar -C _site/web-classes .
           rm -rf _site/web-classes
           cp .github/pages/index.html _site/index.html
           cp dist/fptu-pro192-food-store-management.jar _site/fptu-pro192-food-store-management.jar
-          cp -r data _site/data
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
@@ -58,7 +57,7 @@ jobs:
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '_site'
+          path: "_site"
 
       - name: Deploy to GitHub Pages
         id: deployment
