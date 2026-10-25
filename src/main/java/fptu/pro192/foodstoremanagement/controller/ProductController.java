@@ -50,7 +50,8 @@ public class ProductController {
     private final Set<String> units;
 
     /**
-     * Constructs a ProductController bound to default CSV paths in data/ and loads records.
+     * Constructs a ProductController bound to default CSV paths in data/ and loads
+     * records.
      */
     public ProductController() {
         this.productCsvPath = Paths.get(DEFAULT_PRODUCTS_CSV);
@@ -520,8 +521,10 @@ public class ProductController {
      *
      * @param productId         the product ID to deduct from
      * @param requestedQuantity the positive integer quantity to deduct
-     * @throws IllegalArgumentException if product is not found, quantity not positive,
-     *                                  or available non-expired stock is insufficient
+     * @throws IllegalArgumentException if product is not found, quantity not
+     *                                  positive,
+     *                                  or available non-expired stock is
+     *                                  insufficient
      */
     public void deductStockFEFO(String productId, int requestedQuantity) {
         InputValidator.validatePositiveQuantity(requestedQuantity, "Requested deduction quantity");

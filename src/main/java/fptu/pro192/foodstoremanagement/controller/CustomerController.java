@@ -30,7 +30,8 @@ public class CustomerController {
     private final List<Customer> customers;
 
     /**
-     * Constructs a CustomerController bound to default data/customers.csv and loads records.
+     * Constructs a CustomerController bound to default data/customers.csv and loads
+     * records.
      */
     public CustomerController() {
         this.csvPath = Paths.get(DEFAULT_CUSTOMERS_CSV);

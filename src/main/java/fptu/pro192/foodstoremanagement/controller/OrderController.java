@@ -52,7 +52,8 @@ public class OrderController {
     private final CustomerController customerController;
 
     /**
-     * Constructs an OrderController bound to default CSV paths with shared controllers.
+     * Constructs an OrderController bound to default CSV paths with shared
+     * controllers.
      *
      * @param productController  the shared ProductController instance
      * @param customerController the shared CustomerController instance
@@ -347,7 +348,8 @@ public class OrderController {
      *
      * @param draft the non-empty draft Order to finalize
      * @return the finalized and persisted Order
-     * @throws IllegalArgumentException if draft is null, empty, or stock is insufficient
+     * @throws IllegalArgumentException if draft is null, empty, or stock is
+     *                                  insufficient
      */
     public Order finalizeOrder(Order draft) {
         if (draft == null) {
