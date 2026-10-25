@@ -93,8 +93,8 @@ public class InventoryMenu extends Menu {
                 printDivider();
                 continue;
             }
-            System.out.printf("  Selected: %s - %s (Current Available: %d %s)%n",
-                    product.getId(), product.getName(), product.getAvailableStock(), product.getUnit());
+            ProductMenu.renderProductTable(Collections.singletonList(product));
+            System.out.println();
 
             LocalDate prodDate = ConsoleUtil.readDate(
                     "Enter production date (dd/MM/yyyy, Enter for today, 0 to cancel): ",
@@ -106,14 +106,14 @@ public class InventoryMenu extends Menu {
             }
 
             LocalDate expDate = ConsoleUtil.readDate(
-                    "Enter expiration date (dd/MM/yyyy, or 0 to cancel): ", null);
+                    "Enter expiration date [dd/MM/yyyy] (or 0 to cancel): ", null);
             if (expDate == null) {
                 System.out.println("  [INFO] Batch import cancelled.");
                 printDivider();
                 continue;
             }
             if (prodDate.isAfter(expDate)) {
-                System.out.println("  [ERROR] Production date cannot be after expiration date (BR7).");
+                System.out.println("  [ERROR] Production date cannot be after expiration date.");
                 printDivider();
                 continue;
             }
@@ -148,7 +148,7 @@ public class InventoryMenu extends Menu {
     private void handleAdjustBatchStock() {
         while (true) {
             String rawBatchId = ConsoleUtil.readString(
-                    "Enter Batch ID to adjust stock (e.g., B00001, or 0 to cancel): ");
+                    "Enter Batch ID to adjust stock (or 0 to cancel): ");
             if (rawBatchId == null) {
                 break;
             }
@@ -158,12 +158,10 @@ public class InventoryMenu extends Menu {
                 printDivider();
                 continue;
             }
-            Product parent = this.productController.findByIdIncludeDeleted(target.getProductId());
-            String parentName = (parent != null) ? parent.getName() : "Unknown";
-            System.out.printf("  Batch %s | Product: %s - %s | Current Stock: %d%n",
-                    target.getBatchId(), target.getProductId(), parentName, target.getQuantity());
+            renderBatchTable(Collections.singletonList(target));
+            System.out.println();
 
-            Integer newQty = ConsoleUtil.readInt("Enter new exact batch quantity [>=0] (or 0 to cancel): ", 0,
+            Integer newQty = ConsoleUtil.readInt("Enter new exact batch quantity [>=0]: ", 0,
                     Integer.MAX_VALUE);
             if (!ConsoleUtil.confirm("Confirm setting batch " + target.getBatchId() + " stock to " + newQty + "?")) {
                 System.out.println("  [INFO] Adjustment cancelled.");
