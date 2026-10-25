@@ -1,88 +1,109 @@
 # Contributing Guidelines
 
-This document defines the version control, branching, commit message, issue tracking, and pull request workflow for the Food Store Management System (`PRO192`). Coding standards, naming conventions, and architectural specifications are documented separately in the [`docs/`](docs/) directory.
+This document defines version control practices, branching strategy, commit message standards, issue tracking, and pull request workflows for this project. These guidelines follow industry-standard conventions and standard feature-branching workflows) to ensure clear version history, reliable automation, and smooth team collaboration across projects.
 
 ---
 
 ## 1. Git Branching Strategy
 
-The `main` branch holds stable, compilable, and reviewed code. Direct pushes to `main` are prohibited. All development work must take place on dedicated branches created from the latest `main` branch.
+The `main` branch maintains stable, compilable, and reviewed code. Direct commits and pushes to `main` are restricted. All development, enhancements, and bug fixes take place on dedicated branches created from the latest `main` branch.
 
-Branch names use a prefix that reflects the nature of the change, followed by a short hyphen-separated identifier:
+### 1.1. Branch Naming Conventions
 
-| Branch Prefix | Purpose | Example |
+Branch names use a lowercase prefix indicating the nature of the work, followed by a forward slash (`/`) and a short, hyphen-separated description:
+
+| Branch Prefix | Purpose / Scope | Example |
 | :--- | :--- | :--- |
-| `feature/<module>` | New functional module or user-facing capability | `feature/product-catalog` |
-| `fix/<issue>` | Bug fix for a specific defect | `fix/fefo-stock-deduction` |
-| `refactor/<scope>` | Structural code improvement without changing external behavior | `refactor/mvc-and-retail-domain` |
-| `docs/<topic>` | Documentation creations or updates | `docs/standardize-specifications` |
-| `chore/<task>` | Build configuration, seed data, or release maintenance | `chore/seed-retail-data` |
+| `feature/<name>` | New feature, module, or user-facing capability | `feature/user-authentication` |
+| `fix/<name>` | Bug fix or defect resolution | `fix/null-pointer-exception` |
+| `refactor/<name>` | Code restructuring without altering external behavior | `refactor/modularize-controllers` |
+| `docs/<name>` | Documentation creation, updates, or technical guides | `docs/api-specification` |
+| `test/<name>` | Adding or enhancing unit, integration, or E2E tests | `test/order-processing` |
+| `perf/<name>` | Performance optimizations and memory tuning | `perf/cache-queries` |
+| `chore/<name>` | Tooling, build scripts, dependencies, or maintenance | `chore/update-dependencies` |
 
-### Standard Branch Lifecycle
+### 1.2. Standard Branch Lifecycle
 
 ```bash
 git checkout main
 git pull origin main
+
 git checkout -b feature/<short-description>
+
+git add <files>
+git commit -m "feat(scope): add new capability"
+
+git push -u origin feature/<short-description>
 ```
 
-Keep branches short-lived and focused on a single issue so changes remain easy to review and merge without conflicts.
+Keep branches focused and short-lived. A branch should address a single objective or issue to keep reviews fast and prevent merge conflicts.
 
 ---
 
 ## 2. Commit Message Standards
 
-All commit messages follow the Conventional Commits specification:
+All commit messages must adhere to the [Conventional Commits](https://www.conventionalcommits.org/) specification.
+
+### 2.1. Commit Message Structure
 
 ```text
-<type>(<scope>): <concise summary in imperative mood>
+<type>[optional scope][!]: <description>
 
-<optional body explaining the rationale and context of the change>
+[optional body]
 
-Refs: #<issue-number>
+[optional footer(s)]
 ```
 
-### Allowed Commit Types
+- Header line contains the commit type, an optional scope enclosed in parentheses, an optional exclamation mark (`!`) for breaking changes, a required colon and space, and a concise summary.
+- Body explains the motivation, context, and details of the change. Must be separated from the header by a blank line and wrapped at 72 characters.
+- Footer references issue numbers (e.g., `Closes #123`, `Refs: #45`) or declares breaking changes (`BREAKING CHANGE: <explanation>`). Separated from the body by a blank line.
 
-| Type | When to Use |
-| :--- | :--- |
-| `feat` | Introducing a new domain model, controller capability, or console menu view |
-| `fix` | Resolving a logic bug, validation defect, or runtime error |
-| `refactor` | Restructuring classes or methods for clarity without altering system behavior |
-| `docs` | Creating or updating Markdown documentation and Javadoc specifications |
-| `test` | Adding or updating automated verification tests under `src/test/java` |
-| `chore` | Updating build scripts, IDE metadata, `.gitignore`, or seed CSV datasets |
+### 2.2. Allowed Commit Types
 
-### Commit Message Rules
+The allowed types align with Conventional Commits and standard commit linting configurations (`committed.toml`):
 
-1. Write the subject line in English using the imperative mood (`add`, `fix`, `update`, not `added` or `adds`).
-2. Start the description after the colon with a lowercase letter and omit trailing periods.
-3. Keep the subject line under 72 characters.
-4. Make each commit atomic so that every commit leaves the project in a compilable state.
+| Type | Description / When to Use | SemVer Correlation |
+| :--- | :--- | :--- |
+| `feat` | Introduces a new feature or user-facing functional capability | `MINOR` |
+| `fix` | Patches a bug, defect, or unexpected runtime behavior | `PATCH` |
+| `docs` | Documentation-only changes (README, guides, API docs, code comments) | None |
+| `style` | Code formatting, whitespace, indentation, or semicolon adjustments (no logic change) | None |
+| `refactor` | Code restructuring that neither fixes a bug nor adds a feature | None |
+| `perf` | Code changes that improve execution performance or reduce resource consumption | `PATCH` (or `MINOR`) |
+| `test` | Adding missing tests, updating test fixtures, or improving test coverage | None |
+| `build` | Changes affecting build tools, project configurations, or external dependencies | None |
+| `ci` | Changes to CI/CD workflows, automated pipelines, or deployment scripts | None |
+| `chore` | Routine maintenance tasks, repository housekeeping, or data seeding | None |
+| `revert` | Reverts a previously merged commit | Varies |
 
-### Examples
+### 2.3. Commit Formatting Rules
 
-```text
-feat(model): implement Product and Batch composition with FEFO helpers
-fix(controller): exclude expired batches when calculating available stock
-docs(spec): define 80-column ASCII table layout formulas in UI_SPECIFICATION
-```
+1. Write the subject line in the imperative present tense (e.g., `add`, `fix`, `update`, `refactor`, not `added`, `fixes`, or `updating`).
+2. Start the description immediately following the colon in lowercase (e.g., `feat: implement user signup`).
+3. Do not end the subject line with a period (`.`) or exclamation mark (`!`).
+4. Keep the subject line under 72 characters. Wrap body paragraphs at 72 characters with a hard maximum limit of 100 characters for long URLs or tokens.
+5. Make each commit self-contained and focused on a single logical change. Every commit should leave the codebase in a compilable and passing state.
+6. Indicate breaking changes by placing a `!` before the colon in the header (e.g., `feat(api)!: redesign authentication endpoint`) or by including `BREAKING CHANGE: <description>` in the footer (correlates with `MAJOR` in SemVer).
 
 ---
 
 ## 3. GitHub Issues and Pull Request Workflow
 
-Every code or documentation change must be tracked by a GitHub Issue and merged through a reviewed Pull Request.
+Every significant change should be tracked by an issue and integrated through a reviewed Pull Request.
 
-### Issue Tracking
+### 3.1. Issue Tracking
 
-1. Before starting work on a task, verify that a corresponding GitHub Issue exists and is assigned to the responsible team member.
-2. Each issue must state its objective, target files, enforced business rules (`BR1` through `BR34` where applicable), and testable acceptance criteria.
+1. Before starting development, verify that a corresponding GitHub Issue exists and is assigned.
+2. Each issue should describe:
+   - What problem needs to be solved or what capability needs to be added.
+   - Target packages, components, or documentation files affected.
+   - Any domain rules, interface contracts, or technical constraints.
+   - A verifiable checklist confirming when the task is complete.
 
-### Pull Request Process
+### 3.2. Pull Request Process
 
 1. Rebase or merge the latest `main` branch into your working branch and resolve any conflicts locally.
-2. Verify that the project compiles cleanly on Java 8 (`ant clean compile test`) with zero errors and zero warnings.
-3. Push the branch to the remote repository and open a Pull Request targeting `main`.
-4. Link the Pull Request to its corresponding issue using `Closes #<issue-number>` in the description.
-5. At least one team review (or project leader approval) is required before merging into `main`. Delete the working branch after the Pull Request is merged.
+2. Ensure all build steps, test suites, linters (including commit message linters), and quality checks pass cleanly with zero errors.
+3. Push the branch to remote and open a Pull Request targeting `main`. Fill out the Pull Request template completely.
+4. Link the PR to its corresponding issue using closing keywords (e.g., `Closes #<issue-number>`) in the description.
+5. At least one peer review or maintainer approval is required before merging. After merging, delete the feature branch to keep the repository tidy.
