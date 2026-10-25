@@ -33,8 +33,9 @@ public class InventoryMenu extends Menu {
     private static final String BATCH_TABLE_HEADER = "| Batch  | ProdID | Product Name    | Prod Date  | Exp Date   |   Qty | Status |";
     private static final String LOW_STOCK_BORDER = "+--------+-------------------------+--------------+--------+--------+----------+";
     private static final String LOW_STOCK_HEADER = "| ID     | Product Name            | Category     | Unit   |  Avail |    Total |";
-    private static final String PRODUCT_BATCHES_BORDER = "+--------+------------+------------+------------+-------+----------------------+";
-    private static final String PRODUCT_BATCHES_HEADER = "| Batch  | ImportDate | Prod Date  | Exp Date   |   Qty | Status               |";
+    private static final String PRODUCT_BATCHES_BORDER = "+--------+------------+------------+------------+----------+-------------------+";
+    private static final String PRODUCT_BATCHES_HEADER = "| Batch  | ImportDate | Prod Date  | Exp Date   | Status   |               Qty |";
+    private static final String PRODUCT_BATCHES_TOTAL_BORDER = "+----------------------------------------------------------+-------------------+";
 
     private final ProductController productController;
 
@@ -162,7 +163,8 @@ public class InventoryMenu extends Menu {
             System.out.printf("  Batch %s | Product: %s - %s | Current Stock: %d%n",
                     target.getBatchId(), target.getProductId(), parentName, target.getQuantity());
 
-            Integer newQty = ConsoleUtil.readInt("Enter new exact batch quantity [>=0] (or 0 to cancel): ", 0, Integer.MAX_VALUE);
+            Integer newQty = ConsoleUtil.readInt("Enter new exact batch quantity [>=0] (or 0 to cancel): ", 0,
+                    Integer.MAX_VALUE);
             if (!ConsoleUtil.confirm("Confirm setting batch " + target.getBatchId() + " stock to " + newQty + "?")) {
                 System.out.println("  [INFO] Adjustment cancelled.");
                 printDivider();
@@ -347,7 +349,8 @@ public class InventoryMenu extends Menu {
     }
 
     /**
-     * Renders a dedicated 80-column ASCII table showing all imported batches for a product.
+     * Renders a dedicated 80-column ASCII table showing all imported batches for a
+     * product.
      *
      * @param product the non-null product whose batches are to be displayed
      */
@@ -357,44 +360,45 @@ public class InventoryMenu extends Menu {
             return;
         }
         System.out.println(PRODUCT_BATCHES_BORDER);
-        String titleLine = "Product: " + product.getId() + " - " + product.getName();
-        System.out.printf("| %-76s |%n", TableFormatter.fit(titleLine, 76));
-
-        String detailsLine = String.format("Category: %-10s | Unit: %-6s | Price: %s | Stock: %d / %d",
-                TableFormatter.fit(product.getCategory(), 10),
-                TableFormatter.fit(product.getUnit(), 6),
-                InputValidator.formatCurrency(product.getPrice()),
-                product.getAvailableStock(),
-                product.getTotalStock());
-        System.out.printf("| %-76s |%n", TableFormatter.fit(detailsLine, 76));
+        System.out.printf("| %-76s |%n",
+                TableFormatter.fit("Product : " + product.getId() + " - " + product.getName(), 76));
+        System.out.printf("| %-76s |%n",
+                TableFormatter.fit("Category: " + product.getCategory(), 76));
+        System.out.printf("| %-76s |%n",
+                TableFormatter.fit("Unit    : " + product.getUnit(), 76));
+        System.out.printf("| %-76s |%n",
+                TableFormatter.fit("Price   : " + InputValidator.formatCurrency(product.getPrice()), 76));
+        System.out.printf("| %-76s |%n",
+                TableFormatter.fit("Stock   : " + product.getAvailableStock() + "/" + product.getTotalStock(), 76));
         System.out.println(PRODUCT_BATCHES_BORDER);
         System.out.println(PRODUCT_BATCHES_HEADER);
         System.out.println(PRODUCT_BATCHES_BORDER);
 
         List<Batch> batches = product.getBatches();
         if (batches.isEmpty()) {
-            System.out.printf("| %-76s |%n", TableFormatter.center("(No inventory batches recorded for this product)", 76));
+            System.out.printf("| %-76s |%n",
+                    TableFormatter.center("(No inventory batches recorded for this product)", 76));
         } else {
             for (Batch batch : batches) {
                 String batchIdCell = TableFormatter.fit(batch.getBatchId(), 6);
                 String importDateCell = TableFormatter.fit(InputValidator.formatDisplayDate(batch.getImportDate()), 10);
-                String prodDateCell = TableFormatter.fit(InputValidator.formatDisplayDate(batch.getProductionDate()), 10);
-                String expDateCell = TableFormatter.fit(InputValidator.formatDisplayDate(batch.getExpirationDate()), 10);
-                String qtyCell = TableFormatter.fitRight(String.valueOf(batch.getQuantity()), 5);
-                String statusCell = TableFormatter.fit(determineBatchStatus(batch), 20);
+                String prodDateCell = TableFormatter.fit(InputValidator.formatDisplayDate(batch.getProductionDate()),
+                        10);
+                String expDateCell = TableFormatter.fit(InputValidator.formatDisplayDate(batch.getExpirationDate()),
+                        10);
+                String statusCell = TableFormatter.fit(determineBatchStatus(batch), 8);
+                String qtyCell = TableFormatter.fitRight(String.valueOf(batch.getQuantity()), 17);
 
                 System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
-                        batchIdCell, importDateCell, prodDateCell, expDateCell, qtyCell, statusCell);
+                        batchIdCell, importDateCell, prodDateCell, expDateCell, statusCell, qtyCell);
             }
         }
         System.out.println(PRODUCT_BATCHES_BORDER);
-        String footerLine = String.format("Total Batches: %d | Total Inventory Stock: %d %s (Available: %d %s)",
-                batches.size(),
-                product.getTotalStock(), product.getUnit(),
-                product.getAvailableStock(), product.getUnit());
-        System.out.printf("| %-76s |%n", TableFormatter.fit(footerLine, 76));
-        System.out.println(PRODUCT_BATCHES_BORDER);
-        System.out.printf("  Total batches displayed for %s: %d%n", product.getId(), batches.size());
+        System.out.printf("| %s | %s |%n",
+                TableFormatter.fit("Total Inventory Stock", 56),
+                TableFormatter.fitRight(String.valueOf(product.getTotalStock()), 17));
+        System.out.println(PRODUCT_BATCHES_TOTAL_BORDER);
+        System.out.printf("  Total batches displayed: %d%n", batches.size());
     }
 
     /**

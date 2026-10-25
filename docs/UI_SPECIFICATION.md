@@ -166,20 +166,23 @@ Formula: `1 + (8) + 1 + (8) + 1 + (18) + 1 + (12) + 1 + (12) + 1 + (7) + 1 + (8)
 
 ### 4.4. Dedicated Product Batches Detail Table (`80` Columns)
 
-Formula: `1 + (8) + 1 + (12) + 1 + (12) + 1 + (12) + 1 + (7) + 1 + (22) + 1 = 80` columns.
+Formula: `1 + (8) + 1 + (12) + 1 + (12) + 1 + (12) + 1 + (10) + 1 + (19) + 1 = 80` columns.
 
 ```text
-+--------+------------+------------+------------+-------+----------------------+
-| Product: P00001 - ST25 Fragrant Rice 5kg                                     |
-| Category: Grains     | Unit: Bag    | Price: 165,000 | Stock: 45 / 45        |
-+--------+------------+------------+------------+-------+----------------------+
-| Batch  | ImportDate | Prod Date  | Exp Date   |   Qty | Status               |
-+--------+------------+------------+------------+-------+----------------------+
-| B00001 | 05/10/2026 | 25/09/2026 | 23/04/2027 |    15 | ACTIVE               |
-| B00002 | 15/10/2026 | 10/10/2026 | 23/04/2027 |    30 | ACTIVE               |
-+--------+------------+------------+------------+-------+----------------------+
-| Total Batches: 2 | Total Inventory Stock: 45 Bag (Available: 45 Bag)         |
-+--------+------------+------------+------------+-------+----------------------+
++--------+------------+------------+------------+----------+-------------------+
+| Product : P00002 - Hao Hao Sour Spicy Noodles                                |
+| Category: Noodles                                                            |
+| Unit    : Pack                                                               |
+| Price   : 4,500                                                              |
+| Stock   : 140/140                                                            |
++--------+------------+------------+------------+----------+-------------------+
+| Batch  | ImportDate | Prod Date  | Exp Date   | Status   |               Qty |
++--------+------------+------------+------------+----------+-------------------+
+| B00003 | 05/10/2026 | 25/09/2026 | 23/04/2027 | ACTIVE   |                80 |
+| B00004 | 15/10/2026 | 10/10/2026 | 23/04/2027 | ACTIVE   |                60 |
++--------+------------+------------+------------+----------+-------------------+
+| Total Inventory Stock                                    |               140 |
++----------------------------------------------------------+-------------------+
 ```
 
 | Column Header | Content Width (`fit`) | Padded Cell Width | Description |
@@ -188,8 +191,8 @@ Formula: `1 + (8) + 1 + (12) + 1 + (12) + 1 + (12) + 1 + (7) + 1 + (22) + 1 = 80
 | `ImportDate` | `10` (`dd/MM/yyyy`) | `12` | Warehouse import date |
 | `Prod Date` | `10` (`dd/MM/yyyy`) | `12` | Manufacturing date |
 | `Exp Date` | `10` (`dd/MM/yyyy`) | `12` | Expiration date |
-| `Qty` | `5` | `7` | Batch remaining stock |
-| `Status` | `20` | `22` | Shelf-life status |
+| `Status` | `8` (`ACTIVE`/`NEAR`/`EXPRD`/`EMPTY`) | `10` | Shelf-life status |
+| `Qty` | `17` | `19` | Batch remaining stock (right-aligned) |
 
 ### 4.5. Customer Directory Table (`80` Columns)
 
