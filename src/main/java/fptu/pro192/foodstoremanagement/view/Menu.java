@@ -12,8 +12,16 @@ import java.util.NoSuchElementException;
  */
 public abstract class Menu {
 
+    public static final String DIVIDER = TableFormatter.repeat('-', TableFormatter.SCREEN_WIDTH);
     private static final String DOUBLE_BORDER = TableFormatter.repeat('=', TableFormatter.SCREEN_WIDTH);
-    private static final String SINGLE_BORDER = TableFormatter.repeat('-', TableFormatter.SCREEN_WIDTH);
+
+    /**
+     * Prints an empty line followed by the standard 80-character divider.
+     */
+    public static void printDivider() {
+        System.out.println();
+        System.out.println(DIVIDER);
+    }
 
     /**
      * Uppercase menu screen title centered in the 80-column header banner.
@@ -65,9 +73,6 @@ public abstract class Menu {
                         printBreadcrumbHeader(this.title + " > [" + choice + "] " + this.options[choice - 1]);
                     }
                     handleChoice(choice);
-                    if (shouldPauseAfterAction(choice)) {
-                        ConsoleUtil.pressEnterToContinue();
-                    }
                 }
             } catch (NoSuchElementException e) {
                 running = false;
@@ -88,7 +93,7 @@ public abstract class Menu {
             System.out.printf("  [%d] %s%n", i + 1, this.options[i]);
         }
         System.out.printf("  [0] %s%n", getZeroOptionLabel());
-        System.out.println(SINGLE_BORDER);
+        System.out.println(DIVIDER);
     }
 
     /**
@@ -97,30 +102,6 @@ public abstract class Menu {
      * @param choice the validated 1-based option index selected by the user
      */
     protected abstract void handleChoice(int choice);
-
-    /**
-     * Hook method controlling whether the menu pauses for the user to press
-     * Enter after completing an action. Subclasses can override this method
-     * to selectively suppress pausing for specific options (e.g. search or
-     * view loops).
-     *
-     * @param choice the 1-based option index that was executed
-     * @return true to pause after handleChoice, false otherwise
-     */
-    protected boolean shouldPauseAfterAction(int choice) {
-        return shouldPauseAfterAction();
-    }
-
-    /**
-     * Hook method controlling whether the menu pauses for the user to press
-     * Enter after completing an action. Defaults to true for leaf menus and
-     * is overridden to return false in MainMenu.
-     *
-     * @return true to pause after handleChoice, false otherwise
-     */
-    protected boolean shouldPauseAfterAction() {
-        return true;
-    }
 
     /**
      * Hook method controlling whether an automatic breadcrumb banner is rendered

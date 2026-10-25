@@ -80,17 +80,6 @@ public class MainMenu extends Menu {
     }
 
     /**
-     * Suppresses the "Press Enter to continue" pause when returning from a
-     * submenu back to the main menu.
-     *
-     * @return false so MainMenu immediately re-renders after a submenu exits
-     */
-    @Override
-    protected boolean shouldPauseAfterAction() {
-        return false;
-    }
-
-    /**
      * Suppresses automatic breadcrumb banners at the top-level main menu.
      *
      * @return false so that submenus render their own contextual breadcrumbs

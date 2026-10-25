@@ -27,7 +27,6 @@ public class SalesMenu extends Menu {
             "View All Sales Orders"
     };
 
-    private static final String DIVIDER = TableFormatter.repeat('-', TableFormatter.SCREEN_WIDTH);
     private static final String INVOICE_BORDER = "+-----+--------+-------------------------+-------+-------------+---------------+";
     private static final String ORDERS_BORDER = "+----------+----------+------------+-------------+-------------+---------------+";
 
@@ -76,29 +75,26 @@ public class SalesMenu extends Menu {
         }
     }
 
-    @Override
-    protected boolean shouldPauseAfterAction(int choice) {
-        return false;
-    }
-
     /**
      * Interactive workflow for assembling a draft shopping cart, adding items
      * with real-time stock and expiration checks, and completing or cancelling
-     * the transaction.
+     * the transaction in a continuous loop.
      */
     public void handleCreateOrderFlow() {
-        List<Product> activeProducts = this.productController.getAllProducts();
-        if (activeProducts.isEmpty()) {
-            System.out.println("  [WARN] No active products in catalog. Cannot create an order.");
-            return;
+        while (true) {
+            List<Product> activeProducts = this.productController.getAllProducts();
+            if (activeProducts.isEmpty()) {
+                System.out.println("  [WARN] No active products in catalog. Cannot create an order.");
+                break;
+            }
+            String resolvedCustomerId = promptCustomerOrGuest();
+            if ("CANCEL".equals(resolvedCustomerId)) {
+                break;
+            }
+            Order draft = this.orderController.createDraftOrder(resolvedCustomerId);
+            executeLiveCartDashboard(draft);
+            printDivider();
         }
-        String resolvedCustomerId = promptCustomerOrGuest();
-        if ("CANCEL".equals(resolvedCustomerId)) {
-            System.out.println("  [INFO] Order creation cancelled.");
-            return;
-        }
-        Order draft = this.orderController.createDraftOrder(resolvedCustomerId);
-        executeLiveCartDashboard(draft);
     }
 
     private void executeLiveCartDashboard(Order draft) {
@@ -117,7 +113,7 @@ public class SalesMenu extends Menu {
 
             int action = ConsoleUtil.readInt("\nSelect cart action [1-2] (or 0 to cancel): ", 0, 2);
             if (action == 0) {
-                if (draft.getItems().isEmpty() || ConsoleUtil.confirm("Discard draft order and return to menu?")) {
+                if (draft.getItems().isEmpty() || ConsoleUtil.confirm("Discard draft order and return?")) {
                     this.orderController.cancelDraft(draft);
                     System.out.println("  [INFO] Draft order cancelled.");
                     shopping = false;
@@ -132,8 +128,7 @@ public class SalesMenu extends Menu {
 
     private boolean handleCheckout(Order draft) {
         if (draft.getItems().isEmpty()) {
-            System.out.println("  [ERROR] Cart is empty. Add at least one item before checkout or press 0 to cancel.");
-            ConsoleUtil.pressEnterToContinue();
+            System.out.println("  [ERROR] Cart is empty. Add at least one item before checkout or select 0 to cancel.");
             return false;
         }
         if (!ConsoleUtil.confirm("Confirm payment and deduct stock via FEFO?")) {
@@ -146,11 +141,9 @@ public class SalesMenu extends Menu {
                     finalized.getOrderId(),
                     InputValidator.formatCurrency(finalized.getFinalAmount()));
             renderInvoiceTable(finalized);
-            ConsoleUtil.pressEnterToContinue();
             return true;
         } catch (IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
-            ConsoleUtil.pressEnterToContinue();
             return false;
         }
     }
@@ -158,7 +151,7 @@ public class SalesMenu extends Menu {
     private String promptCustomerOrGuest() {
         while (true) {
             String raw = ConsoleUtil.readOptionalString(
-                    "Enter Customer ID (e.g., C00001, 'GUEST', or 0 to cancel): ");
+                    "Enter Customer ID (e.g., C00001, Enter for GUEST, 0 to cancel): ");
             if ("0".equals(raw)) {
                 return "CANCEL";
             }
@@ -192,11 +185,9 @@ public class SalesMenu extends Menu {
         }
         try {
             this.orderController.addItemToDraft(draft, selected.getId(), qty);
-            System.out.printf("  [OK] Added %d x %s to cart.%n%n", qty, selected.getName());
-            ConsoleUtil.pressEnterToContinue();
+            System.out.printf("  [OK] Added %d x %s to cart.%n", qty, selected.getName());
         } catch (IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
-            ConsoleUtil.pressEnterToContinue();
         }
     }
 
@@ -225,7 +216,6 @@ public class SalesMenu extends Menu {
         List<Product> matches = this.productController.search(input);
         if (matches.isEmpty()) {
             System.out.println("  [ERROR] No active products match keyword: " + input);
-            ConsoleUtil.pressEnterToContinue();
             return null;
         }
         if (matches.size() == 1) {
@@ -237,7 +227,7 @@ public class SalesMenu extends Menu {
 
     private Product promptExactProductIdToAdd() {
         while (true) {
-            String raw = ConsoleUtil.readCancellableString(
+            String raw = ConsoleUtil.readString(
                     "Enter Product ID to add (or 0 to cancel): ");
             if (raw == null) {
                 return null;
@@ -258,7 +248,6 @@ public class SalesMenu extends Menu {
             System.out.println("  [ERROR] Product '" + product.getName()
                     + "' has 0 remaining sellable stock available.");
         }
-        ConsoleUtil.pressEnterToContinue();
     }
 
     /**
@@ -268,8 +257,8 @@ public class SalesMenu extends Menu {
     public void handleViewAllOrders() {
         renderOrdersSummaryTable(this.orderController.getAllOrders());
         while (true) {
-            System.out.println(DIVIDER);
-            String input = ConsoleUtil.readOptionalString("Enter search keyword (or 0 to cancel): ");
+            printDivider();
+            String input = ConsoleUtil.readOptionalString("Enter search keyword or Order ID (or 0 to cancel): ");
             if ("0".equals(input)) {
                 break;
             }
