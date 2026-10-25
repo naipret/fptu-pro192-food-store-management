@@ -167,79 +167,84 @@ public class SalesMenu extends Menu {
     }
 
     private void promptAddItemToCart(Order draft) {
-        Product selected = selectProductForCart();
-        if (selected == null) {
-            return;
-        }
-        int remainingStock = this.orderController.getRemainingAvailableStock(draft, selected.getId());
-        if (remainingStock <= 0) {
-            displayStockDepletedError(selected);
-            return;
-        }
-        ProductMenu.renderProductTable(Collections.singletonList(selected));
-        System.out.println();
-        Integer qty = ConsoleUtil.readPositiveInt(
-                "Enter quantity to add (1-" + remainingStock + ", or 0 to cancel): ", remainingStock);
-        if (qty == null) {
-            return;
-        }
-        try {
-            this.orderController.addItemToDraft(draft, selected.getId(), qty);
-            System.out.printf("  [OK] Added %d x %s to cart.%n", qty, selected.getName());
-        } catch (IllegalArgumentException e) {
-            System.out.println("  [ERROR] " + e.getMessage());
+        while (true) {
+            Product selected = selectProductForCart();
+            if (selected == null) {
+                return;
+            }
+            int remainingStock = this.orderController.getRemainingAvailableStock(draft, selected.getId());
+            if (remainingStock <= 0) {
+                displayStockDepletedError(selected);
+                continue;
+            }
+            ProductMenu.renderProductTable(Collections.singletonList(selected));
+            System.out.println();
+            Integer qty = ConsoleUtil.readPositiveInt(
+                    "Enter quantity to add (1-" + remainingStock + ", or 0 to cancel): ", remainingStock);
+            if (qty == null) {
+                System.out.println("  [INFO] Operation cancelled.");
+                continue;
+            }
+            try {
+                this.orderController.addItemToDraft(draft, selected.getId(), qty);
+                System.out.printf("  [OK] Added %d x %s to cart.%n", qty, selected.getName());
+                return;
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
         }
     }
 
     private Product selectProductForCart() {
-        System.out.println();
-        System.out.println("  (Enter for all, 0 to cancel)");
-        String input = ConsoleUtil.readOptionalString(
-                "Enter Product ID or search keyword: ");
-        if ("0".equals(input)) {
-            return null;
+        while (true) {
+            printDivider();
+            String input = ConsoleUtil.readOptionalString(
+                    "Enter search keyword or Product ID (Enter for all, 0 to cancel): ");
+            if ("0".equals(input)) {
+                return null;
+            }
+            if (input.isEmpty()) {
+                ProductMenu.renderProductTable(this.productController.getAllProducts());
+                continue;
+            }
+            Product direct = resolveProductByIdOrKeyword(input);
+            if (direct != null) {
+                return direct;
+            }
         }
-        if (input.isEmpty()) {
-            ProductMenu.renderProductTable(this.productController.getAllProducts());
-            return promptExactProductIdToAdd();
-        }
-        return resolveProductByIdOrKeyword(input);
     }
 
     private Product resolveProductByIdOrKeyword(String input) {
-        String possibleId = InputValidator.tryNormalizeProductId(input);
+        if (input == null || input.trim().isEmpty()) {
+            return null;
+        }
+        String clean = input.trim();
+        String lower = clean.toLowerCase(Locale.ROOT);
+        if (lower.startsWith("product ")) {
+            clean = clean.substring(8).trim();
+        } else if (lower.startsWith("prod ")) {
+            clean = clean.substring(5).trim();
+        }
+
+        String possibleId = InputValidator.tryNormalizeProductId(clean);
         Product direct = (possibleId != null) ? this.productController.findById(possibleId) : null;
         if (direct == null) {
-            direct = this.productController.findById(input);
+            direct = this.productController.findById(clean);
         }
         if (direct != null) {
             return direct;
         }
-        List<Product> matches = this.productController.search(input);
+
+        List<Product> matches = this.productController.search(clean);
         if (matches.isEmpty()) {
-            System.out.println("  [ERROR] No active products match keyword: " + input);
+            System.out.println("  [ERROR] No active products match keyword or ID: " + input);
             return null;
         }
         if (matches.size() == 1) {
             return matches.get(0);
         }
         ProductMenu.renderProductTable(matches);
-        return promptExactProductIdToAdd();
-    }
-
-    private Product promptExactProductIdToAdd() {
-        while (true) {
-            String raw = ConsoleUtil.readString(
-                    "Enter Product ID to add (or 0 to cancel): ");
-            if (raw == null) {
-                return null;
-            }
-            Product found = this.productController.findById(raw);
-            if (found != null) {
-                return found;
-            }
-            System.out.println("  [ERROR] Active product not found with ID: " + raw);
-        }
+        return null;
     }
 
     private void displayStockDepletedError(Product product) {

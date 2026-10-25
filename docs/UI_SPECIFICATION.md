@@ -253,7 +253,7 @@ Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 
    - `[0] Back to Main Menu`
 
 3. Sales Menu (`SalesMenu`):
-   - `[1] New Sale` (prompts Customer ID or Enter for Guest; Live Dashboard displaying Cart Table at top, Add to Cart with live product table inspection, Complete Checkout, Cancel)
+   - `[1] New Sale` (prompts Customer ID or Enter for Guest; Live Dashboard displaying Cart Table at top, Add to Cart with continuous keyword/ID search and catalog inspection loop, Complete Checkout, Cancel)
    - `[2] View All Sales Orders` (summary table with smart Order ID auto-expansion into full invoice details, keyword search, Enter refresh loop)
    - `[0] Back to Main Menu`
 
@@ -292,3 +292,4 @@ To provide maximum usability for grocery store clerks:
 - Case-insensitive substring matching against Customer ID, Full Name, Phone Number, or Residential Address (e.g., `HCM` or `Le Loi`). Supports shorthand ID normalization (e.g., `C1` or `1` matches `C00001`). Prompts loop continuously until `0` is entered to return to the menu.
 - Substring matching against Order ID, Customer ID, Customer Name, or Order Date representations (e.g. `2026`, `10/2026`, `19/10/2026`). Smart Order ID detection automatically expands and displays the full itemized invoice table when shorthand or canonical Order ID is provided (`4`, `O4`, or `O00004`). Prompts loop continuously until `0` is entered to return to the menu.
 - Dedicated Product Batches inspection in Inventory Menu (`[3] View All Batches of a Product`): Entering a Product ID in shorthand or natural prefix (`p1`, `prod p1`, `product p1`, or `P00001`) automatically expands and displays the dedicated Product Batches Detail Table showing the product summary header and itemized warehouse batches. Prompts loop continuously until `0` is entered to return to the menu.
+- Continuous Search in Sales Cart Flow (`[1] New Sale > [1] Add Product to Cart`): Prompts loop continuously with `Enter search keyword or Product ID (Enter for all, 0 to cancel): `. Supports keyword filtering across names and categories, full catalog refresh on empty `[Enter]`, shorthand Product ID normalization (e.g., `1`, `p1`, `prod p1`), and direct single-match selection with immediate quantity prompting. Entering `0` cancels and returns to the cart dashboard.
