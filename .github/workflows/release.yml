@@ -41,18 +41,13 @@ jobs:
       - name: Prepare Release Archive
         run: |
           mkdir -p release-pkg/dist
-          mkdir -p release-pkg/data
-          touch release-pkg/data/.gitkeep
 
           # Copy NetBeans project structure to package root
           cp -r .github/netbeans/* release-pkg/
 
-          # Copy core sources, scripts, and documentation
+          # Copy core sources and scripts
           cp -r src release-pkg/
           cp -r scripts release-pkg/
-          cp README.md release-pkg/
-          cp CONTRIBUTING.md release-pkg/ 2>/dev/null || true
-          cp LICENSE release-pkg/ 2>/dev/null || true
 
           # Copy pre-compiled distribution JAR
           cp dist/fptu-pro192-food-store-management.jar release-pkg/dist/
@@ -66,16 +61,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: Food Store Management System (Continuous Build)
+          name: Latest Release
           body: |
             Automated continuous release generated from commit `${{ github.sha }}` on branch `main`.
-
-            ### Package Contents (`fptu-pro192-food-store-management.zip`):
-            - **NetBeans IDE Ready:** Open directly in NetBeans (`nbproject/`, `build.xml`).
-            - **Pre-compiled Executable:** Ready-to-run JAR located in `dist/`.
-            - **Complete Source Code:** Full Java source files in `src/`.
-            - **Dynamic Date Seeding:** Includes `scripts/seed.ps1` and `scripts/seed.sh` to generate fresh sample data for today.
-            - **Data Folder:** Empty `data/` directory ready for runtime persistence.
           files: fptu-pro192-food-store-management.zip
           draft: false
           prerelease: false
