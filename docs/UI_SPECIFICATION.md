@@ -259,8 +259,8 @@ Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 
 
 4. Inventory Menu (`InventoryMenu`):
    - `[1] Import New Batch for Product` (prompts Product ID with immediate product table display, production date with today default, expiration date, quantity, continuous loop)
-   - `[2] Adjust Existing Batch Quantity` (lookup batch across products with immediate batch table display, set exact non-negative stock with confirmation)
-   - `[3] View All Batches of a Product` (all active batches table with keyword and Product ID inspection loop)
+   - `[2] View All Batches of a Product` (all active batches table with keyword and Product ID inspection loop)
+   - `[3] Adjust Existing Batch Quantity` (lookup batch across products with immediate batch table display, set exact non-negative stock with confirmation)
    - `[4] Alert Low-Stock Products` (interactive threshold prompt with default 5)
    - `[5] Alert Near-Expiry Batches` (interactive warning window prompt with default 7 days)
    - `[6] Alert Expired Batches` (lists expired batches with look-back filter)
@@ -291,5 +291,5 @@ To provide maximum usability for grocery store clerks:
 - Case-insensitive substring matching against Product ID, Product Name, Category, or Measurement Unit. Supports shorthand ID normalization (e.g., `P1` or `1` matches `P00001`). Prompts loop continuously until `0` is entered to return to the menu.
 - Case-insensitive substring matching against Customer ID, Full Name, Phone Number, or Residential Address (e.g., `HCM` or `Le Loi`). Supports shorthand ID normalization (e.g., `C1` or `1` matches `C00001`). Prompts loop continuously until `0` is entered to return to the menu.
 - Substring matching against Order ID, Customer ID, Customer Name, or Order Date representations (e.g. `2026`, `10/2026`, `19/10/2026`). Smart Order ID detection automatically expands and displays the full itemized invoice table when shorthand or canonical Order ID is provided (`4`, `O4`, or `O00004`). Prompts loop continuously until `0` is entered to return to the menu.
-- Dedicated Product Batches inspection in Inventory Menu (`[3] View All Batches of a Product`): Entering a Product ID in shorthand or natural prefix (`p1`, `prod p1`, `product p1`, or `P00001`) automatically expands and displays the dedicated Product Batches Detail Table showing the product summary header and itemized warehouse batches. Prompts loop continuously until `0` is entered to return to the menu.
+- Dedicated Product Batches inspection in Inventory Menu (`[2] View All Batches of a Product`): Entering a Product ID in shorthand or natural prefix (`p1`, `prod p1`, `product p1`, or `P00001`) automatically expands and displays the dedicated Product Batches Detail Table showing the product summary header and itemized warehouse batches. Prompts loop continuously until `0` is entered to return to the menu.
 - Continuous Search in Sales Cart Flow (`[1] New Sale > [1] Add Product to Cart`): Prompts loop continuously with `Enter search keyword or Product ID (Enter for all, 0 to cancel):`. Supports keyword filtering across names and categories, full catalog refresh on empty `[Enter]`, shorthand Product ID normalization (e.g., `1`, `p1`, `prod p1`), and direct single-match selection with immediate quantity prompting. Entering `0` cancels and returns to the cart dashboard.

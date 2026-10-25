@@ -22,8 +22,8 @@ public class InventoryMenu extends Menu {
 
     private static final String[] MENU_OPTIONS = {
             "Import New Batch for Product",
-            "Adjust Existing Batch Quantity",
             "View All Batches of a Product",
+            "Adjust Existing Batch Quantity",
             "Alert Low-Stock Products",
             "Alert Near-Expiry Batches",
             "Alert Expired Batches"
@@ -60,10 +60,10 @@ public class InventoryMenu extends Menu {
                 handleImportNewBatch();
                 break;
             case 2:
-                handleAdjustBatchStock();
+                handleViewBatches();
                 break;
             case 3:
-                handleViewBatches();
+                handleAdjustBatchStock();
                 break;
             case 4:
                 handleViewLowStockAlert();
