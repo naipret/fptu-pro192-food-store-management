@@ -71,13 +71,13 @@ Set-Content -Path (Join-Path $dataDir "batches.csv") -Value $batchesCsv -Encodin
 
 $customersCsv = @"
 id,fullName,phone,address,customerType,isDeleted
-C00001,Nguyễn Văn An,0901234567,"12 Lê Lợi, Ben Nghe Ward, District 1, Ho Chi Minh City",VIP,false
-C00002,Trần Thị Bình,0912345678,"45 Nguyễn Huệ, District 1, Ho Chi Minh City",Regular,false
-C00003,Lê Hoàng Minh,0987654321,"108 Điện Biên Phủ, Ward 6, District 3, Ho Chi Minh City",VIP,false
-C00004,Phạm Thu Hà,0938112233,"22 Phan Xích Long, Phu Nhuan District, Ho Chi Minh City",Regular,false
-C00005,Võ Quốc Bảo,0979445566,"88 Nguyễn Văn Linh, District 7, Ho Chi Minh City",VIP,false
-C00006,Đặng Minh Tuấn,0909887766,"15 Cách Mạng Tháng 8, District 10, Ho Chi Minh City",Regular,false
-C00007,Hoàng Gia Huy,0932998877,"30 Lý Tự Trọng, District 1, Ho Chi Minh City",Regular,true
+C00001,Nguyen Van An,0901234567,"12 Le Loi, Ben Nghe Ward, District 1, Ho Chi Minh City",VIP,false
+C00002,Tran Thi Binh,0912345678,"45 Nguyen Hue, District 1, Ho Chi Minh City",Regular,false
+C00003,Le Hoang Minh,0987654321,"108 Dien Bien Phu, Ward 6, District 3, Ho Chi Minh City",VIP,false
+C00004,Pham Thu Ha,0938112233,"22 Phan Xich Long, Phu Nhuan District, Ho Chi Minh City",Regular,false
+C00005,Vo Quoc Bao,0979445566,"88 Nguyen Van Linh, District 7, Ho Chi Minh City",VIP,false
+C00006,Dang Minh Tuan,0909887766,"15 Cach Mang Thang 8, District 10, Ho Chi Minh City",Regular,false
+C00007,Hoang Gia Huy,0932998877,"30 Ly Tu Trong, District 1, Ho Chi Minh City",Regular,true
 "@
 Set-Content -Path (Join-Path $dataDir "customers.csv") -Value $customersCsv -Encoding UTF8
 
