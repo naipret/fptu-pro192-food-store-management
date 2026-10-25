@@ -250,7 +250,7 @@ public class SalesMenu extends Menu {
     private void displayStockDepletedError(Product product) {
         if (product.getTotalStock() > 0 && product.getAvailableStock() == 0) {
             System.out.println("  [ERROR] Cannot add '" + product.getName()
-                    + "': all batches in stock have expired (BR11).");
+                    + "': all batches in stock have expired.");
         } else {
             System.out.println("  [ERROR] Product '" + product.getName()
                     + "' has 0 remaining sellable stock available.");
