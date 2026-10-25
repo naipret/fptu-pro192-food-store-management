@@ -307,7 +307,7 @@ public class InventoryMenu extends Menu {
                     TableFormatter.fitRight(String.valueOf(p.getTotalStock()), 8));
         }
         System.out.println(LOW_STOCK_BORDER);
-        System.out.printf("  Total low-stock products (<= %d units): %d%n", threshold, lowStock.size());
+        System.out.printf("  Total low-stock products listed: %d%n", lowStock.size());
     }
 
     private void handleViewNearExpiryAlert() {
@@ -327,7 +327,7 @@ public class InventoryMenu extends Menu {
     private void handleViewExpiredAlert() {
         while (true) {
             Integer windowDays = ConsoleUtil.readInt(
-                    "Enter look-back window in days (Enter for all, 0 to cancel): ",
+                    "Enter look-back window in days [N] (Enter for all, 0 to cancel): ",
                     1, Integer.MAX_VALUE, 0);
             if (windowDays == null) {
                 break;
