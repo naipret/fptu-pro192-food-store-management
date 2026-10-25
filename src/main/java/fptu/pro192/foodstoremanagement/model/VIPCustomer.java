@@ -2,30 +2,18 @@ package fptu.pro192.foodstoremanagement.model;
 
 /**
  * Concrete customer subclass representing a VIP loyalty tier customer
- * eligible for a 10% discount on orders (BR15).
+ * eligible for a 10% discount on orders (BR16).
  */
 public class VIPCustomer extends Customer {
 
     /**
-     * Fractional discount rate for VIP tier customers (10%) (BR15).
+     * Fractional discount rate for VIP tier customers (10%) (BR16).
      */
     public static final double DISCOUNT_RATE = 0.10;
 
     /**
-     * Constructs an active VIPCustomer (BR2, BR3, BR15, BR25).
-     *
-     * @param id       the 6-character customer ID (C00001-C99999)
-     * @param fullName the customer's full name
-     * @param phone    the customer's phone number
-     * @param address  the customer's address
-     */
-    public VIPCustomer(String id, String fullName, String phone, String address) {
-        super(id, fullName, phone, address, false);
-    }
-
-    /**
-     * Constructs a VIPCustomer with an explicit soft-delete state (BR2, BR3, BR15,
-     * BR25, BR27).
+     * Constructs a VIPCustomer with an explicit soft-delete state (BR2,
+     * BR16, BR25, BR27, BR33).
      *
      * @param id        the 6-character customer ID (C00001-C99999)
      * @param fullName  the customer's full name
@@ -38,7 +26,7 @@ public class VIPCustomer extends Customer {
     }
 
     /**
-     * Calculates the 10% loyalty discount for a VIP customer (BR15).
+     * Calculates the 10% loyalty discount for a VIP customer (BR16).
      *
      * @param amount the pre-discount order subtotal
      * @return 10% of the subtotal
@@ -53,17 +41,7 @@ public class VIPCustomer extends Customer {
     }
 
     /**
-     * Returns the fractional discount rate for VIP customers (0.10) (BR15).
-     *
-     * @return 0.10
-     */
-    @Override
-    public double getDiscountRate() {
-        return DISCOUNT_RATE;
-    }
-
-    /**
-     * Returns the canonical customer tier discriminator ("VIP") (BR15).
+     * Returns the canonical customer tier discriminator ("VIP") (BR16).
      *
      * @return "VIP"
      */

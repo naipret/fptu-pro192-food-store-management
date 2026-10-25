@@ -52,8 +52,8 @@ public class OrderController {
     private final CustomerController customerController;
 
     /**
-     * Constructs an OrderController bound to the default CSV paths in data/
-     * with explicitly injected ProductController and CustomerController instances.
+     * Constructs an OrderController bound to default CSV paths with shared
+     * controllers.
      *
      * @param productController  the shared ProductController instance
      * @param customerController the shared CustomerController instance
@@ -61,37 +61,14 @@ public class OrderController {
      */
     public OrderController(ProductController productController,
             CustomerController customerController) {
-        this(Paths.get(DEFAULT_ORDERS_CSV), Paths.get(DEFAULT_ORDER_DETAILS_CSV),
-                productController, customerController);
-    }
-
-    /**
-     * Constructs an OrderController with explicit CSV Paths and shared
-     * controller collaborators, immediately loading completed historical
-     * orders from disk.
-     *
-     * @param ordersCsvPath      the Path for orders.csv
-     * @param detailsCsvPath     the Path for order_details.csv
-     * @param productController  the shared ProductController instance
-     * @param customerController the shared CustomerController instance
-     * @throws IllegalArgumentException if any argument is null
-     */
-    public OrderController(Path ordersCsvPath, Path detailsCsvPath,
-            ProductController productController, CustomerController customerController) {
-        if (ordersCsvPath == null) {
-            throw new IllegalArgumentException("Orders CSV path cannot be null.");
-        }
-        if (detailsCsvPath == null) {
-            throw new IllegalArgumentException("Order details CSV path cannot be null.");
-        }
         if (productController == null) {
             throw new IllegalArgumentException("ProductController cannot be null.");
         }
         if (customerController == null) {
             throw new IllegalArgumentException("CustomerController cannot be null.");
         }
-        this.ordersCsvPath = ordersCsvPath;
-        this.detailsCsvPath = detailsCsvPath;
+        this.ordersCsvPath = Paths.get(DEFAULT_ORDERS_CSV);
+        this.detailsCsvPath = Paths.get(DEFAULT_ORDER_DETAILS_CSV);
         this.productController = productController;
         this.customerController = customerController;
         this.orders = new ArrayList<>();
@@ -109,10 +86,10 @@ public class OrderController {
         List<String[]> orderRows = CsvUtil.readCsv(this.ordersCsvPath);
         List<String[]> detailRows = CsvUtil.readCsv(this.detailsCsvPath);
         if (orderRows.isEmpty()) {
-            CsvUtil.writeAtomic(this.ordersCsvPath, Collections.singletonList(ORDER_CSV_HEADERS));
+            CsvUtil.writeToFile(this.ordersCsvPath, Collections.singletonList(ORDER_CSV_HEADERS));
         }
         if (detailRows.isEmpty()) {
-            CsvUtil.writeAtomic(this.detailsCsvPath, Collections.singletonList(DETAIL_CSV_HEADERS));
+            CsvUtil.writeToFile(this.detailsCsvPath, Collections.singletonList(DETAIL_CSV_HEADERS));
         }
 
         Map<String, List<OrderDetail>> detailsByOrder = new LinkedHashMap<>();
@@ -224,12 +201,12 @@ public class OrderController {
             }
         }
 
-        CsvUtil.writeAtomic(this.ordersCsvPath, orderRows);
-        CsvUtil.writeAtomic(this.detailsCsvPath, detailRows);
+        CsvUtil.writeToFile(this.ordersCsvPath, orderRows);
+        CsvUtil.writeToFile(this.detailsCsvPath, detailRows);
     }
 
     /**
-     * Generates the next available 6-character Order ID (O00001-O99999) (BR8).
+     * Generates the next available 6-character Order ID (O00001-O99999) (BR33).
      *
      * @return the next canonical Order ID
      */
@@ -238,12 +215,9 @@ public class OrderController {
         for (Order order : this.orders) {
             String id = order.getOrderId();
             if (id != null && id.length() == 6 && (id.charAt(0) == 'O' || id.charAt(0) == 'o')) {
-                try {
-                    int num = Integer.parseInt(id.substring(1));
-                    if (num > maxNumber) {
-                        maxNumber = num;
-                    }
-                } catch (NumberFormatException ignored) {
+                int num = Integer.parseInt(id.substring(1));
+                if (num > maxNumber) {
+                    maxNumber = num;
                 }
             }
         }
@@ -316,13 +290,10 @@ public class OrderController {
      * @param draft     the draft Order being assembled
      * @param productId the product ID to add
      * @param quantity  the positive integer quantity to add
-     * @throws IllegalArgumentException   if draft/product is invalid, quantity is
-     *                                    not positive, or all stock is expired
-     * @throws InsufficientStockException if cumulative cart quantity exceeds
-     *                                    available non-expired stock
+     * @throws IllegalArgumentException if draft/product is invalid, quantity is
+     *                                  not positive, or stock is insufficient
      */
-    public void addItemToDraft(Order draft, String productId, int quantity)
-            throws InsufficientStockException {
+    public void addItemToDraft(Order draft, String productId, int quantity) {
         if (draft == null) {
             throw new IllegalArgumentException("Draft order cannot be null.");
         }
@@ -344,7 +315,7 @@ public class OrderController {
         int existingInCart = draft.getQuantityForProduct(product.getId());
         int newCumulativeQuantity = existingInCart + quantity;
         if (newCumulativeQuantity > availableStock) {
-            throw new InsufficientStockException(
+            throw new IllegalArgumentException(
                     "Insufficient stock for '" + product.getName() + "'. Available: "
                             + availableStock + ", already in cart: " + existingInCart
                             + ", requested to add: " + quantity + ".");
@@ -377,12 +348,10 @@ public class OrderController {
      *
      * @param draft the non-empty draft Order to finalize
      * @return the finalized and persisted Order
-     * @throws IllegalArgumentException   if draft is null, empty, or has a
-     *                                    duplicate orderId
-     * @throws InsufficientStockException if any line item exceeds available
-     *                                    non-expired stock
+     * @throws IllegalArgumentException if draft is null, empty, or stock is
+     *                                  insufficient
      */
-    public Order finalizeOrder(Order draft) throws InsufficientStockException {
+    public Order finalizeOrder(Order draft) {
         if (draft == null) {
             throw new IllegalArgumentException("Draft order cannot be null.");
         }
@@ -402,7 +371,7 @@ public class OrderController {
             }
             int available = product.getAvailableStock();
             if (available < item.getQuantity()) {
-                throw new InsufficientStockException(
+                throw new IllegalArgumentException(
                         "Insufficient stock for '" + product.getName() + "'. Requested: "
                                 + item.getQuantity() + ", Available: " + available + ".");
             }
@@ -424,7 +393,7 @@ public class OrderController {
 
     /**
      * Finds a completed Order by its identifier (case-insensitive, supporting
-     * shorthand like "O1" to "O00001") (BR8).
+     * shorthand like "O1" to "O00001") (BR33).
      *
      * @param orderId the order ID to look up
      * @return the matching Order, or null if not found
@@ -433,10 +402,8 @@ public class OrderController {
         if (orderId == null || orderId.trim().isEmpty()) {
             return null;
         }
-        String lookupId;
-        try {
-            lookupId = InputValidator.normalizeOrderId(orderId);
-        } catch (IllegalArgumentException e) {
+        String lookupId = InputValidator.tryNormalizeOrderId(orderId);
+        if (lookupId == null) {
             lookupId = orderId.trim();
         }
         for (Order order : this.orders) {
@@ -459,16 +426,24 @@ public class OrderController {
             return getAllOrders();
         }
         String lower = keyword.trim().toLowerCase(Locale.ROOT);
+        String normalizedOrderId = InputValidator.tryNormalizeOrderId(keyword.trim());
+        String normalizedCustomerId = InputValidator.tryNormalizeCustomerId(keyword.trim());
         List<Order> result = new ArrayList<>();
         for (Order order : this.orders) {
-            boolean matchOrderId = order.getOrderId().toLowerCase(Locale.ROOT).contains(lower);
+            boolean matchOrderId = order.getOrderId().toLowerCase(Locale.ROOT).contains(lower)
+                    || (normalizedOrderId != null && order.getOrderId().equalsIgnoreCase(normalizedOrderId));
+            Customer cust = (order.getCustomerId() == null) ? null
+                    : this.customerController.findByIdIncludeDeleted(order.getCustomerId());
+            boolean matchCustName = cust != null && cust.getFullName().toLowerCase(Locale.ROOT).contains(lower);
             boolean matchCustomerId = (order.getCustomerId() != null
-                    && order.getCustomerId().toLowerCase(Locale.ROOT).contains(lower))
+                    && (order.getCustomerId().toLowerCase(Locale.ROOT).contains(lower)
+                            || (normalizedCustomerId != null
+                                    && order.getCustomerId().equalsIgnoreCase(normalizedCustomerId))))
                     || (order.getCustomerId() == null && "guest".contains(lower));
             String dateDisplay = InputValidator.formatDisplayDate(order.getOrderDate().toLocalDate());
             String dateIso = order.getOrderDate().toLocalDate().toString();
             boolean matchDate = dateDisplay.contains(lower) || dateIso.contains(lower);
-            if (matchOrderId || matchCustomerId || matchDate) {
+            if (matchOrderId || matchCustomerId || matchCustName || matchDate) {
                 result.add(order);
             }
         }
@@ -476,7 +451,7 @@ public class OrderController {
     }
 
     /**
-     * Returns an unmodifiable list of all completed orders in the system (BR17).
+     * Returns an unmodifiable list of all completed orders in the system (BR23).
      *
      * @return an unmodifiable list of Order objects
      */

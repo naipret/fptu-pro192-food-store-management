@@ -50,29 +50,12 @@ public class ProductController {
     private final Set<String> units;
 
     /**
-     * Constructs a ProductController bound to the default CSV paths in data/.
+     * Constructs a ProductController bound to default CSV paths in data/ and loads
+     * records.
      */
     public ProductController() {
-        this(Paths.get(DEFAULT_PRODUCTS_CSV), Paths.get(DEFAULT_BATCHES_CSV));
-    }
-
-    /**
-     * Constructs a ProductController bound to the specified Path objects and
-     * immediately loads existing product and batch records from disk.
-     *
-     * @param productCsvPath the Path for products.csv
-     * @param batchCsvPath   the Path for batches.csv
-     * @throws IllegalArgumentException if either Path is null
-     */
-    public ProductController(Path productCsvPath, Path batchCsvPath) {
-        if (productCsvPath == null) {
-            throw new IllegalArgumentException("Product CSV path cannot be null.");
-        }
-        if (batchCsvPath == null) {
-            throw new IllegalArgumentException("Batch CSV path cannot be null.");
-        }
-        this.productCsvPath = productCsvPath;
-        this.batchCsvPath = batchCsvPath;
+        this.productCsvPath = Paths.get(DEFAULT_PRODUCTS_CSV);
+        this.batchCsvPath = Paths.get(DEFAULT_BATCHES_CSV);
         this.products = new ArrayList<>();
         this.categories = new LinkedHashSet<>(InputValidator.DEFAULT_CATEGORIES);
         this.units = new LinkedHashSet<>(InputValidator.DEFAULT_UNITS);
@@ -94,10 +77,10 @@ public class ProductController {
         List<String[]> productRows = CsvUtil.readCsv(this.productCsvPath);
         List<String[]> batchRows = CsvUtil.readCsv(this.batchCsvPath);
         if (productRows.isEmpty()) {
-            CsvUtil.writeAtomic(this.productCsvPath, Collections.singletonList(PRODUCT_CSV_HEADERS));
+            CsvUtil.writeToFile(this.productCsvPath, Collections.singletonList(PRODUCT_CSV_HEADERS));
         }
         if (batchRows.isEmpty()) {
-            CsvUtil.writeAtomic(this.batchCsvPath, Collections.singletonList(BATCH_CSV_HEADERS));
+            CsvUtil.writeToFile(this.batchCsvPath, Collections.singletonList(BATCH_CSV_HEADERS));
         }
 
         Map<String, Product> productMap = new LinkedHashMap<>();
@@ -116,7 +99,7 @@ public class ProductController {
             }
             try {
                 String id = InputValidator.validateProductId(row[0]);
-                String name = InputValidator.normalizeText(row[1], "Product name");
+                String name = InputValidator.normalizeProductName(row[1]);
                 String category = registerCategory(row[2]);
                 String unit = registerUnit(row[3]);
                 double price = Double.parseDouble(row[4].trim());
@@ -197,8 +180,8 @@ public class ProductController {
             }
         }
 
-        CsvUtil.writeAtomic(this.productCsvPath, productRows);
-        CsvUtil.writeAtomic(this.batchCsvPath, batchRows);
+        CsvUtil.writeToFile(this.productCsvPath, productRows);
+        CsvUtil.writeToFile(this.batchCsvPath, batchRows);
     }
 
     /**
@@ -264,21 +247,18 @@ public class ProductController {
     /**
      * Generates the next available 6-character Product ID (P00001-P99999),
      * checking both active and soft-deleted records so deleted IDs are never
-     * reused (BR1, BR27).
+     * reused (BR1, BR27, BR33).
      *
      * @return the next canonical Product ID
      */
-    public String generateNextProductId() {
+    private String generateNextProductId() {
         int maxNumber = 0;
         for (Product product : this.products) {
             String id = product.getId();
             if (id != null && id.length() == 6 && (id.charAt(0) == 'P' || id.charAt(0) == 'p')) {
-                try {
-                    int num = Integer.parseInt(id.substring(1));
-                    if (num > maxNumber) {
-                        maxNumber = num;
-                    }
-                } catch (NumberFormatException ignored) {
+                int num = Integer.parseInt(id.substring(1));
+                if (num > maxNumber) {
+                    maxNumber = num;
                 }
             }
         }
@@ -290,22 +270,19 @@ public class ProductController {
 
     /**
      * Generates the next available 6-character Batch ID (B00001-B99999) across
-     * all products in the catalog (BR6).
+     * all products in the catalog (BR33).
      *
      * @return the next canonical Batch ID
      */
-    public String generateNextBatchId() {
+    private String generateNextBatchId() {
         int maxNumber = 0;
         for (Product product : this.products) {
             for (Batch batch : product.getBatches()) {
                 String id = batch.getBatchId();
                 if (id != null && id.length() == 6 && (id.charAt(0) == 'B' || id.charAt(0) == 'b')) {
-                    try {
-                        int num = Integer.parseInt(id.substring(1));
-                        if (num > maxNumber) {
-                            maxNumber = num;
-                        }
-                    } catch (NumberFormatException ignored) {
+                    int num = Integer.parseInt(id.substring(1));
+                    if (num > maxNumber) {
+                        maxNumber = num;
                     }
                 }
             }
@@ -325,33 +302,6 @@ public class ProductController {
      */
     public boolean existsById(String id) {
         return findByIdIncludeDeleted(id) != null;
-    }
-
-    /**
-     * Checks whether a Batch ID already exists across any product in the catalog
-     * (BR6).
-     *
-     * @param batchId the batch ID to check
-     * @return true if the batch ID is already in use
-     */
-    public boolean existsBatchId(String batchId) {
-        if (batchId == null || batchId.trim().isEmpty()) {
-            return false;
-        }
-        String target;
-        try {
-            target = InputValidator.normalizeBatchId(batchId);
-        } catch (IllegalArgumentException e) {
-            target = batchId.trim();
-        }
-        for (Product product : this.products) {
-            for (Batch batch : product.getBatches()) {
-                if (batch.getBatchId().equalsIgnoreCase(target)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /**
@@ -381,10 +331,8 @@ public class ProductController {
         if (id == null || id.trim().isEmpty()) {
             return null;
         }
-        String lookupId;
-        try {
-            lookupId = InputValidator.normalizeProductId(id);
-        } catch (IllegalArgumentException e) {
+        String lookupId = InputValidator.tryNormalizeProductId(id);
+        if (lookupId == null) {
             lookupId = id.trim();
         }
         for (Product product : this.products) {
@@ -411,31 +359,27 @@ public class ProductController {
     }
 
     /**
-     * Adds a new Product without an initial batch and persists to CSV (BR1, BR3,
-     * BR4, BR5, BR27).
+     * Adds a new active Product with an auto-generated Product ID and persists
+     * to CSV (BR1, BR3, BR4, BR5, BR27, BR33).
      *
-     * @param product the new Product to register
-     * @throws IllegalArgumentException if product is null, its ID already exists,
-     *                                  or any attached batch ID already exists
+     * @param name     the non-empty product display name
+     * @param category the single-word retail category
+     * @param unit     the single-word measurement unit
+     * @param price    the strictly positive selling price
+     * @return the newly created and persisted Product
+     * @throws IllegalArgumentException if any parameter violates domain invariants
      */
-    public void addProduct(Product product) {
-        if (product == null) {
-            throw new IllegalArgumentException("Product cannot be null.");
-        }
-        if (existsById(product.getId())) {
-            throw new IllegalArgumentException(
-                    "Product ID '" + product.getId() + "' already exists in the system.");
-        }
-        for (Batch attached : product.getBatches()) {
-            if (existsBatchId(attached.getBatchId())) {
-                throw new IllegalArgumentException(
-                        "Batch ID '" + attached.getBatchId() + "' already exists in the system.");
-            }
-        }
-        product.setCategory(registerCategory(product.getCategory()));
-        product.setUnit(registerUnit(product.getUnit()));
+    public Product addProduct(String name, String category, String unit, double price) {
+        String id = generateNextProductId();
+        String validatedName = InputValidator.normalizeProductName(name);
+        String registeredCat = registerCategory(category);
+        String registeredUnit = registerUnit(unit);
+        double validatedPrice = InputValidator.validatePositivePrice(price);
+
+        Product product = new Product(id, validatedName, registeredCat, registeredUnit, validatedPrice, false);
         this.products.add(product);
         saveToCsv();
+        return product;
     }
 
     /**
@@ -459,7 +403,7 @@ public class ProductController {
             throw new IllegalArgumentException("Active product not found with ID: " + id);
         }
         String validatedName = (newName != null && !newName.trim().isEmpty())
-                ? InputValidator.normalizeText(newName, "Product name")
+                ? InputValidator.normalizeProductName(newName)
                 : product.getName();
         String validatedCategory = (newCategory != null && !newCategory.trim().isEmpty())
                 ? registerCategory(newCategory)
@@ -496,59 +440,50 @@ public class ProductController {
     }
 
     /**
-     * Attaches a new inventory Batch to an existing active Product after
-     * verifying positive quantity and global batchId uniqueness (BR6, BR7, BR18,
-     * BR26).
+     * Imports and attaches a new inventory Batch with an auto-generated Batch ID
+     * to an active Product at today's date, then persists to CSV (BR6, BR7, BR26,
+     * BR30, BR33).
      *
-     * @param productId the target product ID
-     * @param batch     the new Batch to attach
-     * @throws IllegalArgumentException if product is not found, batch is null,
-     *                                  quantity is not positive, or batchId is
-     *                                  duplicate
+     * @param productId      the target product ID
+     * @param productionDate the manufacturing date of the batch
+     * @param expirationDate the expiration date of the batch
+     * @param quantity       the strictly positive integer quantity
+     * @return the newly created and attached Batch
+     * @throws IllegalArgumentException if product is not found, dates are invalid,
+     *                                  or quantity is not positive
      */
-    public void addBatchToProduct(String productId, Batch batch) {
-        Product product = findById(productId);
-        if (product == null) {
-            throw new IllegalArgumentException("Active product not found with ID: " + productId);
-        }
-        if (batch == null) {
-            throw new IllegalArgumentException("Batch cannot be null.");
-        }
-        InputValidator.validatePositiveQuantity(batch.getQuantity(), "New batch quantity");
-        if (existsBatchId(batch.getBatchId())) {
-            throw new IllegalArgumentException(
-                    "Batch ID '" + batch.getBatchId() + "' already exists in the system.");
-        }
-        product.addBatch(batch);
-        saveToCsv();
+    public Batch importBatch(String productId, LocalDate productionDate,
+            LocalDate expirationDate, int quantity) {
+        return importBatch(productId, LocalDate.now(), productionDate, expirationDate, quantity);
     }
 
     /**
-     * Replenishes an existing Batch by adding a positive integer quantity to its
-     * current stock and persisting to CSV (BR6, BR26).
+     * Imports and attaches a new inventory Batch with an auto-generated Batch ID
+     * and explicit import date to an active Product, then persists to CSV (BR6,
+     * BR7, BR26, BR30, BR33).
      *
-     * @param productId     the parent product ID
-     * @param batchId       the target batch ID
-     * @param addedQuantity the positive integer quantity to add
-     * @throws IllegalArgumentException if product or batch is not found or
-     *                                  addedQuantity is not positive
+     * @param productId      the target product ID
+     * @param importDate     the date the batch was received
+     * @param productionDate the manufacturing date of the batch
+     * @param expirationDate the expiration date of the batch
+     * @param quantity       the strictly positive integer quantity
+     * @return the newly created and attached Batch
+     * @throws IllegalArgumentException if product is not found, dates are invalid,
+     *                                  or quantity is not positive
      */
-    public void replenishBatch(String productId, String batchId, int addedQuantity) {
-        InputValidator.validatePositiveQuantity(addedQuantity, "Replenishment quantity");
+    public Batch importBatch(String productId, LocalDate importDate,
+            LocalDate productionDate, LocalDate expirationDate, int quantity) {
         Product product = findById(productId);
         if (product == null) {
             throw new IllegalArgumentException("Active product not found with ID: " + productId);
         }
-        String normalizedBatchId = InputValidator.normalizeBatchId(batchId);
-        for (Batch batch : product.getBatches()) {
-            if (batch.getBatchId().equalsIgnoreCase(normalizedBatchId)) {
-                batch.setQuantity(batch.getQuantity() + addedQuantity);
-                saveToCsv();
-                return;
-            }
-        }
-        throw new IllegalArgumentException(
-                "Batch '" + normalizedBatchId + "' not found on product " + product.getId() + ".");
+        InputValidator.validatePositiveQuantity(quantity, "New batch quantity");
+        String batchId = generateNextBatchId();
+        Batch batch = new Batch(batchId, product.getId(), importDate,
+                productionDate, expirationDate, quantity);
+        product.addBatch(batch);
+        saveToCsv();
+        return batch;
     }
 
     /**
@@ -582,18 +517,16 @@ public class ProductController {
     /**
      * Deducts the requested quantity from a product's non-expired batches
      * relative to today using the First-Expired-First-Out algorithm and
-     * persists the updated batch quantities atomically (BR10, BR11, BR14, BR24,
-     * BR26).
+     * persists the updated batch quantities (BR10, BR11, BR14, BR24, BR26).
      *
      * @param productId         the product ID to deduct from
      * @param requestedQuantity the positive integer quantity to deduct
-     * @throws IllegalArgumentException   if product is not found or
-     *                                    requestedQuantity is not positive
-     * @throws InsufficientStockException if available non-expired stock is less
-     *                                    than requestedQuantity
+     * @throws IllegalArgumentException if product is not found, quantity not
+     *                                  positive,
+     *                                  or available non-expired stock is
+     *                                  insufficient
      */
-    public void deductStockFEFO(String productId, int requestedQuantity)
-            throws InsufficientStockException {
+    public void deductStockFEFO(String productId, int requestedQuantity) {
         InputValidator.validatePositiveQuantity(requestedQuantity, "Requested deduction quantity");
         Product product = findById(productId);
         if (product == null) {
@@ -602,7 +535,7 @@ public class ProductController {
 
         int availableStock = product.getAvailableStock();
         if (availableStock < requestedQuantity) {
-            throw new InsufficientStockException(
+            throw new IllegalArgumentException(
                     "Insufficient stock for product '" + product.getName() + "' ("
                             + product.getId() + "). Requested: " + requestedQuantity
                             + ", Available non-expired stock: " + availableStock + ".");
@@ -635,12 +568,14 @@ public class ProductController {
             return getAllProducts();
         }
         String lower = keyword.trim().toLowerCase(Locale.ROOT);
+        String normalizedId = InputValidator.tryNormalizeProductId(keyword.trim());
         List<Product> matches = new ArrayList<>();
         for (Product product : this.products) {
             if (product.isDeleted()) {
                 continue;
             }
-            boolean matchId = product.getId().toLowerCase(Locale.ROOT).contains(lower);
+            boolean matchId = product.getId().toLowerCase(Locale.ROOT).contains(lower)
+                    || (normalizedId != null && product.getId().equalsIgnoreCase(normalizedId));
             boolean matchName = product.getName().toLowerCase(Locale.ROOT).contains(lower);
             boolean matchCat = product.getCategory().toLowerCase(Locale.ROOT).contains(lower);
             boolean matchUnit = product.getUnit().toLowerCase(Locale.ROOT).contains(lower);
@@ -649,16 +584,6 @@ public class ProductController {
             }
         }
         return Collections.unmodifiableList(matches);
-    }
-
-    /**
-     * Returns all active products whose available non-expired stock is at or
-     * below the default threshold of 5 units relative to today (BR19).
-     *
-     * @return an unmodifiable list of low-stock active products
-     */
-    public List<Product> getLowStockProducts() {
-        return getLowStockProducts(Product.DEFAULT_LOW_STOCK_THRESHOLD);
     }
 
     /**
@@ -702,16 +627,6 @@ public class ProductController {
         }
         sortBatchesByExpiry(expired);
         return Collections.unmodifiableList(expired);
-    }
-
-    /**
-     * Returns all non-expired batches with positive stock across active products
-     * that expire within the default 7-day warning window from today (BR20).
-     *
-     * @return an unmodifiable list of near-expiry batches
-     */
-    public List<Batch> getNearExpiryBatches() {
-        return getNearExpiryBatches(Product.DEFAULT_NEAR_EXPIRY_DAYS);
     }
 
     /**

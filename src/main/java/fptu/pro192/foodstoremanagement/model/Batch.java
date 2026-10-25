@@ -34,8 +34,8 @@ public class Batch {
             LocalDate productionDate, LocalDate expirationDate, int quantity) {
         setBatchId(batchId);
         setProductId(productId);
-        setImportDate(importDate);
         setDates(productionDate, expirationDate);
+        setImportDate(importDate);
         setQuantity(quantity);
     }
 
@@ -97,7 +97,7 @@ public class Batch {
     }
 
     /**
-     * Sets and validates the batch identifier (BR6).
+     * Sets and validates the batch identifier (BR33).
      *
      * @param batchId the 6-character batch ID (B00001-B99999)
      * @throws IllegalArgumentException if batchId is invalid
@@ -116,7 +116,7 @@ public class Batch {
     }
 
     /**
-     * Sets and validates the parent product identifier (BR1, BR18).
+     * Sets and validates the parent product identifier (BR1, BR30, BR33).
      *
      * @param productId the 6-character product ID (P00001-P99999)
      * @throws IllegalArgumentException if productId is invalid
@@ -143,6 +143,9 @@ public class Batch {
     public final void setImportDate(LocalDate importDate) {
         if (importDate == null) {
             throw new IllegalArgumentException("Import date cannot be null.");
+        }
+        if (this.productionDate != null && this.expirationDate != null) {
+            InputValidator.validateBatchDates(this.productionDate, this.expirationDate, importDate);
         }
         this.importDate = importDate;
     }
@@ -175,7 +178,11 @@ public class Batch {
      *                                  after expirationDate
      */
     public final void setDates(LocalDate productionDate, LocalDate expirationDate) {
-        InputValidator.validateDateOrder(productionDate, expirationDate);
+        if (this.importDate != null) {
+            InputValidator.validateBatchDates(productionDate, expirationDate, this.importDate);
+        } else {
+            InputValidator.validateDateOrder(productionDate, expirationDate);
+        }
         this.productionDate = productionDate;
         this.expirationDate = expirationDate;
     }

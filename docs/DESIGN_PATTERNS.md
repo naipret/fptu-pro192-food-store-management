@@ -4,7 +4,7 @@ This document describes the five software design patterns implemented in the Foo
 
 ---
 
-## 1. Static Factory (Simple Factory) Pattern
+## 1. Factory Pattern
 
 ### 1.1. Context and Problem
 
@@ -35,7 +35,7 @@ Placing the factory method directly on `Customer` (following the standard Java c
 
 ---
 
-## 2. Atomic CSV Persistence Pattern
+## 2. Atomic Persistence Pattern
 
 ### 2.1. Context and Problem
 
@@ -43,12 +43,12 @@ Writing directly to a live data file (`data/products.csv` or `data/orders.csv`) 
 
 ### 2.2. Implementation in Codebase
 
-`CsvUtil.writeAtomic(Path targetPath, List<String[]> rows)` implements a two-phase atomic write protocol:
+`CsvUtil.writeToFile(Path targetPath, List<String[]> rows)` implements a safe write protocol:
 
 1. Ensure the parent directory (`data/`) exists and write all escaped CSV rows (starting with the header row at index 0) to a sibling temporary file (`<filename>.csv.tmp`), flushing the UTF-8 buffered stream completely.
 2. Replace the target file in a single operation using `Files.move(tempPath, targetPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)`, falling back to `StandardCopyOption.REPLACE_EXISTING` if the underlying filesystem does not support atomic move semantics.
 
-Each domain controller (`ProductController`, `CustomerController`, `OrderController`) pairs in-memory collection updates with `saveToCsv()` calls that delegate to `CsvUtil.writeAtomic`, guaranteeing that on-disk files always contain complete, valid snapshots.
+Each domain controller (`ProductController`, `CustomerController`, `OrderController`) pairs in-memory collection updates with `saveToCsv()` calls that delegate to `CsvUtil.writeToFile`, guaranteeing that on-disk files always contain complete, valid snapshots.
 
 ---
 
@@ -80,7 +80,7 @@ public final class ScannerManager {
 
 ---
 
-## 4. Strategy Pattern (via Subclass Polymorphism)
+## 4. Strategy Pattern
 
 ### 4.1. Context and Problem
 
@@ -97,7 +97,7 @@ During checkout, `Order.calculateTotals(Customer customer)` delegates discount c
 
 ---
 
-## 5. Template Method Pattern
+## 5. Template Pattern
 
 ### 5.1. Context and Problem
 
@@ -108,7 +108,7 @@ Every interactive console screen (`MainMenu`, `ProductMenu`, `InventoryMenu`, `C
 The abstract class `Menu` defines the `final` template method `display()`:
 
 ```java
-public void display() {
+public final void display() {
     boolean running = true;
     while (running) {
         renderMenuFrame();
@@ -122,15 +122,15 @@ public void display() {
                 printBreadcrumbHeader(this.title + " > [" + choice + "] " + this.options[choice - 1]);
             }
             handleChoice(choice);
-            if (shouldPauseAfterAction()) {
-                ConsoleUtil.pressEnterToContinue();
-            }
         }
     }
 }
 ```
 
-Subclasses implement the abstract primitive operation `protected abstract void handleChoice(int choice)` and may override the hook methods:
-- `protected boolean shouldPauseAfterAction()`: defaults to `true` in `Menu` for leaf action screens and returns `false` in `MainMenu` so returning from a submenu does not trigger a redundant `Press Enter` prompt.
+Subclasses implement the abstract primitive operation `protected abstract void handleChoice(int choice)` and interact seamlessly with the continuous loop UX:
+
+- Each menu action executes its own continuous `while (true)` loop with distinct iteration dividers (`printDivider()` prints an empty line followed by the 80-column `DIVIDER`).
+- Selecting `0` at the primary prompt breaks out of the loop and returns to the menu frame immediately without annoying intermediate pauses.
+- Selecting `0` or `N` during secondary confirmation cancels that single operation (`[INFO] Operation cancelled.`) and continues the loop.
 - `protected boolean shouldShowBreadcrumb()`: defaults to `true` to automatically render the centered 80-column breadcrumb banner before executing the selected action handler; overridden in `MainMenu` to return `false`.
-- Each submenu passes its full hierarchical title directly into `super(...)` (e.g., `super("MAIN MENU > [1] PRODUCTS", MENU_OPTIONS)`), so the menu frame header and action breadcrumbs share a single unified source of truth.
+- Each submenu passes its full hierarchical title directly into `super(...)` (e.g., `super("FOOD STORE MANAGEMENT SYSTEM > [1] PRODUCTS", MENU_OPTIONS)`), so the menu frame header and action breadcrumbs share a single unified source of truth.

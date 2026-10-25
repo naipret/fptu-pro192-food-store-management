@@ -38,7 +38,7 @@ public class Product {
      * @param name     the non-empty product display name
      * @param category the single-word retail category name
      * @param unit     the single-word measurement unit
-     * @param price    the positive unit selling price in VND
+     * @param price    the positive unit selling price
      * @throws IllegalArgumentException if any parameter violates domain invariants
      */
     public Product(String id, String name, String category, String unit, double price) {
@@ -53,7 +53,7 @@ public class Product {
      * @param name      the non-empty product display name
      * @param category  the single-word retail category name
      * @param unit      the single-word measurement unit
-     * @param price     the positive unit selling price in VND
+     * @param price     the positive unit selling price
      * @param isDeleted true if the product is soft-deleted, false if active
      * @throws IllegalArgumentException if any parameter violates domain invariants
      */
@@ -188,7 +188,7 @@ public class Product {
     }
 
     /**
-     * Sets and validates the product identifier (BR1).
+     * Sets and validates the product identifier (BR1, BR33).
      * Immutable outside of constructor.
      *
      * @param id the 6-character product ID (P00001-P99999)
@@ -208,13 +208,13 @@ public class Product {
     }
 
     /**
-     * Sets and validates the product display name (BR3).
+     * Sets and validates the product display name (BR3, BR32).
      *
      * @param name the non-empty product name
      * @throws IllegalArgumentException if name is blank, purely numeric, or unsafe
      */
     public final void setName(String name) {
-        this.name = InputValidator.normalizeText(name, "Product name");
+        this.name = InputValidator.normalizeProductName(name);
     }
 
     /**
@@ -227,7 +227,7 @@ public class Product {
     }
 
     /**
-     * Sets and validates the single-word retail category (BR5).
+     * Sets and validates the single-word retail category (BR3, BR31).
      *
      * @param category the category token
      * @throws IllegalArgumentException if category is blank or contains invalid
@@ -247,7 +247,7 @@ public class Product {
     }
 
     /**
-     * Sets and validates the single-word measurement unit (BR5).
+     * Sets and validates the single-word measurement unit (BR4, BR31).
      *
      * @param unit the measurement unit token
      * @throws IllegalArgumentException if unit is blank or contains invalid
@@ -258,7 +258,7 @@ public class Product {
     }
 
     /**
-     * Returns the unit selling price in VND.
+     * Returns the unit selling price.
      *
      * @return the positive selling price
      */
@@ -267,7 +267,7 @@ public class Product {
     }
 
     /**
-     * Sets and validates the unit selling price in VND (BR4).
+     * Sets and validates the unit selling price (BR5).
      *
      * @param price the positive selling price
      * @throws IllegalArgumentException if price is not greater than zero

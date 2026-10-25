@@ -4,9 +4,15 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Food Store Management System - Web Terminal</title>
+    <title>Food Store Management System</title>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
+
+    <!-- Google Fonts: JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
 
     <!-- xterm.js CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css" />
@@ -22,105 +28,161 @@
         html {
             width: 100%;
             height: 100%;
-            overflow: hidden;
-            background-color: #0d1117;
+            overflow-x: hidden;
+            background-color: #121212;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        #terminal-container {
-            width: 100vw;
-            height: 100vh;
-            padding: 8px 12px;
-            background-color: #0d1117;
-        }
-
-        .xterm {
-            height: 100%;
-        }
-
-        /* Floating control bar at the top-right corner */
-        #floating-toolbar {
-            position: fixed;
-            top: 12px;
-            right: 18px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            z-index: 100;
-            background: rgba(22, 27, 34, 0.85);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(48, 54, 61, 0.7);
-            border-radius: 8px;
-            padding: 6px 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            opacity: 0.45;
-            transition: opacity 0.2s ease, transform 0.2s ease;
+            justify-content: center;
         }
 
-        #floating-toolbar:hover {
-            opacity: 1;
-            transform: translateY(-1px);
+        #app-wrapper {
+            width: 96vw;
+            max-width: 1100px;
+            height: 94vh;
+            max-height: 850px;
+            background: #1e1e1e;
+            border: 1px solid #383838;
+            border-radius: 12px;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        .badge-status {
-            display: inline-flex;
+        /* GNOME Headerbar */
+        #gnome-headerbar {
+            height: 44px;
+            background: #2e2e2e;
+            border-bottom: 1px solid #3c3c3c;
+            padding: 0 14px;
+            display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            color: #8b949e;
+            justify-content: space-between;
             user-select: none;
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #d29922;
-            box-shadow: 0 0 6px rgba(210, 153, 34, 0.6);
-            transition: background-color 0.3s ease;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 140px;
         }
 
-        .status-dot.ready {
-            background-color: #2ea043;
-            box-shadow: 0 0 6px rgba(46, 160, 67, 0.8);
+        .terminal-icon {
+            width: 18px;
+            height: 18px;
+            fill: #9a9a9a;
         }
 
-        .status-dot.error {
-            background-color: #f85149;
-            box-shadow: 0 0 6px rgba(248, 81, 73, 0.8);
+        .header-title {
+            font-size: 13.5px;
+            font-weight: 500;
+            color: #f0f0f0;
+            letter-spacing: 0.2px;
+            text-align: center;
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .btn-action {
-            background: #21262d;
-            color: #c9d1d9;
-            border: 1px solid #30363d;
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 140px;
+            justify-content: flex-end;
+        }
+
+        .btn-reset {
+            background: #383838;
+            color: #deddda;
+            border: 1px solid #4a4a4a;
             border-radius: 6px;
-            padding: 4px 10px;
+            padding: 5px 11px;
             font-size: 12px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.15s ease;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
         }
 
-        .btn-action:hover {
-            background: #30363d;
-            color: #f0f6fc;
-            border-color: #8b949e;
+        .btn-reset:hover {
+            background: #484848;
+            color: #ffffff;
+            border-color: #5a5a5a;
         }
 
-        .btn-action:active {
-            transform: scale(0.96);
+        .btn-reset:active {
+            background: #2b2b2b;
+            transform: scale(0.97);
         }
 
-        /* Loading splash overlay */
+        .btn-close {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #383838;
+            color: #9a9a9a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .btn-close:hover {
+            background: #c01c28;
+            color: #ffffff;
+        }
+
+        /* Terminal screen container */
+        #terminal-container {
+            flex: 1;
+            background-color: #1e1e1e;
+            padding: 12px 16px;
+            overflow: auto;
+            position: relative;
+        }
+
+        /* Custom scrollbar matching GNOME dark */
+        #terminal-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        #terminal-container::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        #terminal-container::-webkit-scrollbar-thumb {
+            background: #3c3c3c;
+            border-radius: 4px;
+        }
+
+        #terminal-container::-webkit-scrollbar-thumb:hover {
+            background: #505050;
+        }
+
+        .xterm {
+            height: 100%;
+        }
+
+        /* Minimal empty footer */
+        #gnome-footer {
+            height: 8px;
+            background: #242424;
+            border-top: 1px solid #343434;
+        }
+
+        /* Splash loading overlay */
         #splash-screen {
             position: fixed;
             inset: 0;
-            background: #0d1117;
+            background: #121212;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -139,8 +201,8 @@
         .spinner {
             width: 44px;
             height: 44px;
-            border: 3px solid rgba(56, 139, 253, 0.2);
-            border-top-color: #58a6ff;
+            border: 3px solid rgba(98, 160, 234, 0.2);
+            border-top-color: #62a0ea;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             margin-bottom: 20px;
@@ -156,7 +218,7 @@
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 8px;
-            color: #f0f6fc;
+            color: #deddda;
         }
 
         .splash-desc {
@@ -178,53 +240,237 @@
     <div id="splash-screen">
         <div class="spinner"></div>
         <div class="splash-title">Food Store Management System</div>
-        <div class="splash-desc" id="splash-status">Initializing Java WebAssembly runtime (CheerpJ)...</div>
+        <div class="splash-desc" id="splash-status">Initializing WebAssembly Runtime...</div>
     </div>
 
-    <!-- Floating Control Bar -->
-    <div id="floating-toolbar">
-        <div class="badge-status">
-            <span class="status-dot" id="status-indicator"></span>
-            <span id="status-text">Loading...</span>
+    <!-- GNOME Terminal Window -->
+    <div id="app-wrapper">
+        <!-- Headerbar -->
+        <div id="gnome-headerbar">
+            <div class="header-left">
+                <svg class="terminal-icon" viewBox="0 0 24 24">
+                    <path
+                        d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8h16v10zm-12-3l3-3-3-3 1.4-1.4 4.4 4.4-4.4 4.4L8 15zm5 0h6v2h-6v-2z" />
+                </svg>
+            </div>
+            <div class="header-title">Food Store Management System</div>
+            <div class="header-right">
+                <button class="btn-reset" id="btn-reset-data"
+                    title="Generate fresh sample data based on current date and restart">
+                    <svg width="13" height="13" fill="none" stroke="#ffb86c" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                        </path>
+                    </svg>
+                    <span>Reset Data</span>
+                </button>
+                <div class="btn-close" id="btn-close-app" title="Exit">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </div>
+            </div>
         </div>
-        <button class="btn-action" id="btn-restart" title="Restart application">Restart App</button>
-        <button class="btn-action" id="btn-reset-data"
-            title="Discard modifications and restore original sample dataset">Reset Data</button>
-    </div>
 
-    <!-- Terminal Container -->
-    <div id="terminal-container"></div>
+        <!-- Terminal Output -->
+        <div id="terminal-container"></div>
+
+        <!-- Minimal Footer -->
+        <div id="gnome-footer"></div>
+    </div>
 
     <script>
-        // Initialize xterm.js
+        // Client-Side Dynamic Seed Data Generator
+        function generateDynamicSeedData() {
+            const now = new Date();
+
+            function calcDate(days) {
+                const d = new Date(now.getTime() + days * 86400000);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+            function calcDateTime(days, timeStr) {
+                return `${calcDate(days)}T${timeStr}`;
+            }
+
+            const dProdPast60 = calcDate(-60);
+            const dProdPast30 = calcDate(-30);
+            const dProdPast15 = calcDate(-15);
+            const dProdPast5 = calcDate(-5);
+            const dProdPast2 = calcDate(-2);
+
+            const dImportPast45 = calcDate(-45);
+            const dImportPast20 = calcDate(-20);
+            const dImportPast10 = calcDate(-10);
+            const dImportPast3 = calcDate(-3);
+            const dImportPast1 = calcDate(-1);
+
+            const dExpActiveLong = calcDate(180);
+            const dExpActiveMed = calcDate(60);
+            const dExpActiveShort = calcDate(14);
+            const dExpNear1 = calcDate(2);
+            const dExpNear2 = calcDate(5);
+            const dExpExpired1 = calcDate(-3);
+            const dExpExpired2 = calcDate(-12);
+
+            const dOrderPast25 = calcDateTime(-25, "10:30:00");
+            const dOrderPast20 = calcDateTime(-20, "14:15:00");
+            const dOrderYesterdayMorn = calcDateTime(-1, "09:15:00");
+            const dOrderYesterdayEve = calcDateTime(-1, "17:45:00");
+            const dOrderTodayMorning = calcDateTime(0, "08:30:00");
+            const dOrderTodayNoon = calcDateTime(0, "12:15:00");
+            const dOrderTodayAfternoon = calcDateTime(0, "15:20:00");
+
+            const productsCsv = [
+                "id,name,category,unit,price,isDeleted",
+                "P00001,ST25 Fragrant Rice 5kg,Grains,Bag,165000.0,false",
+                "P00002,Hao Hao Sour Spicy Noodles,Noodles,Pack,4500.0,false",
+                "P00003,Australian Beef Sirloin 500g,Meat,Tray,145000.0,false",
+                "P00004,Norwegian Salmon Fillet 300g,Seafood,Tray,195000.0,false",
+                "P00005,Dalat Hydroponic Lettuce,Produce,Bag,22000.0,false",
+                "P00006,Vinamilk Fresh Milk 1L,Dairy,Carton,36000.0,false",
+                "P00007,CP Pork & Shrimp Dumplings,Frozen,Pack,68000.0,false",
+                "P00008,Three Lady Cooks Canned Tuna,Canned,Can,32000.0,false",
+                "P00009,La Vie Mineral Water 1.5L,Beverages,Bottle,24000.0,false",
+                "P00010,Nam Ngu Phu Quoc Fish Sauce,Condiments,Bottle,48000.0,false",
+                "P00011,Oishi Prawn Crackers 80g,Snacks,Pack,26000.0,false",
+                "P00012,ABC Whole Wheat Sandwich Bread,Bakery,Pack,25000.0,false",
+                "P00013,Dutch Lady Condensed Milk,Dairy,Can,28000.0,false",
+                "P00014,Chinsu Chili Sauce 250g,Condiments,Bottle,18000.0,false",
+                "P00015,Discontinued Imported Butter,Dairy,Box,95000.0,true",
+                "P00016,Seasonal Lychee Fruit 1kg,Produce,Bag,55000.0,true",
+                ""
+            ].join("\n");
+
+            const batchesCsv = [
+                "batchId,productId,importDate,productionDate,expirationDate,quantity",
+                `B00001,P00001,${dImportPast20},${dProdPast30},${dExpActiveLong},15`,
+                `B00002,P00001,${dImportPast10},${dProdPast15},${dExpActiveLong},30`,
+                `B00003,P00002,${dImportPast20},${dProdPast30},${dExpActiveLong},80`,
+                `B00004,P00002,${dImportPast10},${dProdPast15},${dExpActiveLong},60`,
+                `B00005,P00003,${dImportPast3},${dProdPast5},${dExpNear1},4`,
+                `B00006,P00003,${dImportPast10},${dProdPast15},${dExpExpired1},3`,
+                `B00007,P00004,${dImportPast3},${dProdPast5},${dExpActiveShort},5`,
+                `B00008,P00005,${dImportPast1},${dProdPast2},${dExpNear2},12`,
+                `B00009,P00006,${dImportPast10},${dProdPast15},${dExpActiveShort},8`,
+                `B00010,P00006,${dImportPast3},${dProdPast5},${dExpActiveMed},24`,
+                `B00011,P00007,${dImportPast20},${dProdPast30},${dExpActiveLong},18`,
+                `B00012,P00008,${dImportPast20},${dProdPast30},${dExpActiveLong},35`,
+                `B00013,P00009,${dImportPast20},${dProdPast30},${dExpActiveLong},48`,
+                `B00014,P00010,${dImportPast20},${dProdPast30},${dExpActiveLong},22`,
+                `B00015,P00011,${dImportPast20},${dProdPast30},${dExpActiveLong},40`,
+                `B00016,P00012,${dImportPast10},${dProdPast15},${dExpExpired1},6`,
+                `B00017,P00012,${dImportPast1},${dProdPast2},${dExpNear1},3`,
+                `B00018,P00013,${dImportPast20},${dProdPast30},${dExpActiveLong},50`,
+                `B00019,P00014,${dImportPast45},${dProdPast60},${dExpActiveMed},0`,
+                `B00020,P00014,${dImportPast3},${dProdPast5},${dExpActiveLong},4`,
+                `B00021,P00015,${dImportPast45},${dProdPast60},${dExpExpired2},2`,
+                `B00022,P00016,${dImportPast20},${dProdPast30},${dExpExpired2},10`,
+                `B00023,P00016,${dImportPast10},${dProdPast15},${dExpExpired1},5`,
+                ""
+            ].join("\n");
+
+            const customersCsv = [
+                "id,fullName,phone,address,customerType,isDeleted",
+                'C00001,Nguyen Van An,0901234567,"12 Le Loi, Ben Nghe Ward, District 1, Ho Chi Minh City",VIP,false',
+                'C00002,Tran Thi Binh,0912345678,"45 Nguyen Hue, District 1, Ho Chi Minh City",Regular,false',
+                'C00003,Le Hoang Minh,0987654321,"108 Dien Bien Phu, Ward 6, District 3, Ho Chi Minh City",VIP,false',
+                'C00004,Pham Thu Ha,0938112233,"22 Phan Xich Long, Phu Nhuan District, Ho Chi Minh City",Regular,false',
+                'C00005,Vo Quoc Bao,0979445566,"88 Nguyen Van Linh, District 7, Ho Chi Minh City",VIP,false',
+                'C00006,Dang Minh Tuan,0909887766,"15 Cach Mang Thang 8, District 10, Ho Chi Minh City",Regular,false',
+                'C00007,Hoang Gia Huy,0932998877,"30 Ly Tu Trong, District 1, Ho Chi Minh City",Regular,true',
+                'C00008,Do Thi Mai,0945667788,"56 Hai Ba Trung, District 1, Ho Chi Minh City",VIP,false',
+                'C00009,Bui Quang Khai,0968123456,"72 Vo Thi Sau, District 3, Ho Chi Minh City",Regular,false',
+                'C00010,Trinh Hong Ngoc,0918776655,"19 Tran Hung Dao, District 5, Ho Chi Minh City",VIP,true',
+                ""
+            ].join("\n");
+
+            const ordersCsv = [
+                "orderId,customerId,orderDate,totalAmount,discount,finalAmount",
+                `O00001,C00001,${dOrderPast25},378000.0,37800.0,340200.0`,
+                `O00002,C00002,${dOrderPast20},117000.0,0.0,117000.0`,
+                `O00003,C00007,${dOrderPast20},254000.0,0.0,254000.0`,
+                `O00004,C00003,${dOrderYesterdayMorn},485000.0,48500.0,436500.0`,
+                `O00005,C00004,${dOrderYesterdayEve},172000.0,0.0,172000.0`,
+                `O00006,GUEST,${dOrderTodayMorning},124000.0,0.0,124000.0`,
+                `O00007,C00001,${dOrderTodayMorning},351000.0,35100.0,315900.0`,
+                `O00008,C00005,${dOrderTodayNoon},194000.0,19400.0,174600.0`,
+                `O00009,C00008,${dOrderTodayNoon},764000.0,76400.0,687600.0`,
+                `O00010,C00001,${dOrderTodayAfternoon},303000.0,30300.0,272700.0`,
+                ""
+            ].join("\n");
+
+            const orderDetailsCsv = [
+                "orderId,productId,quantity,unitPrice",
+                "O00001,P00001,2,165000.0",
+                "O00001,P00010,1,48000.0",
+                "O00002,P00002,10,4500.0",
+                "O00002,P00006,2,36000.0",
+                "O00003,P00015,2,95000.0",
+                "O00003,P00008,2,32000.0",
+                "O00004,P00003,2,145000.0",
+                "O00004,P00004,1,195000.0",
+                "O00005,P00007,2,68000.0",
+                "O00005,P00014,2,18000.0",
+                "O00006,P00009,3,24000.0",
+                "O00006,P00011,2,26000.0",
+                "O00007,P00001,1,165000.0",
+                "O00007,P00007,2,68000.0",
+                "O00007,P00012,2,25000.0",
+                "O00008,P00008,4,32000.0",
+                "O00008,P00005,3,22000.0",
+                "O00009,P00003,2,145000.0",
+                "O00009,P00004,2,195000.0",
+                "O00009,P00013,3,28000.0",
+                "O00010,P00004,1,195000.0",
+                "O00010,P00006,3,36000.0",
+                ""
+            ].join("\n");
+
+            return {
+                "products.csv": productsCsv,
+                "batches.csv": batchesCsv,
+                "customers.csv": customersCsv,
+                "orders.csv": ordersCsv,
+                "order_details.csv": orderDetailsCsv
+            };
+        }
+
+        const dynamicSeedCache = generateDynamicSeedData();
+
+        // Initialize xterm.js with JetBrains Mono and GNOME dark theme
         const term = new Terminal({
             cursorBlink: true,
             cursorStyle: 'block',
-            fontFamily: 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+            fontFamily: '"JetBrains Mono", "Courier New", monospace',
             fontSize: 14,
             lineHeight: 1.25,
             theme: {
-                background: '#0d1117',
-                foreground: '#e6edf3',
-                cursor: '#58a6ff',
-                cursorAccent: '#0d1117',
-                selectionBackground: 'rgba(56, 139, 253, 0.4)',
-                black: '#484f58',
-                red: '#ff7b72',
-                green: '#3fb950',
-                yellow: '#d29922',
-                blue: '#58a6ff',
-                magenta: '#bc8cff',
-                cyan: '#39c5cf',
-                white: '#b1bac4',
-                brightBlack: '#6e7681',
-                brightRed: '#ffa198',
-                brightGreen: '#56d364',
-                brightYellow: '#e3b341',
-                brightBlue: '#79c0ff',
-                brightMagenta: '#d2a8ff',
-                brightCyan: '#56d4dd',
-                brightWhite: '#f0f6fc'
+                background: '#1e1e1e',
+                foreground: '#deddda',
+                cursor: '#57e389',
+                cursorAccent: '#1e1e1e',
+                selectionBackground: 'rgba(98, 160, 234, 0.4)',
+                black: '#2e3436',
+                red: '#f66151',
+                green: '#57e389',
+                yellow: '#f8e45c',
+                blue: '#62a0ea',
+                magenta: '#c061cb',
+                cyan: '#47d4b9',
+                white: '#deddda',
+                brightBlack: '#5e5c64',
+                brightRed: '#ed333b',
+                brightGreen: '#33d17a',
+                brightYellow: '#f6d32d',
+                brightBlue: '#3584e4',
+                brightMagenta: '#9141ac',
+                brightCyan: '#26a269',
+                brightWhite: '#ffffff'
             }
         });
 
@@ -233,13 +479,36 @@
 
         const terminalContainer = document.getElementById('terminal-container');
         term.open(terminalContainer);
-        fitAddon.fit();
 
-        window.addEventListener('resize', () => {
+        function fitTerminal() {
             try {
                 fitAddon.fit();
+                // Ensure at least 80 columns so tables never wrap
+                if (term.cols < 80) {
+                    term.resize(80, term.rows);
+                }
             } catch (e) { }
+        }
+
+        fitTerminal();
+
+        window.addEventListener('resize', () => {
+            fitTerminal();
         });
+
+        // Font scaling via Ctrl + MouseWheel
+        window.addEventListener('wheel', (e) => {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                let currentSize = term.options.fontSize || 14;
+                if (e.deltaY < 0 && currentSize < 26) {
+                    term.options.fontSize = currentSize + 1;
+                } else if (e.deltaY > 0 && currentSize > 11) {
+                    term.options.fontSize = currentSize - 1;
+                }
+                fitTerminal();
+            }
+        }, { passive: false });
 
         // Input state management
         let inputResolver = null;
@@ -287,22 +556,20 @@
             }
         });
 
+        // Clipboard Paste Handling (Ctrl+V / Cmd+V)
+        window.addEventListener('paste', async (e) => {
+            if (!inputResolver) return;
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            if (text) {
+                inputBuffer += text;
+                term.write(text);
+            }
+        });
+
         const splashScreen = document.getElementById('splash-screen');
         const splashStatus = document.getElementById('splash-status');
-        const statusIndicator = document.getElementById('status-indicator');
-        const statusText = document.getElementById('status-text');
 
-        function updateStatus(state, message) {
-            if (state === 'ready') {
-                statusIndicator.className = 'status-dot ready';
-                statusText.textContent = 'Online';
-            } else if (state === 'error') {
-                statusIndicator.className = 'status-dot error';
-                statusText.textContent = 'Failed';
-            } else {
-                statusIndicator.className = 'status-dot';
-                statusText.textContent = message || 'Loading...';
-            }
+        function updateStatus(message) {
             if (splashStatus) {
                 splashStatus.textContent = message || '';
             }
@@ -310,7 +577,7 @@
 
         async function runApplication() {
             try {
-                updateStatus('loading', 'Loading Java WebAssembly runtime...');
+                updateStatus('Loading Java WebAssembly runtime (CheerpJ)...');
 
                 await cheerpjInit({
                     version: 8,
@@ -326,39 +593,35 @@
                             if (message) {
                                 term.write(message.replace(/\r?\n/g, '\r\n'));
                             }
+                        },
+                        async Java_web_WebTerminalManager_getInitialCsv(lib, fileName) {
+                            return dynamicSeedCache[fileName] || "";
                         }
                     }
                 });
 
-                updateStatus('loading', 'Loading application bytecode...');
+                updateStatus('Launching Food Store Management System...');
 
                 splashScreen.classList.add('hidden');
-                updateStatus('ready');
                 term.focus();
 
-                // Calculate dynamic path prefix for GitHub Pages subdirectory or custom domains
                 const rawPath = window.location.pathname;
                 const basePath = rawPath.substring(0, rawPath.lastIndexOf('/'));
                 const appPrefix = `/app${basePath}`;
                 const classPath = `${appPrefix}/web-runner.jar:${appPrefix}/fptu-pro192-food-store-management.jar`;
 
-                // Run web.WebMain with both web-runner.jar and the core application JAR on classpath
                 await cheerpjRunMain('web.WebMain', classPath);
             } catch (err) {
                 console.error('CheerpJ execution error:', err);
-                updateStatus('error', err.message);
-                splashScreen.classList.add('hidden');
+                if (splashStatus) {
+                    splashStatus.textContent = 'Runtime error: ' + err.message;
+                }
             }
         }
 
-        // Restart app handler
-        document.getElementById('btn-restart').addEventListener('click', () => {
-            window.location.reload();
-        });
-
-        // Reset data handler (clears IndexedDB storage created by CheerpJ)
+        // Reset data handler: Deletes IndexedDB and reloads page to generate live fresh data
         document.getElementById('btn-reset-data').addEventListener('click', async () => {
-            if (confirm('Are you sure you want to discard local changes and restore the original sample dataset?')) {
+            if (confirm('Are you sure you want to reset all data and generate a fresh sample dataset for today?')) {
                 try {
                     if (window.indexedDB && window.indexedDB.databases) {
                         const dbs = await window.indexedDB.databases();
@@ -368,16 +631,20 @@
                             }
                         }
                     }
-                    alert('Local session data has been reset. Reloading application...');
                     window.location.reload();
                 } catch (e) {
-                    alert('Please clear your browser site data (F12) or open an Incognito window to reset data.');
                     window.location.reload();
                 }
             }
         });
 
-        // Boot up
+        // Close button: Asks confirmation to exit/restart
+        document.getElementById('btn-close-app').addEventListener('click', () => {
+            if (confirm('Do you want to reload the application?')) {
+                window.location.reload();
+            }
+        });
+
         window.addEventListener('load', () => {
             runApplication();
         });

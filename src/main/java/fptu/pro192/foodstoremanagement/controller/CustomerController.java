@@ -30,24 +30,11 @@ public class CustomerController {
     private final List<Customer> customers;
 
     /**
-     * Constructs a CustomerController bound to the default data/customers.csv path.
+     * Constructs a CustomerController bound to default data/customers.csv and loads
+     * records.
      */
     public CustomerController() {
-        this(Paths.get(DEFAULT_CUSTOMERS_CSV));
-    }
-
-    /**
-     * Constructs a CustomerController bound to the specified Path and loads
-     * existing customer records from disk.
-     *
-     * @param csvPath the Path for customers.csv
-     * @throws IllegalArgumentException if csvPath is null
-     */
-    public CustomerController(Path csvPath) {
-        if (csvPath == null) {
-            throw new IllegalArgumentException("Customer CSV path cannot be null.");
-        }
-        this.csvPath = csvPath;
+        this.csvPath = Paths.get(DEFAULT_CUSTOMERS_CSV);
         this.customers = new ArrayList<>();
         loadFromCsv();
     }
@@ -79,9 +66,9 @@ public class CustomerController {
             }
             try {
                 String id = InputValidator.validateCustomerId(row[0]);
-                String fullName = InputValidator.normalizeText(row[1], "Customer full name");
+                String fullName = InputValidator.normalizeCustomerName(row[1]);
                 String phone = InputValidator.normalizePhone(row[2]);
-                String address = InputValidator.normalizeText(row[3], "Customer address");
+                String address = InputValidator.normalizeAddress(row[3]);
                 String type = row[4].trim();
                 boolean isDeleted = Boolean.parseBoolean(row[5].trim());
 
@@ -112,27 +99,24 @@ public class CustomerController {
                     String.valueOf(customer.isDeleted())
             });
         }
-        CsvUtil.writeAtomic(this.csvPath, rows);
+        CsvUtil.writeToFile(this.csvPath, rows);
     }
 
     /**
      * Generates the next available 6-character Customer ID (C00001-C99999),
      * checking both active and soft-deleted records so deleted IDs are never
-     * reused (BR2, BR27).
+     * reused (BR2, BR27, BR33).
      *
      * @return the next canonical Customer ID
      */
-    public String generateNextCustomerId() {
+    private String generateNextCustomerId() {
         int maxNumber = 0;
         for (Customer customer : this.customers) {
             String id = customer.getId();
             if (id != null && id.length() == 6 && (id.charAt(0) == 'C' || id.charAt(0) == 'c')) {
-                try {
-                    int num = Integer.parseInt(id.substring(1));
-                    if (num > maxNumber) {
-                        maxNumber = num;
-                    }
-                } catch (NumberFormatException ignored) {
+                int num = Integer.parseInt(id.substring(1));
+                if (num > maxNumber) {
+                    maxNumber = num;
                 }
             }
         }
@@ -144,7 +128,7 @@ public class CustomerController {
 
     /**
      * Checks whether a Customer ID already exists in the system across both
-     * active and soft-deleted records (BR2, BR27).
+     * active and soft-deleted records (BR2, BR27, BR33).
      *
      * @param id the customer ID to check
      * @return true if the ID is already used
@@ -154,26 +138,21 @@ public class CustomerController {
     }
 
     /**
-     * Registers a new customer after verifying ID uniqueness across all records
-     * and phone uniqueness across active customers, then persists to CSV
-     * (BR2, BR3, BR15, BR25, BR27).
+     * Registers a new customer with an auto-generated Customer ID after verifying
+     * phone uniqueness across active customers, then persists to CSV
+     * (BR2, BR15, BR16, BR25, BR27, BR33).
      *
-     * @param id       the 6-character customer ID (C00001-C99999)
      * @param fullName the customer's full name
      * @param phone    the customer's Vietnamese mobile phone number
      * @param address  the customer's residential address
      * @param type     the loyalty tier ("Regular" or "VIP")
      * @return the newly created and persisted Customer instance
-     * @throws IllegalArgumentException if any field is invalid or ID/phone is
+     * @throws IllegalArgumentException if any field is invalid or phone is
      *                                  duplicate
      */
-    public Customer registerCustomer(String id, String fullName, String phone,
+    public Customer registerCustomer(String fullName, String phone,
             String address, String type) {
-        String validatedId = InputValidator.validateCustomerId(id);
-        if (existsById(validatedId)) {
-            throw new IllegalArgumentException(
-                    "Customer ID '" + validatedId + "' already exists in the system.");
-        }
+        String id = generateNextCustomerId();
         String normalizedPhone = InputValidator.normalizePhone(phone);
         Customer existingByPhone = findByPhone(normalizedPhone);
         if (existingByPhone != null) {
@@ -182,7 +161,7 @@ public class CustomerController {
                             + existingByPhone.getId() + ".");
         }
 
-        Customer created = Customer.create(type, validatedId, fullName,
+        Customer created = Customer.create(type, id, fullName,
                 normalizedPhone, address, false);
         this.customers.add(created);
         saveToCsv();
@@ -223,7 +202,7 @@ public class CustomerController {
         }
 
         String updatedName = (newName != null && !newName.trim().isEmpty())
-                ? InputValidator.normalizeText(newName, "Customer full name")
+                ? InputValidator.normalizeCustomerName(newName)
                 : existing.getFullName();
 
         String updatedPhone = existing.getPhone();
@@ -238,7 +217,7 @@ public class CustomerController {
         }
 
         String updatedAddress = (newAddress != null && !newAddress.trim().isEmpty())
-                ? InputValidator.normalizeText(newAddress, "Customer address")
+                ? InputValidator.normalizeAddress(newAddress)
                 : existing.getAddress();
 
         String updatedType = (newType != null && !newType.trim().isEmpty())
@@ -293,10 +272,8 @@ public class CustomerController {
         if (id == null || id.trim().isEmpty()) {
             return null;
         }
-        String lookupId;
-        try {
-            lookupId = InputValidator.normalizeCustomerId(id);
-        } catch (IllegalArgumentException e) {
+        String lookupId = InputValidator.tryNormalizeCustomerId(id);
+        if (lookupId == null) {
             lookupId = id.trim();
         }
         for (Customer customer : this.customers) {
@@ -319,10 +296,8 @@ public class CustomerController {
         if (rawPhone == null || rawPhone.trim().isEmpty()) {
             return null;
         }
-        String normalized;
-        try {
-            normalized = InputValidator.normalizePhone(rawPhone);
-        } catch (IllegalArgumentException e) {
+        String normalized = InputValidator.tryNormalizePhone(rawPhone);
+        if (normalized == null) {
             return null;
         }
         for (Customer customer : this.customers) {
@@ -362,18 +337,21 @@ public class CustomerController {
         }
         String lower = keyword.trim().toLowerCase(Locale.ROOT);
         String digitsOnly = keyword.trim().replaceAll("[\\s.\\-()]", "");
+        String normalizedId = InputValidator.tryNormalizeCustomerId(keyword.trim());
         List<Customer> matches = new ArrayList<>();
 
         for (Customer customer : this.customers) {
             if (customer.isDeleted()) {
                 continue;
             }
-            boolean matchId = customer.getId().toLowerCase(Locale.ROOT).contains(lower);
+            boolean matchId = customer.getId().toLowerCase(Locale.ROOT).contains(lower)
+                    || (normalizedId != null && customer.getId().equalsIgnoreCase(normalizedId));
             boolean matchName = customer.getFullName().toLowerCase(Locale.ROOT).contains(lower);
             boolean matchPhone = customer.getPhone().contains(lower)
                     || (!digitsOnly.isEmpty() && customer.getPhone().contains(digitsOnly));
             boolean matchAddress = customer.getAddress().toLowerCase(Locale.ROOT).contains(lower);
-            if (matchId || matchName || matchPhone || matchAddress) {
+            boolean matchTier = customer.getCustomerType().toLowerCase(Locale.ROOT).contains(lower);
+            if (matchId || matchName || matchPhone || matchAddress || matchTier) {
                 matches.add(customer);
             }
         }

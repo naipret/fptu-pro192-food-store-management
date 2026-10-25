@@ -1,10 +1,10 @@
 # Software Design Principles Specification
 
-This document explains how the four Object-Oriented Programming (`OOP`) pillars, the five `SOLID` principles, and foundational software engineering principles (`SoC`, `DRY`, `KISS`, `YAGNI`) are applied across the Food Store Management System.
+This document explains how the four `OOP` pillars, the five `SOLID` principles, and foundational software engineering principles (`SoC`, `DRY`, `KISS`, `YAGNI`) are applied across the Food Store Management System.
 
 ---
 
-## 1. The Four Pillars of Object-Oriented Programming
+## 1. The Four Pillars of OOP
 
 ### 1.1. Encapsulation
 
@@ -24,14 +24,14 @@ Conversely, retail products are modeled as a single concrete `Product` class com
 Runtime polymorphism eliminates conditional type-checking (`instanceof` or `switch` statements on customer tier strings) during checkout and menu navigation:
 
 1. When `Order.calculateTotals(Customer customer)` computes an order's discount, it invokes `customer.calculateDiscount(this.totalAmount)`. At runtime, the JVM dispatches the call to `RegularCustomer.calculateDiscount` (`0.0`) or `VIPCustomer.calculateDiscount` (`amount * 0.10`) based on the concrete instance.
-2. When `Menu.display()` executes user selections, it invokes `handleChoice(choice)` and `shouldPauseAfterAction()`, dispatching automatically to the active concrete menu screen.
+2. When `Menu.display()` executes user selections, it invokes `handleChoice(choice)`, dispatching automatically to the active concrete menu screen.
 
 ### 1.4. Abstraction
 
 Abstract classes expose high-level contracts while hiding implementation details from callers:
 
 1. `OrderController` interacts solely with the abstract `Customer` reference when calculating discounts and persisting orders, remaining unaware of how specific loyalty tiers compute their discount rates.
-2. `CsvUtil` abstracts the low-level mechanics of UTF-8 byte streams, RFC 4180 quote escaping, and temporary `.tmp` file replacement behind two methods: `CsvUtil.readCsv(Path)` and `CsvUtil.writeAtomic(Path, List<String[]>)`.
+2. `CsvUtil` abstracts the low-level mechanics of UTF-8 byte streams, RFC 4180 quote escaping, and temporary `.tmp` file replacement behind two methods: `CsvUtil.readCsv(Path)` and `CsvUtil.writeToFile(Path, List<String[]>)`.
 
 ---
 
@@ -97,16 +97,3 @@ Implementations favor clear, readable Java 8 code over complex machinery:
 ### 3.4. You Aren't Gonna Need It (YAGNI)
 
 Speculative abstractions and unused domain classes are excluded from the codebase. Industrial cold-storage attributes (temperature and humidity ranges), separate single-method factory classes (`ProductFactory`, `CustomerFactory`), and unused wrapper records (`Transaction.java`) are omitted so every line of code directly serves a requirement in the retail food store specification.
-
----
-
-## 4. Principle-to-Component Mapping
-
-| Principle | Primary Classes | Architectural Benefit |
-| :--- | :--- | :--- |
-| Encapsulation | `Product`, `Batch`, `Customer`, `Order`, `OrderDetail` | Protects domain invariants and prevents external mutation of internal lists |
-| Inheritance & Polymorphism | `Customer`, `RegularCustomer`, `VIPCustomer`, `Menu` | Enables polymorphic VIP discount calculation and uniform menu rendering |
-| Composition over Inheritance | `Product` + `Batch`, `Order` + `OrderDetail` | Models `1-to-N` inventory batches and order line items without class explosion |
-| Single Responsibility (`SRP`) | `CsvUtil`, `InputValidator`, `TableFormatter`, `*Controller`, `*Menu` | Isolates CSV I/O, field validation, terminal formatting, business logic, and UI |
-| Open/Closed (`OCP`) | `Customer`, `Menu`, `ProductController` (`Set<String>`) | Supports new customer tiers, menu screens, and product categories without modifying core logic |
-| Dependency Inversion (`DIP`) | `Main`, `OrderController`, `ReportController` | Ensures single-source in-memory state via explicit constructor injection |

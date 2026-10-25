@@ -3,6 +3,7 @@ package fptu.pro192.foodstoremanagement.view;
 import fptu.pro192.foodstoremanagement.util.ConsoleUtil;
 import fptu.pro192.foodstoremanagement.util.TableFormatter;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 
 /**
  * Abstract base class for all 80-column interactive console menus,
@@ -11,8 +12,16 @@ import java.util.Arrays;
  */
 public abstract class Menu {
 
+    public static final String DIVIDER = TableFormatter.repeat('-', TableFormatter.SCREEN_WIDTH);
     private static final String DOUBLE_BORDER = TableFormatter.repeat('=', TableFormatter.SCREEN_WIDTH);
-    private static final String SINGLE_BORDER = TableFormatter.repeat('-', TableFormatter.SCREEN_WIDTH);
+
+    /**
+     * Prints an empty line followed by the standard 80-character divider.
+     */
+    public static void printDivider() {
+        System.out.println();
+        System.out.println(DIVIDER);
+    }
 
     /**
      * Uppercase menu screen title centered in the 80-column header banner.
@@ -46,26 +55,27 @@ public abstract class Menu {
      * Template Method executing the interactive menu loop until the user
      * selects 0 to exit or return to the parent menu.
      */
-    public void display() {
+    public final void display() {
         boolean running = true;
         while (running) {
             renderMenuFrame();
-            int choice = ConsoleUtil.readInt(
-                    "Enter your choice [0-" + this.options.length + "]: ",
-                    0,
-                    this.options.length);
-            if (choice == 0) {
-                onExit();
+            try {
+                int choice = ConsoleUtil.readInt(
+                        "Enter your choice [0-" + this.options.length + "]: ",
+                        0,
+                        this.options.length);
+                if (choice == 0) {
+                    onExit();
+                    running = false;
+                } else {
+                    ConsoleUtil.clearScreen();
+                    if (shouldShowBreadcrumb()) {
+                        printBreadcrumbHeader(this.title + " > [" + choice + "] " + this.options[choice - 1]);
+                    }
+                    handleChoice(choice);
+                }
+            } catch (NoSuchElementException e) {
                 running = false;
-            } else {
-                ConsoleUtil.clearScreen();
-                if (shouldShowBreadcrumb()) {
-                    printBreadcrumbHeader(this.title + " > [" + choice + "] " + this.options[choice - 1]);
-                }
-                handleChoice(choice);
-                if (shouldPauseAfterAction()) {
-                    ConsoleUtil.pressEnterToContinue();
-                }
             }
         }
     }
@@ -83,7 +93,7 @@ public abstract class Menu {
             System.out.printf("  [%d] %s%n", i + 1, this.options[i]);
         }
         System.out.printf("  [0] %s%n", getZeroOptionLabel());
-        System.out.println(SINGLE_BORDER);
+        System.out.println(DIVIDER);
     }
 
     /**
@@ -94,20 +104,10 @@ public abstract class Menu {
     protected abstract void handleChoice(int choice);
 
     /**
-     * Hook method controlling whether the menu pauses for the user to press
-     * Enter after completing an action. Defaults to true for leaf menus and
-     * is overridden to return false in MainMenu.
-     *
-     * @return true to pause after handleChoice, false otherwise
-     */
-    protected boolean shouldPauseAfterAction() {
-        return true;
-    }
-
-    /**
      * Hook method controlling whether an automatic breadcrumb banner is rendered
      * before executing a chosen menu action. Defaults to true. MainMenu overrides
-     * this to return false so that top-level dispatching does not print a breadcrumb.
+     * this to return false so that top-level dispatching does not print a
+     * breadcrumb.
      *
      * @return true to show automatic breadcrumb header, false otherwise
      */
@@ -117,7 +117,7 @@ public abstract class Menu {
 
     /**
      * Hook method returning the label for option [0]. Defaults to
-     * "Back to Main Menu" and is overridden in MainMenu to "Exit Application".
+     * "Back to Main Menu" and is overridden in MainMenu to "Exit".
      *
      * @return the display label for choice 0
      */
@@ -135,30 +135,13 @@ public abstract class Menu {
      * Prints a formatted 80-column section header banner for a sub-operation
      * featuring a centered breadcrumb navigation indicator.
      *
-     * @param breadcrumb the hierarchical navigation trail (e.g. "MAIN MENU > [1]
+     * @param breadcrumb the hierarchical navigation trail (e.g. "FOOD STORE
+     *                   MANAGEMENT SYSTEM > [1]
      *                   PRODUCTS > [3] Add product")
      */
     protected void printBreadcrumbHeader(String breadcrumb) {
         System.out.println(DOUBLE_BORDER);
         System.out.println(TableFormatter.center(breadcrumb, TableFormatter.SCREEN_WIDTH));
         System.out.println(DOUBLE_BORDER);
-    }
-
-    /**
-     * Returns the menu title.
-     *
-     * @return the title string
-     */
-    public String getTitle() {
-        return title;
-    }
-
-    /**
-     * Returns a defensive copy of the menu options array.
-     *
-     * @return a copy of the options array
-     */
-    public String[] getOptions() {
-        return Arrays.copyOf(this.options, this.options.length);
     }
 }

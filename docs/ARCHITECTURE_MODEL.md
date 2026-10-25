@@ -161,10 +161,11 @@ classDiagram
         -Set~String~ units
         +loadFromCsv() void
         +saveToCsv() void
-        +addProduct(Product product) void
+        +addProduct(String name, String category, String unit, double price) Product
         +updateProduct(String id, String name, String category, String unit, double price) void
         +deleteProduct(String id) boolean
-        +addBatchToProduct(String productId, Batch batch) void
+        +importBatch(String productId, LocalDate productionDate, LocalDate expirationDate, int quantity) Batch
+        +adjustBatchQuantity(String productId, String batchId, int newQuantity) void
         +deductStockFEFO(String productId, int requestedQuantity) void
         +findById(String id) Product
         +findByIdIncludeDeleted(String id) Product
@@ -179,7 +180,7 @@ classDiagram
         -List~Customer~ customers
         +loadFromCsv() void
         +saveToCsv() void
-        +registerCustomer(String id, String fullName, String phone, String address, String type) Customer
+        +registerCustomer(String fullName, String phone, String address, String type) Customer
         +updateCustomer(String id, String newName, String newPhone, String newAddress, String newType) Customer
         +deleteCustomer(String id) void
         +findById(String id) Customer
@@ -211,9 +212,7 @@ classDiagram
         +getDailyRevenue(LocalDate date) double
         +getOrdersByMonth(YearMonth month) List~Order~
         +getMonthlyRevenue(YearMonth month) double
-        +getTopSellingProducts(int limit) List~ProductSalesSummary~
         +getTopSellingProducts(LocalDate fromDate, LocalDate toDate, int limit) List~ProductSalesSummary~
-        +getHighestSpendingCustomers(int limit) List~CustomerSpendingSummary~
         +getHighestSpendingCustomers(LocalDate fromDate, LocalDate toDate, int limit) List~CustomerSpendingSummary~
     }
 
@@ -223,9 +222,9 @@ classDiagram
         #String[] options
         +display() void
         #handleChoice(int choice)* void
-        #shouldPauseAfterAction() boolean
         #shouldShowBreadcrumb() boolean
         +printBreadcrumbHeader(String breadcrumb) void
+        +printDivider() void
     }
 
     Product "1" *-- "0..*" Batch : contains
@@ -257,7 +256,7 @@ The project utilizes all three primary Java Collections interfaces (`List`, `Set
 
 ## 4. CSV Data Storage Schemas
 
-All persistent data is stored in UTF-8 encoded CSV files inside the `data/` directory. Every CSV file writes a fixed header row at line 0 during save operations and skips that header row during load operations. All writes are performed atomically via `CsvUtil.writeAtomic` using a temporary sibling file (`.tmp`) and `Files.move` with `ATOMIC_MOVE` and `REPLACE_EXISTING`.
+All persistent data is stored in UTF-8 encoded CSV files inside the `data/` directory. Every CSV file writes a fixed header row at line 0 during save operations and skips that header row during load operations. All writes are performed safely via `CsvUtil.writeToFile` using a temporary sibling file (`.tmp`) and `Files.move` with `ATOMIC_MOVE` and `REPLACE_EXISTING`.
 
 ### 4.1. `data/products.csv`
 
@@ -269,7 +268,7 @@ Header row: `id,name,category,unit,price,isDeleted`
 | `1` | `name` | `String` | Non-empty product name (`BR3`) |
 | `2` | `category` | `String` | Single-word retail category registered in `ProductController` (`BR5`) |
 | `3` | `unit` | `String` | Measurement unit registered in `ProductController` (`BR5`) |
-| `4` | `price` | `double` | Positive selling price in VND (`> 0`, `BR4`) |
+| `4` | `price` | `double` | Positive selling price (`> 0`, `BR4`) |
 | `5` | `isDeleted` | `boolean` | `true` if soft-deleted, `false` if active (`BR27`) |
 
 ### 4.2. `data/batches.csv`

@@ -1,5 +1,7 @@
 package fptu.pro192.foodstoremanagement.view;
 
+import fptu.pro192.foodstoremanagement.util.ConsoleUtil;
+
 /**
  * Top-level 80-column console menu orchestrating navigation across all five
  * application modules: Product Catalog Management, Customer Management,
@@ -80,17 +82,6 @@ public class MainMenu extends Menu {
     }
 
     /**
-     * Suppresses the "Press Enter to continue" pause when returning from a
-     * submenu back to the main menu.
-     *
-     * @return false so MainMenu immediately re-renders after a submenu exits
-     */
-    @Override
-    protected boolean shouldPauseAfterAction() {
-        return false;
-    }
-
-    /**
      * Suppresses automatic breadcrumb banners at the top-level main menu.
      *
      * @return false so that submenus render their own contextual breadcrumbs
@@ -103,11 +94,11 @@ public class MainMenu extends Menu {
     /**
      * Returns the exit label for option [0] on the root menu.
      *
-     * @return "Exit Application"
+     * @return "Exit"
      */
     @Override
     protected String getZeroOptionLabel() {
-        return "Exit Application";
+        return "Exit";
     }
 
     /**
@@ -115,6 +106,6 @@ public class MainMenu extends Menu {
      */
     @Override
     protected void onExit() {
-        System.out.println("  [INFO] Thank you for using Food Store Management System. Goodbye!");
+        ConsoleUtil.clearScreen();
     }
 }

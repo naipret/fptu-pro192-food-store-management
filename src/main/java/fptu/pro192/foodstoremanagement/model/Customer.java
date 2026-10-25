@@ -3,8 +3,8 @@ package fptu.pro192.foodstoremanagement.model;
 import fptu.pro192.foodstoremanagement.util.InputValidator;
 
 /**
- * Abstract base class representing a registered store customer (BR2, BR3,
- * BR15, BR25, BR27). Subclasses define loyalty-tier discount strategies via
+ * Abstract base class representing a registered store customer (BR2, BR15,
+ * BR16, BR25, BR27). Subclasses define loyalty-tier discount strategies via
  * polymorphism, and the static create method implements the Factory Method
  * pattern.
  */
@@ -17,21 +17,8 @@ public abstract class Customer {
     private boolean isDeleted;
 
     /**
-     * Constructs an active Customer instance (BR2, BR3, BR25).
-     *
-     * @param id       the unique 6-character customer identifier (C00001-C99999)
-     * @param fullName the customer's full name
-     * @param phone    the customer's Vietnamese mobile phone number
-     * @param address  the customer's residential or delivery address
-     * @throws IllegalArgumentException if any field violates domain invariants
-     */
-    protected Customer(String id, String fullName, String phone, String address) {
-        this(id, fullName, phone, address, false);
-    }
-
-    /**
-     * Constructs a Customer instance with an explicit soft-delete flag (BR2, BR3,
-     * BR25, BR27).
+     * Constructs a Customer instance with an explicit soft-delete flag (BR2,
+     * BR25, BR27, BR33).
      *
      * @param id        the unique 6-character customer identifier (C00001-C99999)
      * @param fullName  the customer's full name
@@ -50,24 +37,8 @@ public abstract class Customer {
 
     /**
      * Factory Method that instantiates the concrete Customer subclass matching
-     * the provided loyalty tier discriminator (BR15).
-     *
-     * @param type     the customer tier ("Regular" or "VIP", case-insensitive)
-     * @param id       the 6-character customer ID (C00001-C99999)
-     * @param fullName the customer's full name
-     * @param phone    the customer's phone number
-     * @param address  the customer's address
-     * @return a RegularCustomer or VIPCustomer instance
-     * @throws IllegalArgumentException if type or any attribute is invalid
-     */
-    public static Customer create(String type, String id, String fullName,
-            String phone, String address) {
-        return create(type, id, fullName, phone, address, false);
-    }
-
-    /**
-     * Factory Method that instantiates the concrete Customer subclass matching
-     * the provided loyalty tier discriminator and soft-delete state (BR15, BR27).
+     * the provided loyalty tier discriminator and soft-delete state (BR15, BR16,
+     * BR27).
      *
      * @param type      the customer tier ("Regular" or "VIP", case-insensitive)
      * @param id        the 6-character customer ID (C00001-C99999)
@@ -96,23 +67,17 @@ public abstract class Customer {
 
     /**
      * Calculates the monetary discount amount for a given pre-discount order
-     * subtotal (BR15).
+     * subtotal (BR15, BR16).
      *
-     * @param amount the pre-discount order subtotal in VND
-     * @return the discount amount in VND
+     * @param amount the pre-discount order subtotal
+     * @return the discount amount
      * @throws IllegalArgumentException if amount is negative
      */
     public abstract double calculateDiscount(double amount);
 
     /**
-     * Returns the fractional discount rate for this customer tier (BR15).
-     *
-     * @return the discount rate between 0.0 and 1.0
-     */
-    public abstract double getDiscountRate();
-
-    /**
-     * Returns the canonical loyalty tier discriminator ("Regular" or "VIP") (BR15).
+     * Returns the canonical loyalty tier discriminator ("Regular" or "VIP") (BR15,
+     * BR16).
      *
      * @return the customer tier string
      */
@@ -128,7 +93,7 @@ public abstract class Customer {
     }
 
     /**
-     * Sets and validates the customer identifier (BR2).
+     * Sets and validates the customer identifier (BR2, BR33).
      * Immutable outside of constructor.
      *
      * @param id the 6-character customer ID (C00001-C99999)
@@ -154,7 +119,7 @@ public abstract class Customer {
      * @throws IllegalArgumentException if fullName is blank or invalid
      */
     public final void setFullName(String fullName) {
-        this.fullName = InputValidator.normalizeText(fullName, "Customer full name");
+        this.fullName = InputValidator.normalizeCustomerName(fullName);
     }
 
     /**
@@ -193,7 +158,7 @@ public abstract class Customer {
      * @throws IllegalArgumentException if address is blank or invalid
      */
     public final void setAddress(String address) {
-        this.address = InputValidator.normalizeText(address, "Customer address");
+        this.address = InputValidator.normalizeAddress(address);
     }
 
     /**
