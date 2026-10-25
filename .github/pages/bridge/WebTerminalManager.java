@@ -32,4 +32,13 @@ public final class WebTerminalManager {
      * @param message the text chunk to render in the browser terminal
      */
     public static native void print(String message);
+
+    /**
+     * Retrieves dynamically generated seed CSV content from the browser runtime
+     * based on the user's current local date.
+     *
+     * @param fileName the CSV file name (e.g., "products.csv")
+     * @return the CSV file contents, or empty string if unavailable
+     */
+    public static native String getInitialCsv(String fileName);
 }
