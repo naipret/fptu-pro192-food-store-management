@@ -1,5 +1,7 @@
 package fptu.pro192.foodstoremanagement.view;
 
+import fptu.pro192.foodstoremanagement.util.ConsoleUtil;
+
 /**
  * Top-level 80-column console menu orchestrating navigation across all five
  * application modules: Product Catalog Management, Customer Management,
@@ -104,6 +106,6 @@ public class MainMenu extends Menu {
      */
     @Override
     protected void onExit() {
-        System.out.println("  [INFO] Thank you for using Food Store Management System. Goodbye!");
+        ConsoleUtil.clearScreen();
     }
 }
