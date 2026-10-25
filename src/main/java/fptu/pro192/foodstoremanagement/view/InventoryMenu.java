@@ -33,6 +33,8 @@ public class InventoryMenu extends Menu {
     private static final String BATCH_TABLE_HEADER = "| Batch  | ProdID | Product Name    | Prod Date  | Exp Date   |   Qty | Status |";
     private static final String LOW_STOCK_BORDER = "+--------+-------------------------+--------------+--------+--------+----------+";
     private static final String LOW_STOCK_HEADER = "| ID     | Product Name            | Category     | Unit   |  Avail |    Total |";
+    private static final String PRODUCT_BATCHES_BORDER = "+--------+------------+------------+------------+-------+----------------------+";
+    private static final String PRODUCT_BATCHES_HEADER = "| Batch  | ImportDate | Prod Date  | Exp Date   |   Qty | Status               |";
 
     private final ProductController productController;
 
@@ -210,18 +212,40 @@ public class InventoryMenu extends Menu {
     }
 
     private void inspectBatchesOrSearch(String input) {
-        String possibleProdId = InputValidator.tryNormalizeProductId(input);
-        Product product = (possibleProdId != null)
-                ? this.productController.findById(possibleProdId)
-                : this.productController.findById(input);
-        if (product != null) {
-            System.out.printf("  Batches for product %s - %s (Total physical stock: %d):%n",
-                    product.getId(), product.getName(), product.getTotalStock());
-            renderBatchTable(product.getBatches());
+        Product directProduct = resolveProductForBatchInspection(input);
+        if (directProduct != null) {
+            renderProductBatchesTable(directProduct);
             return;
         }
         List<Batch> matching = filterBatchesByKeyword(input);
         renderBatchTable(matching);
+    }
+
+    private Product resolveProductForBatchInspection(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return null;
+        }
+        String clean = input.trim();
+        String lower = clean.toLowerCase(Locale.ROOT);
+        if (lower.startsWith("product ")) {
+            clean = clean.substring(8).trim();
+        } else if (lower.startsWith("prod ")) {
+            clean = clean.substring(5).trim();
+        }
+
+        String possibleProdId = InputValidator.tryNormalizeProductId(clean);
+        Product product = (possibleProdId != null)
+                ? this.productController.findById(possibleProdId)
+                : this.productController.findById(clean);
+        if (product != null) {
+            return product;
+        }
+
+        List<Product> matches = this.productController.search(clean);
+        if (matches.size() == 1) {
+            return matches.get(0);
+        }
+        return null;
     }
 
     private List<Batch> filterBatchesByKeyword(String keyword) {
@@ -320,6 +344,57 @@ public class InventoryMenu extends Menu {
             renderBatchTable(expiredBatches);
             printDivider();
         }
+    }
+
+    /**
+     * Renders a dedicated 80-column ASCII table showing all imported batches for a product.
+     *
+     * @param product the non-null product whose batches are to be displayed
+     */
+    public void renderProductBatchesTable(Product product) {
+        if (product == null) {
+            System.out.println("  [INFO] No product selected.");
+            return;
+        }
+        System.out.println(PRODUCT_BATCHES_BORDER);
+        String titleLine = "Product: " + product.getId() + " - " + product.getName();
+        System.out.printf("| %-76s |%n", TableFormatter.fit(titleLine, 76));
+
+        String detailsLine = String.format("Category: %-10s | Unit: %-6s | Price: %s | Stock: %d / %d",
+                TableFormatter.fit(product.getCategory(), 10),
+                TableFormatter.fit(product.getUnit(), 6),
+                InputValidator.formatCurrency(product.getPrice()),
+                product.getAvailableStock(),
+                product.getTotalStock());
+        System.out.printf("| %-76s |%n", TableFormatter.fit(detailsLine, 76));
+        System.out.println(PRODUCT_BATCHES_BORDER);
+        System.out.println(PRODUCT_BATCHES_HEADER);
+        System.out.println(PRODUCT_BATCHES_BORDER);
+
+        List<Batch> batches = product.getBatches();
+        if (batches.isEmpty()) {
+            System.out.printf("| %-76s |%n", TableFormatter.center("(No inventory batches recorded for this product)", 76));
+        } else {
+            for (Batch batch : batches) {
+                String batchIdCell = TableFormatter.fit(batch.getBatchId(), 6);
+                String importDateCell = TableFormatter.fit(InputValidator.formatDisplayDate(batch.getImportDate()), 10);
+                String prodDateCell = TableFormatter.fit(InputValidator.formatDisplayDate(batch.getProductionDate()), 10);
+                String expDateCell = TableFormatter.fit(InputValidator.formatDisplayDate(batch.getExpirationDate()), 10);
+                String qtyCell = TableFormatter.fitRight(String.valueOf(batch.getQuantity()), 5);
+                String statusCell = TableFormatter.fit(determineBatchStatus(batch), 20);
+
+                System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
+                        batchIdCell, importDateCell, prodDateCell, expDateCell, qtyCell, statusCell);
+            }
+        }
+        System.out.println(PRODUCT_BATCHES_BORDER);
+        String footerLine = String.format("Total Batches: %d | Total Inventory Stock: %d %s (Available: %d %s)",
+                batches.size(),
+                product.getTotalStock(), product.getUnit(),
+                product.getAvailableStock(), product.getUnit());
+        System.out.printf("| %-76s |%n", TableFormatter.fit(footerLine, 76));
+        System.out.println(PRODUCT_BATCHES_BORDER);
+        System.out.printf("  Total batches displayed for %s: %d%n", product.getId(), batches.size());
     }
 
     /**

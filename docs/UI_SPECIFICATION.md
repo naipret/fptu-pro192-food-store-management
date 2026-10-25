@@ -164,7 +164,34 @@ Formula: `1 + (8) + 1 + (8) + 1 + (18) + 1 + (12) + 1 + (12) + 1 + (7) + 1 + (8)
 | `Qty` | `5` | `7` | Remaining batch quantity |
 | `Status` | `6` (`ACTIVE`/`NEAR`/`EXPRD`) | `8` | Shelf-life status |
 
-### 4.4. Customer Directory Table (`80` Columns)
+### 4.4. Dedicated Product Batches Detail Table (`80` Columns)
+
+Formula: `1 + (8) + 1 + (12) + 1 + (12) + 1 + (12) + 1 + (7) + 1 + (22) + 1 = 80` columns.
+
+```text
++--------+------------+------------+------------+-------+----------------------+
+| Product: P00001 - ST25 Fragrant Rice 5kg                                     |
+| Category: Grains     | Unit: Bag    | Price: 165,000 | Stock: 45 / 45        |
++--------+------------+------------+------------+-------+----------------------+
+| Batch  | ImportDate | Prod Date  | Exp Date   |   Qty | Status               |
++--------+------------+------------+------------+-------+----------------------+
+| B00001 | 05/10/2026 | 25/09/2026 | 23/04/2027 |    15 | ACTIVE               |
+| B00002 | 15/10/2026 | 10/10/2026 | 23/04/2027 |    30 | ACTIVE               |
++--------+------------+------------+------------+-------+----------------------+
+| Total Batches: 2 | Total Inventory Stock: 45 Bag (Available: 45 Bag)         |
++--------+------------+------------+------------+-------+----------------------+
+```
+
+| Column Header | Content Width (`fit`) | Padded Cell Width | Description |
+| :--- | :--- | :--- | :--- |
+| `Batch` | `6` (`B00001`) | `8` | Batch identifier |
+| `ImportDate` | `10` (`dd/MM/yyyy`) | `12` | Warehouse import date |
+| `Prod Date` | `10` (`dd/MM/yyyy`) | `12` | Manufacturing date |
+| `Exp Date` | `10` (`dd/MM/yyyy`) | `12` | Expiration date |
+| `Qty` | `5` | `7` | Batch remaining stock |
+| `Status` | `20` | `22` | Shelf-life status |
+
+### 4.5. Customer Directory Table (`80` Columns)
 
 Formula: `1 + (8) + 1 + (21) + 1 + (12) + 1 + (24) + 1 + (9) + 1 = 80` columns.
 
@@ -176,7 +203,7 @@ Formula: `1 + (8) + 1 + (21) + 1 + (12) + 1 + (24) + 1 + (9) + 1 = 80` columns.
 | `Address` | `22` | `24` | Residential address |
 | `Tier` | `7` (`Regular`/`VIP`) | `9` | Loyalty tier (untruncated) |
 
-### 4.5. Sales Cart and Invoice Table (`80` Columns)
+### 4.6. Sales Cart and Invoice Table (`80` Columns)
 
 Formula: `1 + (5) + 1 + (8) + 1 + (25) + 1 + (7) + 1 + (13) + 1 + (15) + 1 = 80` columns.
 
@@ -189,7 +216,7 @@ Formula: `1 + (5) + 1 + (8) + 1 + (25) + 1 + (7) + 1 + (13) + 1 + (15) + 1 = 80`
 | `Unit Price` | `11` | `13` | Snapshot selling price |
 | `Subtotal` | `13` | `15` | Line-item subtotal (`Qty * Unit Price`) |
 
-### 4.6. Sales Summary Table (`80` Columns)
+### 4.7. Sales Summary Table (`80` Columns)
 
 Formula: `1 + (10) + 1 + (10) + 1 + (12) + 1 + (13) + 1 + (13) + 1 + (15) + 1 = 80` columns.
 
@@ -261,3 +288,4 @@ To provide maximum usability for grocery store clerks:
 - Case-insensitive substring matching against Product ID, Product Name, Category, or Measurement Unit. Supports shorthand ID normalization (e.g., `P1` or `1` matches `P00001`). Prompts loop continuously until `0` is entered to return to the menu.
 - Case-insensitive substring matching against Customer ID, Full Name, Phone Number, or Residential Address (e.g., `HCM` or `Le Loi`). Supports shorthand ID normalization (e.g., `C1` or `1` matches `C00001`). Prompts loop continuously until `0` is entered to return to the menu.
 - Substring matching against Order ID, Customer ID, Customer Name, or Order Date representations (e.g. `2026`, `10/2026`, `19/10/2026`). Smart Order ID detection automatically expands and displays the full itemized invoice table when shorthand or canonical Order ID is provided (`4`, `O4`, or `O00004`). Prompts loop continuously until `0` is entered to return to the menu.
+- Dedicated Product Batches inspection in Inventory Menu (`[3] View All Batches of a Product`): Entering a Product ID in shorthand or natural prefix (`p1`, `prod p1`, `product p1`, or `P00001`) automatically expands and displays the dedicated Product Batches Detail Table showing the product summary header and itemized warehouse batches. Prompts loop continuously until `0` is entered to return to the menu.
