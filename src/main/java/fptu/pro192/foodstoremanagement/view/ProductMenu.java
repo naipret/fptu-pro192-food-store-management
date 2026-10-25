@@ -281,9 +281,6 @@ public class ProductMenu extends Menu {
                 ? ConsoleUtil.readInt("Select category [1-" + customOption + "] (or 0 to cancel): ", 1, customOption)
                 : ConsoleUtil.readInt("Select new category [1-" + customOption + "]: ",
                         1, customOption, -1);
-        if (selected == null) {
-            return null;
-        }
         if (selected == -1) {
             return currentCategory;
         }
@@ -325,9 +322,6 @@ public class ProductMenu extends Menu {
                 : ConsoleUtil.readInt(
                         "Select new measurement unit [1-" + customOption + "]: ",
                         1, customOption, -1);
-        if (selected == null) {
-            return null;
-        }
         if (selected == -1) {
             return currentUnit;
         }
