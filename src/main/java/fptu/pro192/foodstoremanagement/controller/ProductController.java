@@ -50,29 +50,11 @@ public class ProductController {
     private final Set<String> units;
 
     /**
-     * Constructs a ProductController bound to the default CSV paths in data/.
+     * Constructs a ProductController bound to default CSV paths in data/ and loads records.
      */
     public ProductController() {
-        this(Paths.get(DEFAULT_PRODUCTS_CSV), Paths.get(DEFAULT_BATCHES_CSV));
-    }
-
-    /**
-     * Constructs a ProductController bound to the specified Path objects and
-     * immediately loads existing product and batch records from disk.
-     *
-     * @param productCsvPath the Path for products.csv
-     * @param batchCsvPath   the Path for batches.csv
-     * @throws IllegalArgumentException if either Path is null
-     */
-    public ProductController(Path productCsvPath, Path batchCsvPath) {
-        if (productCsvPath == null) {
-            throw new IllegalArgumentException("Product CSV path cannot be null.");
-        }
-        if (batchCsvPath == null) {
-            throw new IllegalArgumentException("Batch CSV path cannot be null.");
-        }
-        this.productCsvPath = productCsvPath;
-        this.batchCsvPath = batchCsvPath;
+        this.productCsvPath = Paths.get(DEFAULT_PRODUCTS_CSV);
+        this.batchCsvPath = Paths.get(DEFAULT_BATCHES_CSV);
         this.products = new ArrayList<>();
         this.categories = new LinkedHashSet<>(InputValidator.DEFAULT_CATEGORIES);
         this.units = new LinkedHashSet<>(InputValidator.DEFAULT_UNITS);
@@ -94,10 +76,10 @@ public class ProductController {
         List<String[]> productRows = CsvUtil.readCsv(this.productCsvPath);
         List<String[]> batchRows = CsvUtil.readCsv(this.batchCsvPath);
         if (productRows.isEmpty()) {
-            CsvUtil.writeAtomic(this.productCsvPath, Collections.singletonList(PRODUCT_CSV_HEADERS));
+            CsvUtil.writeToFile(this.productCsvPath, Collections.singletonList(PRODUCT_CSV_HEADERS));
         }
         if (batchRows.isEmpty()) {
-            CsvUtil.writeAtomic(this.batchCsvPath, Collections.singletonList(BATCH_CSV_HEADERS));
+            CsvUtil.writeToFile(this.batchCsvPath, Collections.singletonList(BATCH_CSV_HEADERS));
         }
 
         Map<String, Product> productMap = new LinkedHashMap<>();
@@ -197,8 +179,8 @@ public class ProductController {
             }
         }
 
-        CsvUtil.writeAtomic(this.productCsvPath, productRows);
-        CsvUtil.writeAtomic(this.batchCsvPath, batchRows);
+        CsvUtil.writeToFile(this.productCsvPath, productRows);
+        CsvUtil.writeToFile(this.batchCsvPath, batchRows);
     }
 
     /**
@@ -319,31 +301,6 @@ public class ProductController {
      */
     public boolean existsById(String id) {
         return findByIdIncludeDeleted(id) != null;
-    }
-
-    /**
-     * Checks whether a Batch ID already exists across any product in the catalog
-     * (BR33).
-     *
-     * @param batchId the batch ID to check
-     * @return true if the batch ID is already in use
-     */
-    public boolean existsBatchId(String batchId) {
-        if (batchId == null || batchId.trim().isEmpty()) {
-            return false;
-        }
-        String target = InputValidator.tryNormalizeBatchId(batchId);
-        if (target == null) {
-            target = batchId.trim();
-        }
-        for (Product product : this.products) {
-            for (Batch batch : product.getBatches()) {
-                if (batch.getBatchId().equalsIgnoreCase(target)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /**
@@ -529,34 +486,6 @@ public class ProductController {
     }
 
     /**
-     * Replenishes an existing Batch by adding a positive integer quantity to its
-     * current stock and persisting to CSV (BR6, BR26).
-     *
-     * @param productId     the parent product ID
-     * @param batchId       the target batch ID
-     * @param addedQuantity the positive integer quantity to add
-     * @throws IllegalArgumentException if product or batch is not found or
-     *                                  addedQuantity is not positive
-     */
-    public void replenishBatch(String productId, String batchId, int addedQuantity) {
-        InputValidator.validatePositiveQuantity(addedQuantity, "Replenishment quantity");
-        Product product = findById(productId);
-        if (product == null) {
-            throw new IllegalArgumentException("Active product not found with ID: " + productId);
-        }
-        String normalizedBatchId = InputValidator.normalizeBatchId(batchId);
-        for (Batch batch : product.getBatches()) {
-            if (batch.getBatchId().equalsIgnoreCase(normalizedBatchId)) {
-                batch.setQuantity(batch.getQuantity() + addedQuantity);
-                saveToCsv();
-                return;
-            }
-        }
-        throw new IllegalArgumentException(
-                "Batch '" + normalizedBatchId + "' not found on product " + product.getId() + ".");
-    }
-
-    /**
      * Adjusts an existing Batch's stock to an explicit non-negative integer
      * quantity and persists to CSV (BR6, BR26).
      *
@@ -587,18 +516,14 @@ public class ProductController {
     /**
      * Deducts the requested quantity from a product's non-expired batches
      * relative to today using the First-Expired-First-Out algorithm and
-     * persists the updated batch quantities atomically (BR10, BR11, BR14, BR24,
-     * BR26).
+     * persists the updated batch quantities (BR10, BR11, BR14, BR24, BR26).
      *
      * @param productId         the product ID to deduct from
      * @param requestedQuantity the positive integer quantity to deduct
-     * @throws IllegalArgumentException   if product is not found or
-     *                                    requestedQuantity is not positive
-     * @throws InsufficientStockException if available non-expired stock is less
-     *                                    than requestedQuantity
+     * @throws IllegalArgumentException if product is not found, quantity not positive,
+     *                                  or available non-expired stock is insufficient
      */
-    public void deductStockFEFO(String productId, int requestedQuantity)
-            throws InsufficientStockException {
+    public void deductStockFEFO(String productId, int requestedQuantity) {
         InputValidator.validatePositiveQuantity(requestedQuantity, "Requested deduction quantity");
         Product product = findById(productId);
         if (product == null) {
@@ -607,7 +532,7 @@ public class ProductController {
 
         int availableStock = product.getAvailableStock();
         if (availableStock < requestedQuantity) {
-            throw new InsufficientStockException(
+            throw new IllegalArgumentException(
                     "Insufficient stock for product '" + product.getName() + "' ("
                             + product.getId() + "). Requested: " + requestedQuantity
                             + ", Available non-expired stock: " + availableStock + ".");

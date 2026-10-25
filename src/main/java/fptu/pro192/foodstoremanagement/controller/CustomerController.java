@@ -30,24 +30,10 @@ public class CustomerController {
     private final List<Customer> customers;
 
     /**
-     * Constructs a CustomerController bound to the default data/customers.csv path.
+     * Constructs a CustomerController bound to default data/customers.csv and loads records.
      */
     public CustomerController() {
-        this(Paths.get(DEFAULT_CUSTOMERS_CSV));
-    }
-
-    /**
-     * Constructs a CustomerController bound to the specified Path and loads
-     * existing customer records from disk.
-     *
-     * @param csvPath the Path for customers.csv
-     * @throws IllegalArgumentException if csvPath is null
-     */
-    public CustomerController(Path csvPath) {
-        if (csvPath == null) {
-            throw new IllegalArgumentException("Customer CSV path cannot be null.");
-        }
-        this.csvPath = csvPath;
+        this.csvPath = Paths.get(DEFAULT_CUSTOMERS_CSV);
         this.customers = new ArrayList<>();
         loadFromCsv();
     }
@@ -112,7 +98,7 @@ public class CustomerController {
                     String.valueOf(customer.isDeleted())
             });
         }
-        CsvUtil.writeAtomic(this.csvPath, rows);
+        CsvUtil.writeToFile(this.csvPath, rows);
     }
 
     /**

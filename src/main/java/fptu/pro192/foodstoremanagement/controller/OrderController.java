@@ -52,8 +52,7 @@ public class OrderController {
     private final CustomerController customerController;
 
     /**
-     * Constructs an OrderController bound to the default CSV paths in data/
-     * with explicitly injected ProductController and CustomerController instances.
+     * Constructs an OrderController bound to default CSV paths with shared controllers.
      *
      * @param productController  the shared ProductController instance
      * @param customerController the shared CustomerController instance
@@ -61,37 +60,14 @@ public class OrderController {
      */
     public OrderController(ProductController productController,
             CustomerController customerController) {
-        this(Paths.get(DEFAULT_ORDERS_CSV), Paths.get(DEFAULT_ORDER_DETAILS_CSV),
-                productController, customerController);
-    }
-
-    /**
-     * Constructs an OrderController with explicit CSV Paths and shared
-     * controller collaborators, immediately loading completed historical
-     * orders from disk.
-     *
-     * @param ordersCsvPath      the Path for orders.csv
-     * @param detailsCsvPath     the Path for order_details.csv
-     * @param productController  the shared ProductController instance
-     * @param customerController the shared CustomerController instance
-     * @throws IllegalArgumentException if any argument is null
-     */
-    public OrderController(Path ordersCsvPath, Path detailsCsvPath,
-            ProductController productController, CustomerController customerController) {
-        if (ordersCsvPath == null) {
-            throw new IllegalArgumentException("Orders CSV path cannot be null.");
-        }
-        if (detailsCsvPath == null) {
-            throw new IllegalArgumentException("Order details CSV path cannot be null.");
-        }
         if (productController == null) {
             throw new IllegalArgumentException("ProductController cannot be null.");
         }
         if (customerController == null) {
             throw new IllegalArgumentException("CustomerController cannot be null.");
         }
-        this.ordersCsvPath = ordersCsvPath;
-        this.detailsCsvPath = detailsCsvPath;
+        this.ordersCsvPath = Paths.get(DEFAULT_ORDERS_CSV);
+        this.detailsCsvPath = Paths.get(DEFAULT_ORDER_DETAILS_CSV);
         this.productController = productController;
         this.customerController = customerController;
         this.orders = new ArrayList<>();
@@ -109,10 +85,10 @@ public class OrderController {
         List<String[]> orderRows = CsvUtil.readCsv(this.ordersCsvPath);
         List<String[]> detailRows = CsvUtil.readCsv(this.detailsCsvPath);
         if (orderRows.isEmpty()) {
-            CsvUtil.writeAtomic(this.ordersCsvPath, Collections.singletonList(ORDER_CSV_HEADERS));
+            CsvUtil.writeToFile(this.ordersCsvPath, Collections.singletonList(ORDER_CSV_HEADERS));
         }
         if (detailRows.isEmpty()) {
-            CsvUtil.writeAtomic(this.detailsCsvPath, Collections.singletonList(DETAIL_CSV_HEADERS));
+            CsvUtil.writeToFile(this.detailsCsvPath, Collections.singletonList(DETAIL_CSV_HEADERS));
         }
 
         Map<String, List<OrderDetail>> detailsByOrder = new LinkedHashMap<>();
@@ -224,8 +200,8 @@ public class OrderController {
             }
         }
 
-        CsvUtil.writeAtomic(this.ordersCsvPath, orderRows);
-        CsvUtil.writeAtomic(this.detailsCsvPath, detailRows);
+        CsvUtil.writeToFile(this.ordersCsvPath, orderRows);
+        CsvUtil.writeToFile(this.detailsCsvPath, detailRows);
     }
 
     /**
@@ -313,13 +289,10 @@ public class OrderController {
      * @param draft     the draft Order being assembled
      * @param productId the product ID to add
      * @param quantity  the positive integer quantity to add
-     * @throws IllegalArgumentException   if draft/product is invalid, quantity is
-     *                                    not positive, or all stock is expired
-     * @throws InsufficientStockException if cumulative cart quantity exceeds
-     *                                    available non-expired stock
+     * @throws IllegalArgumentException if draft/product is invalid, quantity is
+     *                                  not positive, or stock is insufficient
      */
-    public void addItemToDraft(Order draft, String productId, int quantity)
-            throws InsufficientStockException {
+    public void addItemToDraft(Order draft, String productId, int quantity) {
         if (draft == null) {
             throw new IllegalArgumentException("Draft order cannot be null.");
         }
@@ -341,7 +314,7 @@ public class OrderController {
         int existingInCart = draft.getQuantityForProduct(product.getId());
         int newCumulativeQuantity = existingInCart + quantity;
         if (newCumulativeQuantity > availableStock) {
-            throw new InsufficientStockException(
+            throw new IllegalArgumentException(
                     "Insufficient stock for '" + product.getName() + "'. Available: "
                             + availableStock + ", already in cart: " + existingInCart
                             + ", requested to add: " + quantity + ".");
@@ -374,12 +347,9 @@ public class OrderController {
      *
      * @param draft the non-empty draft Order to finalize
      * @return the finalized and persisted Order
-     * @throws IllegalArgumentException   if draft is null, empty, or has a
-     *                                    duplicate orderId
-     * @throws InsufficientStockException if any line item exceeds available
-     *                                    non-expired stock
+     * @throws IllegalArgumentException if draft is null, empty, or stock is insufficient
      */
-    public Order finalizeOrder(Order draft) throws InsufficientStockException {
+    public Order finalizeOrder(Order draft) {
         if (draft == null) {
             throw new IllegalArgumentException("Draft order cannot be null.");
         }
@@ -399,7 +369,7 @@ public class OrderController {
             }
             int available = product.getAvailableStock();
             if (available < item.getQuantity()) {
-                throw new InsufficientStockException(
+                throw new IllegalArgumentException(
                         "Insufficient stock for '" + product.getName() + "'. Requested: "
                                 + item.getQuantity() + ", Available: " + available + ".");
             }

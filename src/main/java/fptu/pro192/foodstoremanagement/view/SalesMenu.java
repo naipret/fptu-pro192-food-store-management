@@ -1,7 +1,6 @@
 package fptu.pro192.foodstoremanagement.view;
 
 import fptu.pro192.foodstoremanagement.controller.CustomerController;
-import fptu.pro192.foodstoremanagement.controller.InsufficientStockException;
 import fptu.pro192.foodstoremanagement.controller.OrderController;
 import fptu.pro192.foodstoremanagement.controller.ProductController;
 import fptu.pro192.foodstoremanagement.model.Customer;
@@ -149,7 +148,7 @@ public class SalesMenu extends Menu {
             renderInvoiceTable(finalized);
             ConsoleUtil.pressEnterToContinue();
             return true;
-        } catch (InsufficientStockException | IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
             ConsoleUtil.pressEnterToContinue();
             return false;
@@ -195,7 +194,7 @@ public class SalesMenu extends Menu {
             this.orderController.addItemToDraft(draft, selected.getId(), qty);
             System.out.printf("  [OK] Added %d x %s to cart.%n%n", qty, selected.getName());
             ConsoleUtil.pressEnterToContinue();
-        } catch (InsufficientStockException | IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println("  [ERROR] " + e.getMessage());
             ConsoleUtil.pressEnterToContinue();
         }
