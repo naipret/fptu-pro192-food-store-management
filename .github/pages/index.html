@@ -139,36 +139,37 @@
             color: #ffffff;
         }
 
-        /* Terminal screen container */
+        /* Terminal screen container: completely hide scrollbars */
         #terminal-container {
             flex: 1;
             background-color: #1e1e1e;
             padding: 12px 16px;
             overflow: auto;
             position: relative;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
         }
 
-        /* Custom scrollbar matching GNOME dark */
         #terminal-container::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        #terminal-container::-webkit-scrollbar-track {
-            background: #1e1e1e;
-        }
-
-        #terminal-container::-webkit-scrollbar-thumb {
-            background: #3c3c3c;
-            border-radius: 4px;
-        }
-
-        #terminal-container::-webkit-scrollbar-thumb:hover {
-            background: #505050;
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
         }
 
         .xterm {
             height: 100%;
+        }
+
+        /* Completely hide xterm internal scrollbar */
+        .xterm .xterm-viewport {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+
+        .xterm .xterm-viewport::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
         }
 
         /* Minimal empty footer */
@@ -496,14 +497,14 @@
             fitTerminal();
         });
 
-        // Font scaling via Ctrl + MouseWheel
-        window.addEventListener('wheel', (e) => {
+        // Font scaling via Ctrl + MouseWheel ONLY when mouse pointer is inside the terminal container
+        terminalContainer.addEventListener('wheel', (e) => {
             if (e.ctrlKey) {
                 e.preventDefault();
                 let currentSize = term.options.fontSize || 14;
-                if (e.deltaY < 0 && currentSize < 26) {
+                if (e.deltaY < 0 && currentSize < 28) {
                     term.options.fontSize = currentSize + 1;
-                } else if (e.deltaY > 0 && currentSize > 11) {
+                } else if (e.deltaY > 0 && currentSize > 10) {
                     term.options.fontSize = currentSize - 1;
                 }
                 fitTerminal();
