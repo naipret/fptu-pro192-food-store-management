@@ -332,9 +332,15 @@ public class CustomerMenu extends Menu {
         System.out.println("  Select Customer Loyalty Tier:");
         System.out.println("    [1] Regular (0% Discount)");
         System.out.println("    [2] VIP     (10% Discount)");
-        Integer choice = (currentTier == null)
-                ? ConsoleUtil.readInt("Enter tier choice [1-2] (or 0 to cancel): ", 1, 2)
-                : ConsoleUtil.readInt("Enter new tier choice [1-2]: ", 1, 2, -1);
+        Integer choice;
+        if (currentTier == null) {
+            choice = ConsoleUtil.readInt("Enter tier choice [1-2] (or 0 to cancel): ", 0, 2);
+        } else {
+            choice = ConsoleUtil.readInt("Enter new tier choice [1-2]: ", 1, 2, -1);
+        }
+        if (choice == null || choice == 0) {
+            return null;
+        }
         if (choice == -1) {
             return currentTier;
         }

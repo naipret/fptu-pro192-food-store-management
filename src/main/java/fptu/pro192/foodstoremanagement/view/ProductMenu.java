@@ -277,10 +277,16 @@ public class ProductMenu extends Menu {
         }
         int customOption = list.size() + 1;
         System.out.printf("    [%2d] Add New Custom Category%n", customOption);
-        Integer selected = (currentCategory == null)
-                ? ConsoleUtil.readInt("Select category [1-" + customOption + "] (or 0 to cancel): ", 1, customOption)
-                : ConsoleUtil.readInt("Select new category [1-" + customOption + "]: ",
-                        1, customOption, -1);
+        Integer selected;
+        if (currentCategory == null) {
+            selected = ConsoleUtil.readInt("Select category [1-" + customOption + "] (or 0 to cancel): ", 0,
+                    customOption);
+        } else {
+            selected = ConsoleUtil.readInt("Select new category [1-" + customOption + "]: ", 1, customOption, -1);
+        }
+        if (selected == null || selected == 0) {
+            return null;
+        }
         if (selected == -1) {
             return currentCategory;
         }
@@ -316,12 +322,17 @@ public class ProductMenu extends Menu {
         }
         int customOption = list.size() + 1;
         System.out.printf("    [%2d] Add New Custom Unit%n", customOption);
-        Integer selected = (currentUnit == null)
-                ? ConsoleUtil.readInt("Select measurement unit [1-" + customOption + "] (or 0 to cancel): ",
-                        1, customOption)
-                : ConsoleUtil.readInt(
-                        "Select new measurement unit [1-" + customOption + "]: ",
-                        1, customOption, -1);
+        Integer selected;
+        if (currentUnit == null) {
+            selected = ConsoleUtil.readInt("Select measurement unit [1-" + customOption + "] (or 0 to cancel): ", 0,
+                    customOption);
+        } else {
+            selected = ConsoleUtil.readInt("Select new measurement unit [1-" + customOption + "]: ", 1, customOption,
+                    -1);
+        }
+        if (selected == null || selected == 0) {
+            return null;
+        }
         if (selected == -1) {
             return currentUnit;
         }
