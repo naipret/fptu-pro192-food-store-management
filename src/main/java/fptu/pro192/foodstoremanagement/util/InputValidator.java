@@ -178,6 +178,9 @@ public final class InputValidator {
      */
     public static String normalizeCustomerName(String raw) {
         String clean = normalizeText(raw, "Customer name");
+        if (!clean.matches("^[a-zA-Z]+(\\s[a-zA-Z]+)*$")) {
+            throw new IllegalArgumentException("Customer name can only contain letters and spaces.");
+        }
         String[] words = clean.split(" ");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < words.length; i++) {
