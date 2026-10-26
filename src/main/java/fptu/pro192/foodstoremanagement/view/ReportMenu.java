@@ -241,7 +241,7 @@ public class ReportMenu extends Menu {
             CustomerSpendingSummary item = summaries.get(i);
             String spentStr = InputValidator.formatCurrency(item.getTotalSpent());
             System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
-                TableFormatter.fitRight("#" + (i + 1), 4),
+                    TableFormatter.fitRight("#" + (i + 1), 4),
                     TableFormatter.fit(item.getCustomerId(), 6),
                     TableFormatter.fit(item.getCustomerName(), 22),
                     TableFormatter.fit(item.getCustomerType(), 7),
