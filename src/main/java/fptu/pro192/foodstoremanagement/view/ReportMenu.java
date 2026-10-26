@@ -28,6 +28,7 @@ public class ReportMenu extends Menu {
 
     private static final String TOP_PRODUCTS_BORDER = "+------+--------+-------------------------+------------+-------+---------------+";
     private static final String CUSTOMER_SPEND_BORDER = "+------+--------+------------------------+---------+---------+-----------------+";
+    private static final LocalDate CANCEL_DATE = LocalDate.MIN;
 
     private final ReportController reportController;
 
@@ -135,11 +136,12 @@ public class ReportMenu extends Menu {
         while (true) {
             LocalDate fromDate = promptScopeDate(
                     "Enter from date [dd/MM/yyyy] (Enter for all-time, 0 to cancel): ");
-            if (fromDate == null) {
+            if (fromDate == CANCEL_DATE) {
                 break;
             }
             LocalDate toDate = promptScopeEndDate(fromDate);
-            if (toDate == null) {
+            if (toDate == CANCEL_DATE) {
+                System.out.println("  [INFO] Operation cancelled.");
                 printDivider();
                 continue;
             }
@@ -147,6 +149,7 @@ public class ReportMenu extends Menu {
                     "Enter top N limit (N, Enter for all-products, 0 to cancel): ",
                     1, Integer.MAX_VALUE, Integer.MAX_VALUE);
             if (limit == null) {
+                System.out.println("  [INFO] Operation cancelled.");
                 printDivider();
                 continue;
             }
@@ -194,11 +197,12 @@ public class ReportMenu extends Menu {
         while (true) {
             LocalDate fromDate = promptScopeDate(
                     "Enter from date [dd/MM/yyyy] (Enter for all-time, 0 to cancel): ");
-            if (fromDate == null) {
+            if (fromDate == CANCEL_DATE) {
                 break;
             }
             LocalDate toDate = promptScopeEndDate(fromDate);
-            if (toDate == null) {
+            if (toDate == CANCEL_DATE) {
+                System.out.println("  [INFO] Operation cancelled.");
                 printDivider();
                 continue;
             }
@@ -206,6 +210,7 @@ public class ReportMenu extends Menu {
                     "Enter top N limit (N, Enter for all-customers, 0 to cancel): ",
                     1, Integer.MAX_VALUE, Integer.MAX_VALUE);
             if (limit == null) {
+                System.out.println("  [INFO] Operation cancelled.");
                 printDivider();
                 continue;
             }
@@ -236,7 +241,7 @@ public class ReportMenu extends Menu {
             CustomerSpendingSummary item = summaries.get(i);
             String spentStr = InputValidator.formatCurrency(item.getTotalSpent());
             System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
-                    TableFormatter.fitRight("#" + (i + 1), 4),
+                TableFormatter.fitRight("#" + (i + 1), 4),
                     TableFormatter.fit(item.getCustomerId(), 6),
                     TableFormatter.fit(item.getCustomerName(), 22),
                     TableFormatter.fit(item.getCustomerType(), 7),
@@ -248,26 +253,43 @@ public class ReportMenu extends Menu {
     }
 
     private LocalDate promptScopeDate(String prompt) {
-        LocalDate val = ConsoleUtil.readDate(prompt, LocalDate.MIN);
-        if (val == null) {
-            return null;
+        while (true) {
+            String raw = ConsoleUtil.readOptionalString(prompt);
+            if ("0".equals(raw)) {
+                return CANCEL_DATE;
+            }
+            if (raw.isEmpty()) {
+                return null;
+            }
+            try {
+                return InputValidator.parseDisplayDate(raw, "From date");
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
+            }
         }
-        return (val == LocalDate.MIN) ? null : val;
     }
 
     private LocalDate promptScopeEndDate(LocalDate fromDate) {
         while (true) {
-            LocalDate val = ConsoleUtil.readDate(
-                    "Enter to date [dd/MM/yyyy] (Enter for all-time, 0 to cancel): ", LocalDate.MAX);
-            if (val == null) {
+            String raw = ConsoleUtil.readOptionalString(
+                    "Enter to date [dd/MM/yyyy] (Enter for all-time, 0 to cancel): ");
+            if ("0".equals(raw)) {
+                return CANCEL_DATE;
+            }
+            if (raw.isEmpty()) {
                 return null;
             }
-            LocalDate toDate = (val == LocalDate.MAX) ? null : val;
-            if (fromDate == null || toDate == null || !toDate.isBefore(fromDate)) {
+            try {
+                LocalDate toDate = InputValidator.parseDisplayDate(raw, "To date");
+                if (fromDate != null && toDate.isBefore(fromDate)) {
+                    System.out.println("  [ERROR] End date cannot be before start date ("
+                            + InputValidator.formatDisplayDate(fromDate) + ").");
+                    continue;
+                }
                 return toDate;
+            } catch (IllegalArgumentException e) {
+                System.out.println("  [ERROR] " + e.getMessage());
             }
-            System.out.println("  [ERROR] End date cannot be before start date ("
-                    + InputValidator.formatDisplayDate(fromDate) + ").");
         }
     }
 
