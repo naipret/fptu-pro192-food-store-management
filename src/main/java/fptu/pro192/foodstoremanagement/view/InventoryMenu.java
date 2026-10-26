@@ -100,7 +100,27 @@ public class InventoryMenu extends Menu {
                     "Enter production date [dd/MM/yyyy] (Enter for today, 0 to cancel): ",
                     LocalDate.now());
             if (prodDate == null) {
-                System.out.println("  [INFO] Batch import cancelled.");
+                System.out.println("  [INFO] Operation cancelled.");
+                printDivider();
+                continue;
+            }
+            if (prodDate.isAfter(LocalDate.now())) {
+                System.out.println("  [ERROR] Production date cannot be in the future.");
+                printDivider();
+                continue;
+            }
+
+            LocalDate importDate = ConsoleUtil.readDate(
+                    "Enter import date [dd/MM/yyyy] (Enter for today, 0 to cancel): ",
+                    LocalDate.now());
+            if (importDate == null) {
+                System.out.println("  [INFO] Operation cancelled.");
+                printDivider();
+                continue;
+            }
+            if (prodDate.isAfter(importDate)) {
+                System.out.println("  [ERROR] Production date cannot be after import date ("
+                        + InputValidator.formatDisplayDate(importDate) + ").");
                 printDivider();
                 continue;
             }
@@ -108,7 +128,12 @@ public class InventoryMenu extends Menu {
             LocalDate expDate = ConsoleUtil.readDate(
                     "Enter expiration date [dd/MM/yyyy] (or 0 to cancel): ", null);
             if (expDate == null) {
-                System.out.println("  [INFO] Batch import cancelled.");
+                System.out.println("  [INFO] Operation cancelled.");
+                printDivider();
+                continue;
+            }
+            if (importDate.isAfter(expDate)) {
+                System.out.println("  [ERROR] Import date cannot be after expiration date.");
                 printDivider();
                 continue;
             }
@@ -120,21 +145,21 @@ public class InventoryMenu extends Menu {
 
             Integer qty = ConsoleUtil.readPositiveInt("Enter batch quantity [>0] (or 0 to cancel): ");
             if (qty == null) {
-                System.out.println("  [INFO] Batch import cancelled.");
+                System.out.println("  [INFO] Operation cancelled.");
                 printDivider();
                 continue;
             }
 
             System.out.println();
             if (!ConsoleUtil.confirm("Are you sure you want to import this batch?")) {
-                System.out.println("  [INFO] Batch import cancelled.");
+                System.out.println("  [INFO] Operation cancelled.");
                 printDivider();
                 continue;
             }
 
             try {
                 Batch newBatch = this.productController.importBatch(
-                        product.getId(), prodDate, expDate, qty);
+                        product.getId(), importDate, prodDate, expDate, qty);
                 System.out.printf("  [OK] Batch %s (%d %s) imported for product %s.%n",
                         newBatch.getBatchId(), qty, product.getUnit(), product.getId());
                 renderBatchTable(Collections.singletonList(newBatch));
@@ -164,7 +189,7 @@ public class InventoryMenu extends Menu {
             Integer newQty = ConsoleUtil.readInt("Enter new exact batch quantity [>=0]: ", 0,
                     Integer.MAX_VALUE);
             if (!ConsoleUtil.confirm("Confirm setting batch " + target.getBatchId() + " stock to " + newQty + "?")) {
-                System.out.println("  [INFO] Adjustment cancelled.");
+                System.out.println("  [INFO] Operation cancelled.");
                 printDivider();
                 continue;
             }
