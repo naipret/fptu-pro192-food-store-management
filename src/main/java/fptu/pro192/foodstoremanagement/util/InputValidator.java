@@ -98,55 +98,130 @@ public final class InputValidator {
         }
     }
 
-    // Convenience delegates for backwards compatibility
-    public static String normalizeId(String raw, char expectedPrefix, boolean allowShorthandPadding) {
-        return normalizeId(raw, expectedPrefix);
-    }
-
+    /**
+     * Validates and normalizes a Product ID to canonical format (BR1, BR33).
+     *
+     * @param raw the raw ID string
+     * @return the normalized Product ID
+     * @throws IllegalArgumentException if raw is invalid
+     */
     public static String validateProductId(String raw) {
         return normalizeId(raw, 'P');
     }
 
+    /**
+     * Normalizes a Product ID to canonical format (BR1, BR33).
+     *
+     * @param raw the raw ID string
+     * @return the normalized Product ID
+     * @throws IllegalArgumentException if raw is invalid
+     */
     public static String normalizeProductId(String raw) {
         return normalizeId(raw, 'P');
     }
 
+    /**
+     * Safely normalizes a Product ID, returning null on failure (BR1, BR33).
+     *
+     * @param raw the raw ID string
+     * @return the normalized Product ID, or null if invalid
+     */
     public static String tryNormalizeProductId(String raw) {
         return tryNormalizeId(raw, 'P');
     }
 
+    /**
+     * Validates and normalizes a Batch ID to canonical format (BR33).
+     *
+     * @param raw the raw ID string
+     * @return the normalized Batch ID
+     * @throws IllegalArgumentException if raw is invalid
+     */
     public static String validateBatchId(String raw) {
         return normalizeId(raw, 'B');
     }
 
+    /**
+     * Normalizes a Batch ID to canonical format (BR33).
+     *
+     * @param raw the raw ID string
+     * @return the normalized Batch ID
+     * @throws IllegalArgumentException if raw is invalid
+     */
     public static String normalizeBatchId(String raw) {
         return normalizeId(raw, 'B');
     }
 
+    /**
+     * Safely normalizes a Batch ID, returning null on failure (BR33).
+     *
+     * @param raw the raw ID string
+     * @return the normalized Batch ID, or null if invalid
+     */
     public static String tryNormalizeBatchId(String raw) {
         return tryNormalizeId(raw, 'B');
     }
 
+    /**
+     * Validates and normalizes a Customer ID to canonical format (BR2, BR33).
+     *
+     * @param raw the raw ID string
+     * @return the normalized Customer ID
+     * @throws IllegalArgumentException if raw is invalid
+     */
     public static String validateCustomerId(String raw) {
         return normalizeId(raw, 'C');
     }
 
+    /**
+     * Normalizes a Customer ID to canonical format (BR2, BR33).
+     *
+     * @param raw the raw ID string
+     * @return the normalized Customer ID
+     * @throws IllegalArgumentException if raw is invalid
+     */
     public static String normalizeCustomerId(String raw) {
         return normalizeId(raw, 'C');
     }
 
+    /**
+     * Safely normalizes a Customer ID, returning null on failure (BR2, BR33).
+     *
+     * @param raw the raw ID string
+     * @return the normalized Customer ID, or null if invalid
+     */
     public static String tryNormalizeCustomerId(String raw) {
         return tryNormalizeId(raw, 'C');
     }
 
+    /**
+     * Validates and normalizes an Order ID to canonical format (BR33).
+     *
+     * @param raw the raw ID string
+     * @return the normalized Order ID
+     * @throws IllegalArgumentException if raw is invalid
+     */
     public static String validateOrderId(String raw) {
         return normalizeId(raw, 'O');
     }
 
+    /**
+     * Normalizes an Order ID to canonical format (BR33).
+     *
+     * @param raw the raw ID string
+     * @return the normalized Order ID
+     * @throws IllegalArgumentException if raw is invalid
+     */
     public static String normalizeOrderId(String raw) {
         return normalizeId(raw, 'O');
     }
 
+    /**
+     * Safely normalizes an Order ID, returning null on failure (BR33).
+     *
+     * @param raw the raw ID string
+     * @return the normalized Order ID, or null if invalid
+     */
     public static String tryNormalizeOrderId(String raw) {
         return tryNormalizeId(raw, 'O');
     }

@@ -351,8 +351,8 @@ public class SalesMenu extends Menu {
             OrderDetail item = items.get(i);
             Product p = this.productController.findByIdIncludeDeleted(item.getProductId());
             String productName = (p != null) ? p.getName() : "Unknown (" + item.getProductId() + ")";
-            String unitPriceStr = String.format(Locale.US, "%,.0f", item.getUnitPrice());
-            String subTotalStr = String.format(Locale.US, "%,.0f", item.getSubTotal());
+            String unitPriceStr = InputValidator.formatCurrency(item.getUnitPrice());
+            String subTotalStr = InputValidator.formatCurrency(item.getSubTotal());
             System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
                     TableFormatter.fitRight(String.valueOf(i + 1), 3),
                     TableFormatter.fit(item.getProductId(), 6),
@@ -387,9 +387,9 @@ public class SalesMenu extends Menu {
                     ? Order.GUEST_CUSTOMER_ID
                     : order.getCustomerId();
             String dateStr = InputValidator.formatDisplayDate(order.getOrderDate().toLocalDate());
-            String grossStr = String.format(Locale.US, "%,.0f", order.getTotalAmount());
-            String discStr = String.format(Locale.US, "%,.0f", order.getDiscount());
-            String finalStr = String.format(Locale.US, "%,.0f", order.getFinalAmount());
+            String grossStr = InputValidator.formatCurrency(order.getTotalAmount());
+            String discStr = InputValidator.formatCurrency(order.getDiscount());
+            String finalStr = InputValidator.formatCurrency(order.getFinalAmount());
             System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
                     TableFormatter.fit(order.getOrderId(), 8),
                     TableFormatter.fit(custId, 8),

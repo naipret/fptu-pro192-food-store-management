@@ -63,6 +63,7 @@ public final class TableFormatter {
             return "";
         }
         String clean = (text == null) ? "" : text.trim();
+        clean = clean.replace('\r', ' ').replace('\n', ' ').replace('\t', ' ');
         if (clean.length() >= width) {
             return fit(clean, width);
         }
@@ -87,6 +88,7 @@ public final class TableFormatter {
             return "";
         }
         String clean = (text == null) ? "" : text.trim();
+        clean = clean.replace('\r', ' ').replace('\n', ' ').replace('\t', ' ');
         if (clean.length() >= width) {
             return fit(clean, width);
         }

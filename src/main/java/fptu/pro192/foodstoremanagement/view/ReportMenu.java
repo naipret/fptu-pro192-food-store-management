@@ -176,7 +176,7 @@ public class ReportMenu extends Menu {
         System.out.println(TOP_PRODUCTS_BORDER);
         for (int i = 0; i < rankings.size(); i++) {
             ProductSalesSummary item = rankings.get(i);
-            String revStr = String.format(Locale.US, "%,.0f", item.getGrossRevenue());
+            String revStr = InputValidator.formatCurrency(item.getGrossRevenue());
             System.out.printf("| %s | %s | %s | %s | %s | %s |%n",
                     TableFormatter.fitRight("#" + (i + 1), 4),
                     TableFormatter.fit(item.getProductId(), 6),
