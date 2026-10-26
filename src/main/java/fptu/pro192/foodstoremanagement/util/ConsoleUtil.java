@@ -20,6 +20,7 @@ public final class ConsoleUtil {
      * Clears the terminal screen.
      */
     public static void clearScreen() {
+        System.out.println();
         try {
             if (System.getProperty("os.name", "").toLowerCase().contains("win")
                     && System.console() != null) {

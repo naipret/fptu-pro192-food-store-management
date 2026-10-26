@@ -9,7 +9,7 @@ This document defines the terminal layout constraints, localization policy, navi
 | Attribute | Standard |
 | :--- | :--- |
 | Maximum Line Width | Strictly `80` characters per line (`TableFormatter.SCREEN_WIDTH = 80`) |
-| Border Character Set | Basic 7-bit ASCII characters only (`+`, `-`, `=`, `\|`, `*`). Box-drawing Unicode characters are prohibited to prevent garbled output in the NetBeans 13 Output window and Windows `cmd.exe`. |
+| Border Character Set | Basic 7-bit ASCII characters only (`+`, `-`, `=`, `\|`, `*`). Box-drawing Unicode characters are prohibited to prevent garbled output across various IDE output windows and Windows `cmd.exe`. |
 | Interface Language | Full English across all menu titles, prompts, table headers, status messages, categories, and units |
 | Character Set Guarantee | Pure 100% 7-bit ASCII text across all prompts, tables, seeded CSVs, customer names, product names, and addresses. |
 | Date Format | `dd/MM/yyyy` for all console prompts and table columns (converted to ISO `yyyy-MM-dd` only when reading/writing CSV files) |
@@ -29,7 +29,7 @@ Every menu rendered via `Menu.display()` lists numbered options starting from `[
 
 ### 2.2. Default Values and Enter-to-Keep Convention
 
-1. When modifying existing records, pressing `[Enter]` without typing any input retains the current value for that field. Current category and customer tier are displayed on a dedicated line above choice options supporting `Enter to keep, or 0 to cancel`.
+1. When modifying existing records, pressing `[Enter]` without typing any input retains the current value for that field. Current entity values are displayed in the verification table before prompting, allowing users to press `Enter to keep, or 0 to cancel`.
 2. Report Date/Period Defaults (`5.1`, `5.2`):
    - In Daily Revenue (`5.1`), pressing `[Enter]` defaults to today's date (`dd/MM/yyyy`).
    - In Monthly Revenue (`5.2`), user inputs `MM/yyyy` directly (no separate month/year prompts), with `[Enter]` defaulting to the current month.
@@ -62,7 +62,7 @@ All feature screens and search inspectors loop continuously in a standardized `w
 
 To maintain a clean and focused user experience during terminal interaction:
 
-1. Before rendering any menu frame and after completing major workflow actions, the terminal viewport is cleared using ANSI escape sequence `\033[H\033[2J` supplemented by a 25-blank-lines fallback to support legacy Windows `cmd.exe` and IDE console windows without ANSI support.
+1. Before rendering any menu frame and after completing major workflow actions, the terminal viewport is cleared using ANSI escape sequence `\033[H\033[2J` preceded by a newline to ensure clean visual separation across terminal consoles and IDE output windows.
 2. Every dispatched submenu action renders an 80-column centered breadcrumb banner at the top of the screen before executing the selected handler. The banner follows the format `MAIN MENU > [<MenuIndex>] <MENU_NAME> > [<ChoiceIndex>] <Action Name>` (for example, `MAIN MENU > [1] PRODUCTS > [3] Add New Product`) and is centered horizontally using `TableFormatter.center(...)` without redundant prefix tags like `LOCATION:`.
 
 ### 2.7. Standardized Status Prefixes
@@ -152,13 +152,13 @@ Formula: `1 + (8) + 1 + (24) + 1 + (14) + 1 + (8) + 1 + (12) + 1 + (7) + 1 = 80`
 
 ### 4.3. Batch and Expiry Table
 
-Formula: `1 + (8) + 1 + (8) + 1 + (18) + 1 + (12) + 1 + (12) + 1 + (7) + 1 + (8) + 1 = 80` columns.
+Formula: `1 + (8) + 1 + (8) + 1 + (17) + 1 + (12) + 1 + (12) + 1 + (7) + 1 + (8) + 1 = 80` columns.
 
 | Column Header | Content Width (`fit`) | Padded Cell Width | Description |
 | :--- | :--- | :--- | :--- |
 | `Batch` | `6` (`B00001`) | `8` | Batch identifier |
 | `ProdID` | `6` (`P00001`) | `8` | Product identifier |
-| `Product Name` | `16` | `18` | Truncated product name |
+| `Product Name` | `15` | `17` | Truncated product name |
 | `Prod Date` | `10` (`dd/MM/yyyy`) | `12` | Production date |
 | `Exp Date` | `10` (`dd/MM/yyyy`) | `12` | Expiration date |
 | `Qty` | `5` | `7` | Remaining batch quantity |

@@ -14,7 +14,7 @@ This document defines the domain invariants, validation constraints, inventory a
 | `BR4` | Non-Empty Product Measurement Unit | Product unit must not be empty or blank. |
 | `BR5` | Positive Selling Price | Product unit selling price must be strictly greater than zero (`price > 0`). |
 | `BR6` | Non-Negative Stock Quantity | Product stock quantity cannot be negative (`stock >= 0`). |
-| `BR7` | Valid Production and Expiration Dates | Production date cannot be after expiration date (`!productionDate.isAfter(expirationDate)`), production date cannot be after import date (`!productionDate.isAfter(importDate)`), and import date cannot be after expiration date (`!importDate.isAfter(expirationDate)`). |
+| `BR7` | Valid Production and Expiration Dates | Production date cannot be in the future relative to the current date (`!productionDate.isAfter(LocalDate.now())`), production date cannot be after import date (`!productionDate.isAfter(importDate)`), and import date cannot be after expiration date (`!importDate.isAfter(expirationDate)`). |
 | `BR8` | Product Existence Before Sale | A product must exist in active inventory before it can be added to a sales transaction. |
 | `BR9` | Positive Sale Quantity | The quantity sold in an order item must be strictly greater than zero (`quantity > 0`). |
 | `BR10` | Available Stock Quantity Limit | The quantity sold cannot exceed the available non-expired stock of the product. |

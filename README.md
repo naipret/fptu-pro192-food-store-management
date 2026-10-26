@@ -1,6 +1,6 @@
-# Food Store Management System (PRO192)
+# Food Store Management System
 
-A console-based retail food store management application built with pure Java SE 8s for the `PRO192` course at FPT University. The system manages grocery product catalogs, batch-level inventory with `FEFO` stock deduction, customer loyalty tiers, point-of-sale checkout, and analytical revenue reporting.
+A console-based retail food store management application built with pure Java SE 8 for the `PRO192` course at FPT University. The system manages grocery product catalogs, batch-level inventory with `FEFO` stock deduction, customer loyalty tiers, point-of-sale checkout, and analytical revenue reporting.
 
 ---
 
@@ -55,7 +55,7 @@ The application starts cleanly with empty header-only CSV files automatically. T
 
 ```powershell
 # powershell
-scripts/seed.ps1
+scripts\seed.ps1
 ```
 
 ```bash

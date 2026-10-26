@@ -242,7 +242,7 @@ public class CustomerMenu extends Menu {
             renderCustomerTable(Collections.singletonList(existing));
             System.out.println();
             if (!ConsoleUtil.confirm("Confirm removing customer " + existing.getId() + "?")) {
-                System.out.println("  [INFO] Removal cancelled.");
+                System.out.println("  [INFO] Operation cancelled.");
                 printDivider();
                 continue;
             }

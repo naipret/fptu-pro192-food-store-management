@@ -223,7 +223,7 @@ public class ProductMenu extends Menu {
             renderProductTable(Collections.singletonList(existing));
             System.out.println();
             if (!ConsoleUtil.confirm("Confirm removing product " + existing.getId() + "?")) {
-                System.out.println("  [INFO] Removal cancelled.");
+                System.out.println("  [INFO] Operation cancelled.");
                 printDivider();
                 continue;
             }
