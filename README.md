@@ -84,7 +84,7 @@ Experience the complete application directly inside your web browser without ins
 
 - Runs 100% client-side via CheerpJ 3.0 WebAssembly JVM runtime and xterm.js with a GNOME Terminal dark theme.
 - Features client-side dynamic seed data generation, ensuring live dates on every visit.
-- For in-depth architectural details on CheerpJ JNI stream bridging and WebAssembly execution, refer to [Web Terminal Technical Documentation (`.github/pages/README.md`)](.github/pages/README.md).
+- For in-depth architectural details on CheerpJ JNI stream bridging and WebAssembly execution, refer to [Web Terminal Documentation](.github/pages/README.md).
 - Live Web Terminal: [Github Pages](https://naipret.github.io/fptu-pro192-food-store-management/)
 
 ---
@@ -93,13 +93,14 @@ Experience the complete application directly inside your web browser without ins
 
 All architectural decisions, domain rules, and coding standards are maintained in the [`docs/`](docs/) directory:
 
-1. [Business Rules (`docs/BUSINESS_RULES.md`)](docs/BUSINESS_RULES.md): Invariants `BR1` through `BR34` governing product catalog, batch inventory, FEFO deduction, customer loyalty tiers, sales checkout, reporting, and soft deletes.
-2. [Architecture and Data Model (`docs/ARCHITECTURE_MODEL.md`)](docs/ARCHITECTURE_MODEL.md): 3-tier MVC package boundaries, UML class diagram, and CSV schemas.
-3. [Design Principles (`docs/DESIGN_PRINCIPLES.md`)](docs/DESIGN_PRINCIPLES.md): Four OOP pillars, SOLID principles, and core engineering principles (`SoC`, `DRY`, `KISS`, `YAGNI`).
-4. [Design Patterns (`docs/DESIGN_PATTERNS.md`)](docs/DESIGN_PATTERNS.md): Factory Method, Atomic CSV Persistence, Singleton, Strategy, and Template Method patterns.
-5. [User Interface Specification (`docs/UI_SPECIFICATION.md`)](docs/UI_SPECIFICATION.md): 80-column ASCII terminal standards, continuous loops, and table formatting.
-6. [Naming Conventions (`docs/NAMING_CONVENTIONS.md`)](docs/NAMING_CONVENTIONS.md): Architectural naming conventions for classes, methods, and constants.
-7. [Clean Code Standards (`docs/CLEAN_CODE.md`)](docs/CLEAN_CODE.md): Defensive programming, exception handling, and Javadoc standards.
+1. [Business Rules](docs/BUSINESS_RULES.md): Invariants `BR1` through `BR34` governing product catalog, batch inventory, FEFO deduction, customer loyalty tiers, sales checkout, reporting, and soft deletes.
+2. [Architecture and Data Model](docs/ARCHITECTURE_MODEL.md): 3-tier MVC package boundaries, UML class diagram, and CSV schemas.
+3. [Design Principles](docs/DESIGN_PRINCIPLES.md): Four OOP pillars, SOLID principles, and core engineering principles (`SoC`, `DRY`, `KISS`, `YAGNI`).
+4. [Design Patterns](docs/DESIGN_PATTERNS.md): Factory Method, Atomic CSV Persistence, Singleton, Strategy, and Template Method patterns.
+5. [User Interface Specification](docs/UI_SPECIFICATION.md): 80-column ASCII terminal standards, continuous loops, and table formatting.
+6. [Naming Conventions](docs/NAMING_CONVENTIONS.md): Architectural naming conventions for classes, methods, and constants.
+7. [Clean Code Standards](docs/CLEAN_CODE.md): Defensive programming, exception handling, and Javadoc standards.
+8. [Writing Style Guide](docs/WRITING_STYLE.md): Engineering prose standards, prohibited AI writing patterns, and typography rules.
 
 ---
 
