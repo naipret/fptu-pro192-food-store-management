@@ -91,6 +91,8 @@ The allowed types align with Conventional Commits and standard commit linting co
 
 Every significant change should be tracked by an issue and integrated through a reviewed Pull Request.
 
+All documentation files, architectural records, and pull request descriptions must comply with the engineering writing standards defined in [Writing Style Guide](docs/WRITING_STYLE.md).
+
 ### 3.1. Issue Tracking
 
 1. Before starting development, verify that a corresponding GitHub Issue exists and is assigned.
