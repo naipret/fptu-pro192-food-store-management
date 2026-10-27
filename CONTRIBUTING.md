@@ -1,6 +1,6 @@
 # Contributing Guidelines
 
-This document defines version control practices, branching strategy, commit message standards, issue tracking, and pull request workflows for this project. These guidelines follow industry-standard conventions and standard feature-branching workflows) to ensure clear version history, reliable automation, and smooth team collaboration across projects.
+This document defines version control practices, branching strategy, commit message standards, issue tracking, and pull request workflows for this project. These guidelines follow industry-standard conventions and standard feature-branching workflows to ensure clear version history, reliable automation, and smooth team collaboration across projects.
 
 ---
 
