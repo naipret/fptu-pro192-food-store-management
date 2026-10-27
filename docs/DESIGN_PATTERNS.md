@@ -127,7 +127,7 @@ public final void display() {
 }
 ```
 
-Subclasses implement the abstract primitive operation `protected abstract void handleChoice(int choice)` and interact seamlessly with the continuous loop UX:
+Subclasses implement the abstract primitive operation `protected abstract void handleChoice(int choice)` to support the continuous loop user interface:
 
 - Each menu action executes its own continuous `while (true)` loop with distinct iteration dividers (`printDivider()` prints an empty line followed by the 80-column `DIVIDER`).
 - Selecting `0` at the primary prompt breaks out of the loop and returns to the menu frame immediately without annoying intermediate pauses.
