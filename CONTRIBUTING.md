@@ -1,6 +1,6 @@
 # Contributing Guidelines
 
-This document defines version control practices, branching strategy, commit message standards, issue tracking, and pull request workflows for this project. These guidelines follow industry-standard conventions and standard feature-branching workflows) to ensure clear version history, reliable automation, and smooth team collaboration across projects.
+This document defines version control practices, branching strategy, commit message standards, issue tracking, and pull request workflows for this project. These guidelines follow industry-standard conventions and standard feature-branching workflows to ensure clear version history, reliable automation, and smooth team collaboration across projects.
 
 ---
 
@@ -90,6 +90,8 @@ The allowed types align with Conventional Commits and standard commit linting co
 ## 3. GitHub Issues and Pull Request Workflow
 
 Every significant change should be tracked by an issue and integrated through a reviewed Pull Request.
+
+All documentation files, architectural records, and pull request descriptions must comply with the engineering writing standards defined in [Writing Style Guide](docs/WRITING_STYLE.md).
 
 ### 3.1. Issue Tracking
 

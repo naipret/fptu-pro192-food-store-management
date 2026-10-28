@@ -22,6 +22,7 @@
   - [ ] Borders use only basic ASCII characters (`+`, `-`, `=`, `|`, `*`).
   - [ ] Menus and input flows support `[0]` to cancel or return cleanly.
 - [ ] CSV Persistence: File writes execute atomically via `CsvUtil.writeAtomic` with uniform header rows.
+- [ ] Technical Documentation: Any new or modified markdown documentation complies with [Writing Style Guide](docs/WRITING_STYLE.md).
 
 ---
 

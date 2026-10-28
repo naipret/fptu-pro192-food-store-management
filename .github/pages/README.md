@@ -67,7 +67,7 @@ Browser Window (Client Device)
   - Orders distributed across past days, yesterday, and today.
 - This ensures test scenarios (such as near-expiry alerts and FEFO stock deduction) remain fully functional regardless of when the reviewer opens the website.
 
-### 2.5. Local Session Persistence & Safe Reset
+### 2.5. Local Session Persistence and Safe Reset
 
 - All file writes performed by the application (creating orders, importing batches, updating records) are saved to the browser's IndexedDB virtual filesystem.
 - Clicking Reset Data in the headerbar clears the local IndexedDB and triggers fresh dynamic data generation for the current day.
@@ -78,11 +78,11 @@ Browser Window (Client Device)
 
 ```text
 .github/pages/
-├── README.md                      # This documentation file
-├── index.html                     # GNOME Terminal web interface & dynamic seed generator
+├── README.md
+├── index.html
 └── bridge/
-    ├── WebMain.java               # Web bootstrap entry point and stream redirection
-    └── WebTerminalManager.java    # CheerpJ native JNI bridge interface
+    ├── WebMain.java
+    └── WebTerminalManager.java
 ```
 
 ---

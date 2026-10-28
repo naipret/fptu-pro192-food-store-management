@@ -33,7 +33,7 @@ Every menu rendered via `Menu.display()` lists numbered options starting from `[
 2. Report Date/Period Defaults (`5.1`, `5.2`):
    - In Daily Revenue (`5.1`), pressing `[Enter]` defaults to today's date (`dd/MM/yyyy`).
    - In Monthly Revenue (`5.2`), user inputs `MM/yyyy` directly (no separate month/year prompts), with `[Enter]` defaulting to the current month.
-3. Report & Alert Threshold Defaults:
+3. Report and Alert Threshold Defaults:
    - In Low Stock (`4.5`), pressing `[Enter]` defaults to threshold `5`.
    - In Near-Expiry (`4.6`), pressing `[Enter]` defaults to window `7` days.
    - In Expired Batches (`4.7`) and Rankings (`5.3`, `5.4`), pressing `[Enter]` skips date filters to include all records.
