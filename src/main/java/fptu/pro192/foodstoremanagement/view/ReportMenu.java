@@ -10,7 +10,6 @@ import fptu.pro192.foodstoremanagement.util.TableFormatter;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Console view for Analytical and Revenue Reports: daily and monthly sales
