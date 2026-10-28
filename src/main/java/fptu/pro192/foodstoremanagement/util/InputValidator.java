@@ -400,7 +400,8 @@ public final class InputValidator {
     }
 
     /**
-     * Parses a calendar date in dd/MM/yyyy format with shorthand support (BR7, BR18).
+     * Parses a calendar date in dd/MM/yyyy format with shorthand support (BR7,
+     * BR18).
      * Missing month or year fields default to the current month and year.
      *
      * @param raw       the raw date string
@@ -435,7 +436,8 @@ public final class InputValidator {
     }
 
     /**
-     * Parses a month and year in MM/yyyy format with shorthand support (BR18, BR23).
+     * Parses a month and year in MM/yyyy format with shorthand support (BR18,
+     * BR23).
      * Missing year field defaults to the current year.
      *
      * @param raw the raw month-year string
