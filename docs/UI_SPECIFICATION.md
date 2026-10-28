@@ -12,7 +12,7 @@ This document defines the terminal layout constraints, localization policy, navi
 | Border Character Set | Basic 7-bit ASCII characters only (`+`, `-`, `=`, `\|`, `*`). Box-drawing Unicode characters are prohibited to prevent garbled output across various IDE output windows and Windows `cmd.exe`. |
 | Interface Language | Full English across all menu titles, prompts, table headers, status messages, categories, and units |
 | Character Set Guarantee | Pure 100% 7-bit ASCII text across all prompts, tables, seeded CSVs, customer names, product names, and addresses. |
-| Date Format | `dd/MM/yyyy` for all console prompts and table columns (converted to ISO `yyyy-MM-dd` only when reading/writing CSV files) |
+| Date Format | `dd/MM/yyyy` for all console prompts and table columns (supports shorthand expansion: `13` or `13/10` expands using current month and year, `10` expands using current year; converted to ISO `yyyy-MM-dd` only when reading or writing CSV files) |
 | Currency and Number Format | `Locale.US` comma-separated integers amounts (`8,000`, `1,250,000`) and plain integers (`int`) for stock and cart quantities |
 
 ---

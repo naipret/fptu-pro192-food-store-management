@@ -10,7 +10,6 @@ import fptu.pro192.foodstoremanagement.util.TableFormatter;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Console view for Analytical and Revenue Reports: daily and monthly sales
@@ -146,7 +145,7 @@ public class ReportMenu extends Menu {
                 continue;
             }
             Integer limit = ConsoleUtil.readInt(
-                    "Enter top N limit (N, Enter for all-products, 0 to cancel): ",
+                    "Enter top N limit [N] (Enter for all-products, 0 to cancel): ",
                     1, Integer.MAX_VALUE, Integer.MAX_VALUE);
             if (limit == null) {
                 System.out.println("  [INFO] Operation cancelled.");
@@ -207,7 +206,7 @@ public class ReportMenu extends Menu {
                 continue;
             }
             Integer limit = ConsoleUtil.readInt(
-                    "Enter top N limit (N, Enter for all-customers, 0 to cancel): ",
+                    "Enter top N limit [N] (Enter for all-customers, 0 to cancel): ",
                     1, Integer.MAX_VALUE, Integer.MAX_VALUE);
             if (limit == null) {
                 System.out.println("  [INFO] Operation cancelled.");

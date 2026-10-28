@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
@@ -6,13 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Food Store Management System</title>
     <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>" />
 
     <!-- Google Fonts: JetBrains Mono -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+        rel="stylesheet" />
 
     <!-- xterm.js CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css" />
@@ -30,7 +30,9 @@
             height: 100%;
             overflow-x: hidden;
             background-color: #121212;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family:
+                -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                Helvetica, Arial, sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -131,7 +133,9 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: background 0.15s ease, color 0.15s ease;
+            transition:
+                background 0.15s ease,
+                color 0.15s ease;
         }
 
         .btn-close:hover {
@@ -190,7 +194,9 @@
             justify-content: center;
             z-index: 999;
             color: #c9d1d9;
-            transition: opacity 0.4s ease, visibility 0.4s ease;
+            transition:
+                opacity 0.4s ease,
+                visibility 0.4s ease;
         }
 
         #splash-screen.hidden {
@@ -241,7 +247,9 @@
     <div id="splash-screen">
         <div class="spinner"></div>
         <div class="splash-title">Food Store Management System</div>
-        <div class="splash-desc" id="splash-status">Initializing WebAssembly Runtime...</div>
+        <div class="splash-desc" id="splash-status">
+            Initializing WebAssembly Runtime...
+        </div>
     </div>
 
     <!-- GNOME Terminal Window -->
@@ -289,8 +297,8 @@
             function calcDate(days) {
                 const d = new Date(now.getTime() + days * 86400000);
                 const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, "0");
+                const day = String(d.getDate()).padStart(2, "0");
                 return `${year}-${month}-${day}`;
             }
 
@@ -344,7 +352,7 @@
                 "P00014,Chinsu Chili Sauce 250g,Condiments,Bottle,18000.0,false",
                 "P00015,Discontinued Imported Butter,Dairy,Box,95000.0,true",
                 "P00016,Seasonal Lychee Fruit 1kg,Produce,Bag,55000.0,true",
-                ""
+                "",
             ].join("\n");
 
             const batchesCsv = [
@@ -372,7 +380,7 @@
                 `B00021,P00015,${dImportPast45},${dProdPast60},${dExpExpired2},2`,
                 `B00022,P00016,${dImportPast20},${dProdPast30},${dExpExpired2},10`,
                 `B00023,P00016,${dImportPast10},${dProdPast15},${dExpExpired1},5`,
-                ""
+                "",
             ].join("\n");
 
             const customersCsv = [
@@ -387,7 +395,7 @@
                 'C00008,Do Thi Mai,0945667788,"56 Hai Ba Trung, District 1, Ho Chi Minh City",VIP,false',
                 'C00009,Bui Quang Khai,0968123456,"72 Vo Thi Sau, District 3, Ho Chi Minh City",Regular,false',
                 'C00010,Trinh Hong Ngoc,0918776655,"19 Tran Hung Dao, District 5, Ho Chi Minh City",VIP,true',
-                ""
+                "",
             ].join("\n");
 
             const ordersCsv = [
@@ -402,7 +410,7 @@
                 `O00008,C00005,${dOrderTodayNoon},194000.0,19400.0,174600.0`,
                 `O00009,C00008,${dOrderTodayNoon},764000.0,76400.0,687600.0`,
                 `O00010,C00001,${dOrderTodayAfternoon},303000.0,30300.0,272700.0`,
-                ""
+                "",
             ].join("\n");
 
             const orderDetailsCsv = [
@@ -429,7 +437,7 @@
                 "O00009,P00013,3,28000.0",
                 "O00010,P00004,1,195000.0",
                 "O00010,P00006,3,36000.0",
-                ""
+                "",
             ].join("\n");
 
             return {
@@ -437,7 +445,7 @@
                 "batches.csv": batchesCsv,
                 "customers.csv": customersCsv,
                 "orders.csv": ordersCsv,
-                "order_details.csv": orderDetailsCsv
+                "order_details.csv": orderDetailsCsv,
             };
         }
 
@@ -446,39 +454,40 @@
         // Initialize xterm.js with JetBrains Mono and GNOME dark theme
         const term = new Terminal({
             cursorBlink: true,
-            cursorStyle: 'block',
+            cursorStyle: "block",
             fontFamily: '"JetBrains Mono", "Courier New", monospace',
             fontSize: 14,
             lineHeight: 1.25,
             theme: {
-                background: '#1e1e1e',
-                foreground: '#deddda',
-                cursor: '#57e389',
-                cursorAccent: '#1e1e1e',
-                selectionBackground: 'rgba(98, 160, 234, 0.4)',
-                black: '#2e3436',
-                red: '#f66151',
-                green: '#57e389',
-                yellow: '#f8e45c',
-                blue: '#62a0ea',
-                magenta: '#c061cb',
-                cyan: '#47d4b9',
-                white: '#deddda',
-                brightBlack: '#5e5c64',
-                brightRed: '#ed333b',
-                brightGreen: '#33d17a',
-                brightYellow: '#f6d32d',
-                brightBlue: '#3584e4',
-                brightMagenta: '#9141ac',
-                brightCyan: '#26a269',
-                brightWhite: '#ffffff'
-            }
+                background: "#1e1e1e",
+                foreground: "#deddda",
+                cursor: "#57e389",
+                cursorAccent: "#1e1e1e",
+                selectionBackground: "rgba(98, 160, 234, 0.4)",
+                black: "#2e3436",
+                red: "#f66151",
+                green: "#57e389",
+                yellow: "#f8e45c",
+                blue: "#62a0ea",
+                magenta: "#c061cb",
+                cyan: "#47d4b9",
+                white: "#deddda",
+                brightBlack: "#5e5c64",
+                brightRed: "#ed333b",
+                brightGreen: "#33d17a",
+                brightYellow: "#f6d32d",
+                brightBlue: "#3584e4",
+                brightMagenta: "#9141ac",
+                brightCyan: "#26a269",
+                brightWhite: "#ffffff",
+            },
         });
 
         const fitAddon = new FitAddon.FitAddon();
         term.loadAddon(fitAddon);
 
-        const terminalContainer = document.getElementById('terminal-container');
+        const terminalContainer =
+            document.getElementById("terminal-container");
         term.open(terminalContainer);
 
         function fitTerminal() {
@@ -493,38 +502,42 @@
 
         fitTerminal();
 
-        window.addEventListener('resize', () => {
+        window.addEventListener("resize", () => {
             fitTerminal();
         });
 
         // Font scaling via Ctrl + MouseWheel ONLY when mouse pointer is inside the terminal container
-        terminalContainer.addEventListener('wheel', (e) => {
-            if (e.ctrlKey) {
-                e.preventDefault();
-                let currentSize = term.options.fontSize || 14;
-                if (e.deltaY < 0 && currentSize < 28) {
-                    term.options.fontSize = currentSize + 1;
-                } else if (e.deltaY > 0 && currentSize > 10) {
-                    term.options.fontSize = currentSize - 1;
+        terminalContainer.addEventListener(
+            "wheel",
+            (e) => {
+                if (e.ctrlKey) {
+                    e.preventDefault();
+                    let currentSize = term.options.fontSize || 14;
+                    if (e.deltaY < 0 && currentSize < 28) {
+                        term.options.fontSize = currentSize + 1;
+                    } else if (e.deltaY > 0 && currentSize > 10) {
+                        term.options.fontSize = currentSize - 1;
+                    }
+                    fitTerminal();
                 }
-                fitTerminal();
-            }
-        }, { passive: false });
+            },
+            { passive: false },
+        );
 
         // Input state management
         let inputResolver = null;
-        let inputBuffer = '';
+        let inputBuffer = "";
 
-        term.onData(data => {
+        term.onData((data) => {
             if (!inputResolver) {
                 return;
             }
 
             // Handle Enter (CR: \r or LF: \n)
-            if (data === '\r' || data === '\n') {
-                term.write('\r\n');
+            if (data === "\r" || data === "\n") {
+                term.write("\r\n");
                 const submitted = inputBuffer;
-                inputBuffer = '';
+                inputBuffer = "";
                 const resolve = inputResolver;
                 inputResolver = null;
                 resolve(submitted);
@@ -532,121 +545,150 @@
             }
 
             // Handle Backspace (DEL: \x7f or BS: \x08)
-            if (data === '\x7f' || data === '\b') {
+            if (data === "\x7f" || data === "\b") {
                 if (inputBuffer.length > 0) {
                     inputBuffer = inputBuffer.slice(0, -1);
-                    term.write('\b \b');
+                    term.write("\b \b");
                 }
                 return;
             }
 
             // Handle Ctrl+C (\x03)
-            if (data === '\x03') {
-                term.write('^C\r\n');
-                inputBuffer = '';
+            if (data === "\x03") {
+                term.write("^C\r\n");
+                inputBuffer = "";
                 const resolve = inputResolver;
                 inputResolver = null;
-                resolve('');
+                resolve("");
                 return;
             }
 
             // Printable character entry
-            if (data >= ' ' || data.length > 1) {
+            if (data >= " " || data.length > 1) {
                 inputBuffer += data;
                 term.write(data);
             }
         });
 
         // Clipboard Paste Handling (Ctrl+V / Cmd+V)
-        window.addEventListener('paste', async (e) => {
+        window.addEventListener("paste", async (e) => {
             if (!inputResolver) return;
-            const text = (e.clipboardData || window.clipboardData).getData('text');
+            const text = (e.clipboardData || window.clipboardData).getData(
+                "text",
+            );
             if (text) {
                 inputBuffer += text;
                 term.write(text);
             }
         });
 
-        const splashScreen = document.getElementById('splash-screen');
-        const splashStatus = document.getElementById('splash-status');
+        const splashScreen = document.getElementById("splash-screen");
+        const splashStatus = document.getElementById("splash-status");
 
         function updateStatus(message) {
             if (splashStatus) {
-                splashStatus.textContent = message || '';
+                splashStatus.textContent = message || "";
             }
         }
 
         async function runApplication() {
             try {
-                updateStatus('Loading Java WebAssembly runtime (CheerpJ)...');
+                updateStatus(
+                    "Loading Java WebAssembly runtime (CheerpJ)...",
+                );
 
                 await cheerpjInit({
                     version: 8,
-                    status: 'none',
+                    status: "none",
                     natives: {
                         async Java_web_WebTerminalManager_readLine(lib) {
-                            return new Promise(resolve => {
+                            return new Promise((resolve) => {
                                 inputResolver = resolve;
                             });
                         },
                         async Java_web_WebTerminalManager_print(lib, text) {
-                            const message = typeof text === 'string' ? text : String(text || '');
+                            const message =
+                                typeof text === "string"
+                                    ? text
+                                    : String(text || "");
                             if (message) {
-                                term.write(message.replace(/\r?\n/g, '\r\n'));
+                                term.write(
+                                    message.replace(/\r?\n/g, "\r\n"),
+                                );
                             }
                         },
-                        async Java_web_WebTerminalManager_getInitialCsv(lib, fileName) {
+                        async Java_web_WebTerminalManager_getInitialCsv(
+                            lib,
+                            fileName,
+                        ) {
                             return dynamicSeedCache[fileName] || "";
-                        }
-                    }
+                        },
+                    },
                 });
 
-                updateStatus('Launching Food Store Management System...');
+                updateStatus("Launching Food Store Management System...");
 
-                splashScreen.classList.add('hidden');
+                splashScreen.classList.add("hidden");
                 term.focus();
 
                 const rawPath = window.location.pathname;
-                const basePath = rawPath.substring(0, rawPath.lastIndexOf('/'));
+                const basePath = rawPath.substring(
+                    0,
+                    rawPath.lastIndexOf("/"),
+                );
                 const appPrefix = `/app${basePath}`;
                 const classPath = `${appPrefix}/web-runner.jar:${appPrefix}/fptu-pro192-food-store-management.jar`;
 
-                await cheerpjRunMain('web.WebMain', classPath);
+                await cheerpjRunMain("web.WebMain", classPath);
             } catch (err) {
-                console.error('CheerpJ execution error:', err);
+                console.error("CheerpJ execution error:", err);
                 if (splashStatus) {
-                    splashStatus.textContent = 'Runtime error: ' + err.message;
+                    splashStatus.textContent =
+                        "Runtime error: " + err.message;
                 }
             }
         }
 
         // Reset data handler: Deletes IndexedDB and reloads page to generate live fresh data
-        document.getElementById('btn-reset-data').addEventListener('click', async () => {
-            if (confirm('Are you sure you want to reset all data and generate a fresh sample dataset for today?')) {
-                try {
-                    if (window.indexedDB && window.indexedDB.databases) {
-                        const dbs = await window.indexedDB.databases();
-                        for (const db of dbs) {
-                            if (db.name) {
-                                window.indexedDB.deleteDatabase(db.name);
+        document
+            .getElementById("btn-reset-data")
+            .addEventListener("click", async () => {
+                if (
+                    confirm(
+                        "Are you sure you want to reset all data and create a new sample dataset based on your current date?",
+                    )
+                ) {
+                    try {
+                        if (
+                            window.indexedDB &&
+                            window.indexedDB.databases
+                        ) {
+                            const dbs = await window.indexedDB.databases();
+                            for (const db of dbs) {
+                                if (db.name) {
+                                    window.indexedDB.deleteDatabase(
+                                        db.name,
+                                    );
+                                }
                             }
                         }
+                        window.location.reload();
+                    } catch (e) {
+                        window.location.reload();
                     }
-                    window.location.reload();
-                } catch (e) {
-                    window.location.reload();
                 }
-            }
-        });
+            });
 
         // Close button: Asks confirmation to exit/restart
-        document.getElementById('btn-close-app').addEventListener('click', () => {
-            if (confirm('Do you want to reload the application?')) {
-                window.location.reload();
-            }
-        });
+        document
+            .getElementById("btn-close-app")
+            .addEventListener("click", () => {
+                if (confirm("Do you want to reload the application?")) {
+                    window.location.reload();
+                }
+            });
 
-        window.addEventListener('load', () => {
+        window.addEventListener("load", () => {
             runApplication();
         });
     </script>
