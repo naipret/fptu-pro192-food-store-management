@@ -1,9 +1,9 @@
 package fptu.pro192.foodstoremanagement.util;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -400,38 +400,65 @@ public final class InputValidator {
     }
 
     /**
-     * Parses a calendar date in dd/MM/yyyy format.
+     * Parses a calendar date in dd/MM/yyyy format with shorthand support (BR7, BR18).
+     * Missing month or year fields default to the current month and year.
      *
      * @param raw       the raw date string
      * @param fieldName the field label
      * @return the parsed LocalDate
+     * @throws IllegalArgumentException if raw is empty or represents an invalid
+     *                                  date
      */
     public static LocalDate parseDisplayDate(String raw, String fieldName) {
         String label = (fieldName == null || fieldName.trim().isEmpty()) ? "Date" : fieldName.trim();
         if (raw == null || raw.trim().isEmpty()) {
             throw new IllegalArgumentException(label + " cannot be empty.");
         }
+        String[] parts = raw.trim().split("/", -1);
+        if (parts.length == 0 || parts.length > 3
+                || parts[0].length() > 2
+                || (parts.length > 1 && parts[1].length() > 2)
+                || (parts.length == 3 && parts[2].length() != 4)) {
+            throw new IllegalArgumentException(
+                    "Invalid " + label.toLowerCase(Locale.ROOT) + " '" + raw + "'. Please use dd/MM/yyyy format.");
+        }
+        LocalDate now = LocalDate.now();
         try {
-            return LocalDate.parse(raw.trim(), DATE_FORMATTER);
-        } catch (DateTimeParseException e) {
+            int day = Integer.parseInt(parts[0]);
+            int month = (parts.length > 1) ? Integer.parseInt(parts[1]) : now.getMonthValue();
+            int year = (parts.length > 2) ? Integer.parseInt(parts[2]) : now.getYear();
+            return LocalDate.of(year, month, day);
+        } catch (DateTimeException | NumberFormatException e) {
             throw new IllegalArgumentException(
                     "Invalid " + label.toLowerCase(Locale.ROOT) + " '" + raw + "'. Please use dd/MM/yyyy format.");
         }
     }
 
     /**
-     * Parses a month and year in MM/yyyy format.
+     * Parses a month and year in MM/yyyy format with shorthand support (BR18, BR23).
+     * Missing year field defaults to the current year.
      *
      * @param raw the raw month-year string
      * @return the parsed YearMonth
+     * @throws IllegalArgumentException if raw is empty or represents an invalid
+     *                                  month
      */
     public static YearMonth parseDisplayMonth(String raw) {
         if (raw == null || raw.trim().isEmpty()) {
             throw new IllegalArgumentException("Month/Year cannot be empty.");
         }
+        String[] parts = raw.trim().split("/", -1);
+        if (parts.length == 0 || parts.length > 2
+                || parts[0].length() > 2
+                || (parts.length == 2 && parts[1].length() != 4)) {
+            throw new IllegalArgumentException("Invalid month/year '" + raw + "'. Please use MM/yyyy format.");
+        }
+        YearMonth now = YearMonth.now();
         try {
-            return YearMonth.parse(raw.trim(), MONTH_FORMATTER);
-        } catch (DateTimeParseException e) {
+            int month = Integer.parseInt(parts[0]);
+            int year = (parts.length > 1) ? Integer.parseInt(parts[1]) : now.getYear();
+            return YearMonth.of(year, month);
+        } catch (DateTimeException | NumberFormatException e) {
             throw new IllegalArgumentException("Invalid month/year '" + raw + "'. Please use MM/yyyy format.");
         }
     }
