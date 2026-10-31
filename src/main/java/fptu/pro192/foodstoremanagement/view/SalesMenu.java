@@ -197,53 +197,16 @@ public class SalesMenu extends Menu {
     private Product selectProductForCart() {
         while (true) {
             printDivider();
-            String input = ConsoleUtil.readOptionalString(
-                    "Enter search keyword or Product ID (Enter for all, 0 to cancel): ");
-            if ("0".equals(input)) {
+            String rawId = ConsoleUtil.readString("Enter Product ID (or 0 to cancel): ");
+            if (rawId == null) {
                 return null;
             }
-            if (input.isEmpty()) {
-                ProductMenu.renderProductTable(this.productController.getAllProducts());
-                continue;
-            }
-            Product direct = resolveProductByIdOrKeyword(input);
+            Product direct = this.productController.findById(rawId);
             if (direct != null) {
                 return direct;
             }
+            System.out.println("  [ERROR] Active product not found with ID: " + rawId);
         }
-    }
-
-    private Product resolveProductByIdOrKeyword(String input) {
-        if (input == null || input.trim().isEmpty()) {
-            return null;
-        }
-        String clean = input.trim();
-        String lower = clean.toLowerCase(Locale.ROOT);
-        if (lower.startsWith("product ")) {
-            clean = clean.substring(8).trim();
-        } else if (lower.startsWith("prod ")) {
-            clean = clean.substring(5).trim();
-        }
-
-        String possibleId = InputValidator.tryNormalizeProductId(clean);
-        Product direct = (possibleId != null) ? this.productController.findById(possibleId) : null;
-        if (direct == null) {
-            direct = this.productController.findById(clean);
-        }
-        if (direct != null) {
-            return direct;
-        }
-
-        List<Product> matches = this.productController.search(clean);
-        if (matches.isEmpty()) {
-            System.out.println("  [ERROR] No active products match keyword or ID: " + input);
-            return null;
-        }
-        if (matches.size() == 1) {
-            return matches.get(0);
-        }
-        ProductMenu.renderProductTable(matches);
-        return null;
     }
 
     private void displayStockDepletedError(Product product) {
@@ -277,10 +240,7 @@ public class SalesMenu extends Menu {
     }
 
     private void inspectOrderOrSearch(String input) {
-        String possibleOrderId = InputValidator.tryNormalizeOrderId(input);
-        Order directMatch = (possibleOrderId != null)
-                ? this.orderController.findById(possibleOrderId)
-                : null;
+        Order directMatch = this.orderController.findById(input);
         if (directMatch != null) {
             renderInvoiceTable(directMatch);
             System.out.println("  Total orders displayed: 1");
