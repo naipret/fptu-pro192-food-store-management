@@ -70,7 +70,7 @@ public class ReportMenu extends Menu {
      * Prompts for a calendar date in dd/MM/yyyy format and displays all orders
      * and net revenue for that day in an interactive loop (BR23).
      */
-    public void handleDailyRevenueReport() {
+    private void handleDailyRevenueReport() {
         while (true) {
             LocalDate targetDate = ConsoleUtil.readDate(
                     "Enter report date [dd/MM/yyyy] (Enter for today, 0 to cancel): ",
@@ -101,7 +101,7 @@ public class ReportMenu extends Menu {
      * Prompts for a month and year in MM/yyyy format and displays the monthly
      * sales and revenue report in an interactive loop (BR23).
      */
-    public void handleMonthlyRevenueReport() {
+    private void handleMonthlyRevenueReport() {
         while (true) {
             YearMonth ym = ConsoleUtil.readMonthWithDefault(
                     "Enter report month [MM/yyyy] (Enter for this month, 0 to cancel): ",
@@ -131,7 +131,7 @@ public class ReportMenu extends Menu {
      * Displays the ranked table of best-selling products by quantity sold and
      * gross revenue for an optional period in an interactive loop (BR21, BR27).
      */
-    public void handleBestSellingProductsReport() {
+    private void handleBestSellingProductsReport() {
         while (true) {
             LocalDate fromDate = promptScopeDate(
                     "Enter from date [dd/MM/yyyy] (Enter for all-time, 0 to cancel): ");
@@ -192,7 +192,7 @@ public class ReportMenu extends Menu {
      * Displays the ranked table of registered customers by cumulative net
      * spending for an optional period in an interactive loop (BR22, BR27).
      */
-    public void handleCustomerSpendingReport() {
+    private void handleCustomerSpendingReport() {
         while (true) {
             LocalDate fromDate = promptScopeDate(
                     "Enter from date [dd/MM/yyyy] (Enter for all-time, 0 to cancel): ");

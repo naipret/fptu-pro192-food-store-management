@@ -45,7 +45,6 @@ public final class InputValidator {
     public static final String DISPLAY_MONTH_PATTERN = "MM/yyyy";
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("MM/yyyy");
 
     private static final Pattern PHONE_REGEX = Pattern.compile("^0[35789]\\d{8}$");
     private static final Pattern ASCII_LETTER_CHECK = Pattern.compile(".*[a-zA-Z].*");
@@ -110,17 +109,6 @@ public final class InputValidator {
     }
 
     /**
-     * Normalizes a Product ID to canonical format (BR1, BR33).
-     *
-     * @param raw the raw ID string
-     * @return the normalized Product ID
-     * @throws IllegalArgumentException if raw is invalid
-     */
-    public static String normalizeProductId(String raw) {
-        return normalizeId(raw, 'P');
-    }
-
-    /**
      * Safely normalizes a Product ID, returning null on failure (BR1, BR33).
      *
      * @param raw the raw ID string
@@ -138,17 +126,6 @@ public final class InputValidator {
      * @throws IllegalArgumentException if raw is invalid
      */
     public static String validateBatchId(String raw) {
-        return normalizeId(raw, 'B');
-    }
-
-    /**
-     * Normalizes a Batch ID to canonical format (BR33).
-     *
-     * @param raw the raw ID string
-     * @return the normalized Batch ID
-     * @throws IllegalArgumentException if raw is invalid
-     */
-    public static String normalizeBatchId(String raw) {
         return normalizeId(raw, 'B');
     }
 
@@ -174,17 +151,6 @@ public final class InputValidator {
     }
 
     /**
-     * Normalizes a Customer ID to canonical format (BR2, BR33).
-     *
-     * @param raw the raw ID string
-     * @return the normalized Customer ID
-     * @throws IllegalArgumentException if raw is invalid
-     */
-    public static String normalizeCustomerId(String raw) {
-        return normalizeId(raw, 'C');
-    }
-
-    /**
      * Safely normalizes a Customer ID, returning null on failure (BR2, BR33).
      *
      * @param raw the raw ID string
@@ -202,17 +168,6 @@ public final class InputValidator {
      * @throws IllegalArgumentException if raw is invalid
      */
     public static String validateOrderId(String raw) {
-        return normalizeId(raw, 'O');
-    }
-
-    /**
-     * Normalizes an Order ID to canonical format (BR33).
-     *
-     * @param raw the raw ID string
-     * @return the normalized Order ID
-     * @throws IllegalArgumentException if raw is invalid
-     */
-    public static String normalizeOrderId(String raw) {
         return normalizeId(raw, 'O');
     }
 

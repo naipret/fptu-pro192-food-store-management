@@ -294,17 +294,6 @@ public class ProductController {
     }
 
     /**
-     * Checks whether a Product ID already exists in the catalog, including
-     * soft-deleted products (BR1, BR27).
-     *
-     * @param id the product ID to check
-     * @return true if the ID is already used by any active or soft-deleted product
-     */
-    public boolean existsById(String id) {
-        return findByIdIncludeDeleted(id) != null;
-    }
-
-    /**
      * Finds an active (non-deleted) Product by its identifier (BR1, BR27).
      *
      * @param id the product ID to look up (supports shorthand like "P1" or
@@ -441,24 +430,6 @@ public class ProductController {
 
     /**
      * Imports and attaches a new inventory Batch with an auto-generated Batch ID
-     * to an active Product at today's date, then persists to CSV (BR6, BR7, BR26,
-     * BR30, BR33).
-     *
-     * @param productId      the target product ID
-     * @param productionDate the manufacturing date of the batch
-     * @param expirationDate the expiration date of the batch
-     * @param quantity       the strictly positive integer quantity
-     * @return the newly created and attached Batch
-     * @throws IllegalArgumentException if product is not found, dates are invalid,
-     *                                  or quantity is not positive
-     */
-    public Batch importBatch(String productId, LocalDate productionDate,
-            LocalDate expirationDate, int quantity) {
-        return importBatch(productId, LocalDate.now(), productionDate, expirationDate, quantity);
-    }
-
-    /**
-     * Imports and attaches a new inventory Batch with an auto-generated Batch ID
      * and explicit import date to an active Product, then persists to CSV (BR6,
      * BR7, BR26, BR30, BR33).
      *
@@ -502,7 +473,7 @@ public class ProductController {
         if (product == null) {
             throw new IllegalArgumentException("Active product not found with ID: " + productId);
         }
-        String normalizedBatchId = InputValidator.normalizeBatchId(batchId);
+        String normalizedBatchId = InputValidator.validateBatchId(batchId);
         for (Batch batch : product.getBatches()) {
             if (batch.getBatchId().equalsIgnoreCase(normalizedBatchId)) {
                 batch.setQuantity(newQuantity);

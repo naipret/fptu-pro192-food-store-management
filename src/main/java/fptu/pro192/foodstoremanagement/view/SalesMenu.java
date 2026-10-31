@@ -12,7 +12,6 @@ import fptu.pro192.foodstoremanagement.util.InputValidator;
 import fptu.pro192.foodstoremanagement.util.TableFormatter;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Console view for Sales and Checkout Management: interactive shopping cart
@@ -80,7 +79,7 @@ public class SalesMenu extends Menu {
      * with real-time stock and expiration checks, and completing or cancelling
      * the transaction in a continuous loop.
      */
-    public void handleCreateOrderFlow() {
+    private void handleCreateOrderFlow() {
         while (true) {
             List<Product> activeProducts = this.productController.getAllProducts();
             if (activeProducts.isEmpty()) {
@@ -109,7 +108,7 @@ public class SalesMenu extends Menu {
             renderInvoiceTable(draft);
 
             System.out.println("\n  [1] Add Product to Cart");
-            System.out.println("  [2] Confirm & Finalize Checkout");
+            System.out.println("  [2] Confirm and Checkout");
 
             int action = ConsoleUtil.readInt("\nSelect cart action [1-2] (or 0 to cancel): ", 0, 2);
             if (action == 0) {
@@ -198,53 +197,16 @@ public class SalesMenu extends Menu {
     private Product selectProductForCart() {
         while (true) {
             printDivider();
-            String input = ConsoleUtil.readOptionalString(
-                    "Enter search keyword or Product ID (Enter for all, 0 to cancel): ");
-            if ("0".equals(input)) {
+            String rawId = ConsoleUtil.readString("Enter Product ID (or 0 to cancel): ");
+            if (rawId == null) {
                 return null;
             }
-            if (input.isEmpty()) {
-                ProductMenu.renderProductTable(this.productController.getAllProducts());
-                continue;
-            }
-            Product direct = resolveProductByIdOrKeyword(input);
+            Product direct = this.productController.findById(rawId);
             if (direct != null) {
                 return direct;
             }
+            System.out.println("  [ERROR] Active product not found with ID: " + rawId);
         }
-    }
-
-    private Product resolveProductByIdOrKeyword(String input) {
-        if (input == null || input.trim().isEmpty()) {
-            return null;
-        }
-        String clean = input.trim();
-        String lower = clean.toLowerCase(Locale.ROOT);
-        if (lower.startsWith("product ")) {
-            clean = clean.substring(8).trim();
-        } else if (lower.startsWith("prod ")) {
-            clean = clean.substring(5).trim();
-        }
-
-        String possibleId = InputValidator.tryNormalizeProductId(clean);
-        Product direct = (possibleId != null) ? this.productController.findById(possibleId) : null;
-        if (direct == null) {
-            direct = this.productController.findById(clean);
-        }
-        if (direct != null) {
-            return direct;
-        }
-
-        List<Product> matches = this.productController.search(clean);
-        if (matches.isEmpty()) {
-            System.out.println("  [ERROR] No active products match keyword or ID: " + input);
-            return null;
-        }
-        if (matches.size() == 1) {
-            return matches.get(0);
-        }
-        ProductMenu.renderProductTable(matches);
-        return null;
     }
 
     private void displayStockDepletedError(Product product) {
@@ -261,7 +223,7 @@ public class SalesMenu extends Menu {
      * Displays a summary table of all completed historical sales orders and
      * supports interactive live search and detailed invoice lookup (BR23, BR33).
      */
-    public void handleViewAllOrders() {
+    private void handleViewAllOrders() {
         renderOrdersSummaryTable(this.orderController.getAllOrders());
         while (true) {
             printDivider();
@@ -278,10 +240,7 @@ public class SalesMenu extends Menu {
     }
 
     private void inspectOrderOrSearch(String input) {
-        String possibleOrderId = InputValidator.tryNormalizeOrderId(input);
-        Order directMatch = (possibleOrderId != null)
-                ? this.orderController.findById(possibleOrderId)
-                : null;
+        Order directMatch = this.orderController.findById(input);
         if (directMatch != null) {
             renderInvoiceTable(directMatch);
             System.out.println("  Total orders displayed: 1");

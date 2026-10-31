@@ -256,7 +256,7 @@ public class Order {
      * @param totalAmount the non-negative gross total amount
      * @throws IllegalArgumentException if totalAmount is negative
      */
-    public final void setTotalAmount(double totalAmount) {
+    private void setTotalAmount(double totalAmount) {
         if (Double.isNaN(totalAmount) || Double.isInfinite(totalAmount) || totalAmount < 0.0) {
             throw new IllegalArgumentException("Order total amount cannot be negative.");
         }
@@ -278,7 +278,7 @@ public class Order {
      * @param discount the non-negative discount amount
      * @throws IllegalArgumentException if discount is negative
      */
-    public final void setDiscount(double discount) {
+    private void setDiscount(double discount) {
         if (Double.isNaN(discount) || Double.isInfinite(discount) || discount < 0.0) {
             throw new IllegalArgumentException("Order discount cannot be negative.");
         }
@@ -300,7 +300,7 @@ public class Order {
      * @param finalAmount the non-negative final payable amount
      * @throws IllegalArgumentException if finalAmount is negative
      */
-    public final void setFinalAmount(double finalAmount) {
+    private void setFinalAmount(double finalAmount) {
         if (Double.isNaN(finalAmount) || Double.isInfinite(finalAmount) || finalAmount < 0.0) {
             throw new IllegalArgumentException("Order final amount cannot be negative.");
         }

@@ -251,17 +251,7 @@ public class InventoryMenu extends Menu {
             return null;
         }
         String clean = input.trim();
-        String lower = clean.toLowerCase(Locale.ROOT);
-        if (lower.startsWith("product ")) {
-            clean = clean.substring(8).trim();
-        } else if (lower.startsWith("prod ")) {
-            clean = clean.substring(5).trim();
-        }
-
-        String possibleProdId = InputValidator.tryNormalizeProductId(clean);
-        Product product = (possibleProdId != null)
-                ? this.productController.findById(possibleProdId)
-                : this.productController.findById(clean);
+        Product product = this.productController.findById(clean);
         if (product != null) {
             return product;
         }
