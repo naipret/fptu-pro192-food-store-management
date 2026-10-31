@@ -127,17 +127,6 @@ public class CustomerController {
     }
 
     /**
-     * Checks whether a Customer ID already exists in the system across both
-     * active and soft-deleted records (BR2, BR27, BR33).
-     *
-     * @param id the customer ID to check
-     * @return true if the ID is already used
-     */
-    public boolean existsById(String id) {
-        return findByIdIncludeDeleted(id) != null;
-    }
-
-    /**
      * Registers a new customer with an auto-generated Customer ID after verifying
      * phone uniqueness across active customers, then persists to CSV
      * (BR2, BR15, BR16, BR25, BR27, BR33).
