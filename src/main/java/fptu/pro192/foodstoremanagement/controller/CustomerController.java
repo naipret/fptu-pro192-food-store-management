@@ -174,7 +174,7 @@ public class CustomerController {
      */
     public Customer updateCustomer(String id, String newName, String newPhone,
             String newAddress, String newType) {
-        String lookupId = InputValidator.normalizeCustomerId(id);
+        String lookupId = InputValidator.validateCustomerId(id);
         int targetIndex = -1;
         Customer existing = null;
 

@@ -502,7 +502,7 @@ public class ProductController {
         if (product == null) {
             throw new IllegalArgumentException("Active product not found with ID: " + productId);
         }
-        String normalizedBatchId = InputValidator.normalizeBatchId(batchId);
+        String normalizedBatchId = InputValidator.validateBatchId(batchId);
         for (Batch batch : product.getBatches()) {
             if (batch.getBatchId().equalsIgnoreCase(normalizedBatchId)) {
                 batch.setQuantity(newQuantity);
