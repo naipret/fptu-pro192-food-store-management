@@ -45,7 +45,6 @@ public final class InputValidator {
     public static final String DISPLAY_MONTH_PATTERN = "MM/yyyy";
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("MM/yyyy");
 
     private static final Pattern PHONE_REGEX = Pattern.compile("^0[35789]\\d{8}$");
     private static final Pattern ASCII_LETTER_CHECK = Pattern.compile(".*[a-zA-Z].*");
