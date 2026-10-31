@@ -210,7 +210,7 @@ public class OrderController {
      *
      * @return the next canonical Order ID
      */
-    public String generateNextOrderId() {
+    private String generateNextOrderId() {
         int maxNumber = 0;
         for (Order order : this.orders) {
             String id = order.getOrderId();

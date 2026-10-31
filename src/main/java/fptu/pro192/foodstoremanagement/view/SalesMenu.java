@@ -79,7 +79,7 @@ public class SalesMenu extends Menu {
      * with real-time stock and expiration checks, and completing or cancelling
      * the transaction in a continuous loop.
      */
-    public void handleCreateOrderFlow() {
+    private void handleCreateOrderFlow() {
         while (true) {
             List<Product> activeProducts = this.productController.getAllProducts();
             if (activeProducts.isEmpty()) {
@@ -223,7 +223,7 @@ public class SalesMenu extends Menu {
      * Displays a summary table of all completed historical sales orders and
      * supports interactive live search and detailed invoice lookup (BR23, BR33).
      */
-    public void handleViewAllOrders() {
+    private void handleViewAllOrders() {
         renderOrdersSummaryTable(this.orderController.getAllOrders());
         while (true) {
             printDivider();
