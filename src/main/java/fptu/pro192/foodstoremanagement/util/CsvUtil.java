@@ -117,16 +117,6 @@ public final class CsvUtil {
     }
 
     /**
-     * Legacy alias for writeToFile.
-     *
-     * @param targetPath the destination CSV file Path
-     * @param rows       the complete list of rows to write
-     */
-    public static void writeAtomic(Path targetPath, List<String[]> rows) {
-        writeToFile(targetPath, rows);
-    }
-
-    /**
      * Splits a single CSV line into an array of cell values, handling quoted
      * fields that contain commas or escaped double quotes.
      *
