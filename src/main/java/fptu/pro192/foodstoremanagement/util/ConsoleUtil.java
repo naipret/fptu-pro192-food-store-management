@@ -303,27 +303,4 @@ public final class ConsoleUtil {
         }
     }
 
-    /**
-     * Prompts for confirmation with default value on Enter.
-     *
-     * @param prompt     confirmation question
-     * @param defaultYes fallback boolean on Enter
-     * @return true for Yes, false for No
-     */
-    public static boolean confirmWithDefault(String prompt, boolean defaultYes) {
-        String suffix = defaultYes ? " [Y/n]: " : " [y/N]: ";
-        while (true) {
-            String raw = readOptionalString(prompt + suffix);
-            if (raw.isEmpty()) {
-                return defaultYes;
-            }
-            if ("Y".equalsIgnoreCase(raw) || "YES".equalsIgnoreCase(raw)) {
-                return true;
-            }
-            if ("N".equalsIgnoreCase(raw) || "NO".equalsIgnoreCase(raw) || "0".equals(raw)) {
-                return false;
-            }
-            System.out.println("  [ERROR] Please enter Y for Yes or N for No (or 0 to cancel).");
-        }
-    }
 }
