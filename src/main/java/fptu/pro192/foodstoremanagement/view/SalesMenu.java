@@ -109,7 +109,7 @@ public class SalesMenu extends Menu {
             renderInvoiceTable(draft);
 
             System.out.println("\n  [1] Add Product to Cart");
-            System.out.println("  [2] Confirm & Finalize Checkout");
+            System.out.println("  [2] Confirm and Checkout");
 
             int action = ConsoleUtil.readInt("\nSelect cart action [1-2] (or 0 to cancel): ", 0, 2);
             if (action == 0) {
