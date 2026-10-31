@@ -12,7 +12,6 @@ import fptu.pro192.foodstoremanagement.util.InputValidator;
 import fptu.pro192.foodstoremanagement.util.TableFormatter;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Console view for Sales and Checkout Management: interactive shopping cart
